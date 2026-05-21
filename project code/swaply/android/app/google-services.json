@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "311910419748",
+    "project_id": "swaply-cc9a7",
+    "storage_bucket": "swaply-cc9a7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311910419748:android:270cf4bafad7b64442f7b1",
+        "android_client_info": {
+          "package_name": "com.example.swaply"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWEb8hDFwnSCd-YdnwerYI4arkhHCQ47s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
