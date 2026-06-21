@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
-import 'features/sessions/presentation/screens/sessions_screen.dart';
-import 'features/sessions/presentation/controllers/sessions_controller.dart';
-import 'features/sessions/data/repositories/session_repository.dart';
+import 'package:swaply/features/sessions/presentation/controllers/sessions_controller.dart';
+import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
+import 'package:swaply/root.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         );
       }),
       
-      home: const SessionsScreen(),
+      home:  RootView(),
     );
   }
 }
