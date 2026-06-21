@@ -5,7 +5,7 @@ abstract class AppColors {
   AppColors._();
 
   static const Color primary = Color(0xFF4F3FF0);
-  static const Color background = Color(0xFFF5F5F7);
+  static const Color background = Colors.white;
   static const Color card = Colors.white;
   static const Color border = Color(0xFFE5E7EB);
   static const Color muted = Color(0xFF9CA3AF);

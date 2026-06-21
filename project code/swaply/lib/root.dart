@@ -34,7 +34,7 @@ class _RootViewState extends State<RootView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         onPageChanged: (value) => setState(() => currentIndex = value),
         controller: controller,
         children: screens,
@@ -70,7 +70,7 @@ class _RootViewState extends State<RootView> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.swap_horiz),
+              icon: Icon(Icons.date_range_outlined),
               label: 'Sessions',
             ),
             BottomNavigationBarItem(
