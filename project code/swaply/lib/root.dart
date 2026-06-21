@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
-import 'package:swaply/features/sessions/presentation/screens/home_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/messages_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/profile_screen.dart';
+import 'package:swaply/features/home/presentation/screens/home_screen.dart';
+import 'package:swaply/features/chat/presentation/screens/messages_screen.dart';
+import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
 
 class RootView extends StatefulWidget {
-  RootView({super.key});
+  const RootView({super.key});
 
   @override
   State<RootView> createState() => _RootViewState();
@@ -21,12 +21,12 @@ class _RootViewState extends State<RootView> {
   @override
   void initState() {
     controller = PageController(initialPage: currentIndex);
-    screens = {
+    screens = [
       HomeScreen(),
       SessionsScreen(),
       MessagesScreen(),
       ProfileScreen(),
-    }.toList();
+    ];
     super.initState();
   }
 
@@ -41,7 +41,7 @@ class _RootViewState extends State<RootView> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: AppColors.card,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -50,14 +50,18 @@ class _RootViewState extends State<RootView> {
         child: BottomNavigationBar(
           onTap: (value) => setState(() {
             currentIndex = value;
-            controller.jumpToPage(value);
+            controller.animateToPage(
+              value,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+            );
           }),
 
           currentIndex: currentIndex,
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.white,
+          selectedItemColor: AppColors.primary,
           unselectedItemColor: Colors.grey.shade700,
           showUnselectedLabels: false,
           items: [
