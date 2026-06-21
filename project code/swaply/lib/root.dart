@@ -66,12 +66,12 @@ class _RootViewState extends State<RootView> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.local_restaurant_outlined),
-              label: 'Orders',
+              icon: Icon(Icons.swap_horiz),
+              label: 'Sessions',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.cart),
-              label: 'Cart',
+              icon: Icon(CupertinoIcons.chat_bubble_2),
+              label: 'Messages',
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person),
