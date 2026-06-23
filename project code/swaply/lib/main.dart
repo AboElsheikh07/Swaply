@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
 import 'package:swaply/features/sessions/presentation/controllers/sessions_controller.dart';
 import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
+import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:swaply/root.dart';
 
 Future<void> main() async {
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
         );
       }),
       
-      home:  RootView(),
+      home:  WelcomeScreen(),
     );
   }
 }
