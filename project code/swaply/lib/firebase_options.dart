@@ -57,7 +57,6 @@ class DefaultFirebaseOptions {
     projectId: 'swaply-cc9a7',
     storageBucket: 'swaply-cc9a7.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCzJ81tAoGH1T5k7qfqNnZo7Q9XeiVwWFE',
     appId: '1:311910419748:ios:6405e6b9e27e045f42f7b1',
@@ -66,7 +65,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'swaply-cc9a7.firebasestorage.app',
     iosBundleId: 'com.example.swaply',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCzJ81tAoGH1T5k7qfqNnZo7Q9XeiVwWFE',
     appId: '1:311910419748:ios:6405e6b9e27e045f42f7b1',
