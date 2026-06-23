@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:swaply/features/home/presentation/screens/home_screen.dart';
+import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
 import 'package:swaply/features/sessions/presentation/controllers/sessions_controller.dart';
 import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
-import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
+import 'package:swaply/firebase_options.dart';
 import 'package:swaply/root.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(    
+    options: DefaultFirebaseOptions.currentPlatform,
+);
   runApp(const MyApp());
 }
 
@@ -33,7 +38,7 @@ class MyApp extends StatelessWidget {
         );
       }),
       
-      home:  WelcomeScreen(),
+      home: RootView(),
     );
   }
 }
