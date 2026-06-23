@@ -14,26 +14,27 @@ class SessionRemoteDataSource {
   // ── Streams ──────────────────────────────────
 
   /// All sessions where the user is the teacher (incoming requests).
-  Stream<List<SessionModel>> watchIncomingRequests(String uid) {
-    return _sessions
-        .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt')
-        .snapshots()
-        .map((snap) => snap.docs.map(SessionModel.fromFirestore).toList());
-  }
+  // Stream<List<SessionItem>> watchIncomingRequests(String uid) {
+    
+    // return _sessions
+        // .where('teacherId', isEqualTo: uid)
+        // .orderBy('scheduledAt')
+        // .snapshots()
+        // .map((snap) => snap.docs.map(SessionItem.fromFirestore).toList());
+  // }
 
   /// All sessions where the user is the student (my requests).
-  Stream<List<SessionModel>> watchMyRequests(String uid) {
-    return _sessions
-        .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt')
-        .snapshots()
-        .map((snap) => snap.docs.map(SessionModel.fromFirestore).toList());
-  }
+  // Stream<List<SessionItem>> watchMyRequests(String uid) {
+  //   return _sessions
+  //       .where('studentId', isEqualTo: uid)
+  //       .orderBy('scheduledAt')
+  //       .snapshots()
+  //       .map((snap) => snap.docs.map(SessionItem.fromFirestore).toList());
+  // }
 
   // ── Mutations ────────────────────────────────
 
-  Future<void> createSession(SessionModel session) async {
+  Future<void> createSession(SessionItem session) async {
     await _sessions.doc(session.id).set(session.toFirestore());
   }
 
@@ -46,8 +47,8 @@ class SessionRemoteDataSource {
   }
 
   /// Fetch a single session once (for deep-link / notification open).
-  Future<SessionModel?> fetchSession(String sessionId) async {
-    final doc = await _sessions.doc(sessionId).get();
-    return doc.exists ? SessionModel.fromFirestore(doc) : null;
-  }
+  // Future<SessionItem?> fetchSession(String sessionId) async {
+    // final doc = await _sessions.doc(sessionId).get();
+    // return doc.exists ? SessionItem.fromFirestore(doc) : null;
+  // }
 }

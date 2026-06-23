@@ -14,8 +14,8 @@ class SessionsController extends GetxController {
   }) : _repo = repo ?? SessionRepository();
 
   // ── Streams ──────────────────────────────────
-  final incoming = <SessionModel>[].obs;
-  final myRequests = <SessionModel>[].obs;
+  final incoming = <SessionItem>[].obs;
+  final myRequests = <SessionItem>[].obs;
 
   StreamSubscription? _incomingSub;
   StreamSubscription? _myRequestsSub;
@@ -35,8 +35,8 @@ class SessionsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _listenIncoming();
-    _listenMyRequests();
+    // _listenIncoming();
+    // _listenMyRequests();
   }
 
   @override
@@ -46,33 +46,33 @@ class SessionsController extends GetxController {
     super.onClose();
   }
 
-  void _listenIncoming() {
-    _incomingSub = _repo
-        .watchIncomingRequests(currentUid)
-        .listen((list) => incoming.assignAll(list));
+  // void _listenIncoming() {
+  //   _incomingSub = _repo
+  //       .watchIncomingRequests(currentUid)
+  //       .listen((list) => incoming.assignAll(list));
   }
 
-  void _listenMyRequests() {
-    _myRequestsSub = _repo
-        .watchMyRequests(currentUid)
-        .listen((list) => myRequests.assignAll(list));
-  }
+  // void _listenMyRequests() {
+  //   _myRequestsSub = _repo
+  //       .watchMyRequests(currentUid)
+  //       .listen((list) => myRequests.assignAll(list));
+  // }
 
   // ── Accept / Decline ─────────────────────────
 
   Future<void> accept(String sessionId) async {
     try {
-      await _repo.acceptSession(sessionId);
+      // await _repo.acceptSession(sessionId);
     } catch (e) {
-      errorMsg.value = 'Could not accept session. Try again.';
+      // errorMsg.value = 'Could not accept session. Try again.';
     }
   }
 
   Future<void> decline(String sessionId) async {
     try {
-      await _repo.declineSession(sessionId);
+      // await _repo.declineSession(sessionId);
     } catch (e) {
-      errorMsg.value = 'Could not decline session. Try again.';
+      // errorMsg.value = 'Could not decline session. Try again.';
     }
   }
 
@@ -88,51 +88,51 @@ class SessionsController extends GetxController {
     required int pricePerHour,
     required String? message,
   }) async {
-    final date = selectedDate.value;
-    final time = selectedTime.value;
+    // final date = selectedDate.value;
+    // final time = selectedTime.value;
 
-    if (date == null || time.isEmpty || selectedSkill.value.isEmpty) {
-      errorMsg.value = 'Please fill in all fields.';
-      return;
-    }
+    // if (date == null || time.isEmpty || selectedSkill.value.isEmpty) {
+      // errorMsg.value = 'Please fill in all fields.';
+    //   return;
+    // }
 
-    isLoading.value = true;
-    errorMsg.value  = null;
+    // isLoading.value = true;
+    // errorMsg.value  = null;
 
-    try {
-      final scheduledAt = _mergeDateTime(date, time);
-      final cost = ((pricePerHour * selectedMinutes.value) / 60).round();
+  //   try {
+  //     final scheduledAt = _mergeDateTime(date, time);
+  //     final points = ((pricePerHour * selectedMinutes.value) / 60).round();
 
-      await _repo.requestSession(
-        studentId:       currentUid,
-        teacherId:       teacherId,
-        studentName:     studentName,
-        teacherName:     teacherName,
-        studentAvatar:   studentAvatar,
-        teacherAvatar:   teacherAvatar,
-        skill:           selectedSkill.value,
-        scheduledAt:     scheduledAt,
-        durationMinutes: selectedMinutes.value,
-        cost:            cost,
-        message:         message,
-      );
+  //     await _repo.requestSession(
+  //       studentId:       currentUid,
+  //       teacherId:       teacherId,
+  //       studentName:     studentName,
+  //       teacherName:     teacherName,
+  //       studentAvatar:   studentAvatar,
+  //       teacherAvatar:   teacherAvatar,
+  //       skill:           selectedSkill.value,
+  //       scheduledAt:     scheduledAt,
+  //       durationMinutes: selectedMinutes.value,
+  //       points:            points,
+  //       message:         message,
+  //     );
 
-      confirmed.value = true;
-    } catch (e) {
-      errorMsg.value = 'Failed to send request. Please try again.';
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  //     confirmed.value = true;
+  //   } catch (e) {
+  //     errorMsg.value = 'Failed to send request. Please try again.';
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
 
-  void resetForm() {
-    selectedSkill.value   = '';
-    selectedDate.value    = null;
-    selectedTime.value    = '';
-    selectedMinutes.value = 60;
-    confirmed.value       = false;
-    errorMsg.value        = null;
-  }
+  // void resetForm() {
+  //   selectedSkill.value   = '';
+  //   selectedDate.value    = null;
+  //   selectedTime.value    = '';
+  //   selectedMinutes.value = 60;
+  //   confirmed.value       = false;
+  //   errorMsg.value        = null;
+  // }
 
   // ── Helpers ──────────────────────────────────
 
@@ -148,6 +148,6 @@ class SessionsController extends GetxController {
   }
 
   /// Cost based on current form selection and teacher's hourly rate.
-  int computeCost(int pricePerHour) =>
-      ((pricePerHour * selectedMinutes.value) / 60).round();
+  // int computeCost(int pricePerHour) =>
+      // ((pricePerHour * selectedMinutes.value) / 60).round();
 }

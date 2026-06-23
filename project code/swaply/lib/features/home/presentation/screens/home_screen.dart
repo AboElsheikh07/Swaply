@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import '../../../../core/constants/app_colors.dart';
 
 // ─────────────────────────────────────────
 //  Models
@@ -30,11 +31,7 @@ class Category {
   final String name;
   final int count;
 
-  const Category({
-    required this.id,
-    required this.name,
-    required this.count,
-  });
+  const Category({required this.id, required this.name, required this.count});
 }
 
 class Promo {
@@ -56,43 +53,110 @@ class Promo {
 // ─────────────────────────────────────────
 
 const _mentors = [
-  Mentor(id: 'm1', name: 'Sarah Chen',   skill: 'UI/UX Design',      rate: '60 pts/hr', rating: 4.9, reviews: 142, online: true),
-  Mentor(id: 'm2', name: 'James Wilson', skill: 'Flutter & Mobile',  rate: '75 pts/hr', rating: 4.8, reviews: 98,  online: true),
-  Mentor(id: 'm3', name: 'Maria Lopez',  skill: 'Spanish Tutoring',  rate: '40 pts/hr', rating: 5.0, reviews: 211),
-  Mentor(id: 'm4', name: 'Derek Knight', skill: 'Guitar Lessons',    rate: '50 pts/hr', rating: 4.7, reviews: 74),
-  Mentor(id: 'm5', name: 'Priya Patel',  skill: 'Yoga & Meditation', rate: '45 pts/hr', rating: 4.9, reviews: 163, online: true),
-  Mentor(id: 'm6', name: 'Kenji Tanaka', skill: 'React & TypeScript',rate: '70 pts/hr', rating: 4.8, reviews: 119),
-  Mentor(id: 'm7', name: 'Amelia Clarke',skill: 'Public Speaking',   rate: '55 pts/hr', rating: 4.9, reviews: 88),
-  Mentor(id: 'm8', name: 'Omar Haddad',  skill: 'Photography',       rate: '50 pts/hr', rating: 4.7, reviews: 66),
+  Mentor(
+    id: 'm1',
+    name: 'Sarah Chen',
+    skill: 'UI/UX Design',
+    rate: '60 pts/hr',
+    rating: 4.9,
+    reviews: 142,
+    online: true,
+  ),
+  Mentor(
+    id: 'm2',
+    name: 'James Wilson',
+    skill: 'Flutter & Mobile',
+    rate: '75 pts/hr',
+    rating: 4.8,
+    reviews: 98,
+    online: true,
+  ),
+  Mentor(
+    id: 'm3',
+    name: 'Maria Lopez',
+    skill: 'Spanish Tutoring',
+    rate: '40 pts/hr',
+    rating: 5.0,
+    reviews: 211,
+  ),
+  Mentor(
+    id: 'm4',
+    name: 'Derek Knight',
+    skill: 'Guitar Lessons',
+    rate: '50 pts/hr',
+    rating: 4.7,
+    reviews: 74,
+  ),
+  Mentor(
+    id: 'm5',
+    name: 'Priya Patel',
+    skill: 'Yoga & Meditation',
+    rate: '45 pts/hr',
+    rating: 4.9,
+    reviews: 163,
+    online: true,
+  ),
+  Mentor(
+    id: 'm6',
+    name: 'Kenji Tanaka',
+    skill: 'React & TypeScript',
+    rate: '70 pts/hr',
+    rating: 4.8,
+    reviews: 119,
+  ),
+  Mentor(
+    id: 'm7',
+    name: 'Amelia Clarke',
+    skill: 'Public Speaking',
+    rate: '55 pts/hr',
+    rating: 4.9,
+    reviews: 88,
+  ),
+  Mentor(
+    id: 'm8',
+    name: 'Omar Haddad',
+    skill: 'Photography',
+    rate: '50 pts/hr',
+    rating: 4.7,
+    reviews: 66,
+  ),
 ];
 
 const _categories = [
-  Category(id: 'c1', name: 'Design & Creative',    count: 124),
-  Category(id: 'c2', name: 'Development & Tech',   count: 238),
-  Category(id: 'c3', name: 'Languages',             count: 86),
-  Category(id: 'c4', name: 'Music & Audio',         count: 54),
-  Category(id: 'c5', name: 'Wellness & Fitness',   count: 72),
+  Category(id: 'c1', name: 'Design & Creative', count: 124),
+  Category(id: 'c2', name: 'Development & Tech', count: 238),
+  Category(id: 'c3', name: 'Languages', count: 86),
+  Category(id: 'c4', name: 'Music & Audio', count: 54),
+  Category(id: 'c5', name: 'Wellness & Fitness', count: 72),
   Category(id: 'c6', name: 'Business & Marketing', count: 91),
-  Category(id: 'c7', name: 'Photography',           count: 48),
-  Category(id: 'c8', name: 'Cooking & Lifestyle',  count: 63),
+  Category(id: 'c7', name: 'Photography', count: 48),
+  Category(id: 'c8', name: 'Cooking & Lifestyle', count: 63),
 ];
 
 const _promos = [
-  Promo(id: 'p1', title: 'Earn 50 pts when you teach your first skill', subtitle: 'Start teaching today', vendor: 'By Skill Swap'),
-  Promo(id: 'p2', title: 'New mentors this week',                        subtitle: '20+ designers & devs joined', vendor: 'By Skill Swap'),
-  Promo(id: 'p3', title: 'Invite a friend',                              subtitle: 'Get 100 bonus points', vendor: 'By Skill Swap'),
+  Promo(
+    id: 'p1',
+    title: 'Earn 50 pts when you teach your first skill',
+    subtitle: 'Start teaching today',
+    vendor: 'By Skill Swap',
+  ),
+  Promo(
+    id: 'p2',
+    title: 'New mentors this week',
+    subtitle: '20+ designers & devs joined',
+    vendor: 'By Skill Swap',
+  ),
+  Promo(
+    id: 'p3',
+    title: 'Invite a friend',
+    subtitle: 'Get 100 bonus points',
+    vendor: 'By Skill Swap',
+  ),
 ];
 
 // ─────────────────────────────────────────
 //  Colors
 // ─────────────────────────────────────────
-
-const _primary   = Color(0xFF5B4CB8);
-const _primarySoft = Color(0xFFEEECFB);
-const _cardBg    = Colors.white;
-const _mutedFg   = Color(0xFF8A8A9A);
-const _border    = Color(0xFFEAEAF0);
-const _dark      = Color(0xFF1A1A2E);
 
 // ─────────────────────────────────────────
 //  HomeScreen
@@ -134,10 +198,7 @@ class _HomeScreenState extends State<HomeScreen>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: const [
-                  _HomeTab(),
-                  _CategoryTab(),
-                ],
+                children: const [_HomeTab(), _CategoryTab()],
               ),
             ),
           ],
@@ -161,8 +222,12 @@ class _Header extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 22,
-            backgroundColor: _primarySoft,
-            child: const Icon(CupertinoIcons.person_fill, color: _primary, size: 22),
+            backgroundColor: AppColors.primarySoft,
+            child: const Icon(
+              CupertinoIcons.person_fill,
+              color: AppColors.primary,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           // Greeting
@@ -172,17 +237,16 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   'Hi, Jonathan',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
                 ),
                 Text(
                   "Let's learn something today",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: _mutedFg),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.mutedFg),
                 ),
               ],
             ),
@@ -191,11 +255,7 @@ class _Header extends StatelessWidget {
           _IconBtn(icon: CupertinoIcons.search, onTap: () {}),
           const SizedBox(width: 8),
           // Notifications button
-          _IconBtn(
-            icon: CupertinoIcons.bell,
-            onTap: () {},
-            badge: true,
-          ),
+          _IconBtn(icon: CupertinoIcons.bell, onTap: () {}, badge: true),
         ],
       ),
     );
@@ -219,12 +279,12 @@ class _IconBtn extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
-          border: Border.all(color: _border),
+          border: Border.all(color: AppColors.border),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(icon, size: 20, color: _dark),
+            Icon(icon, size: 20, color: AppColors.dark),
             if (badge)
               Positioned(
                 top: 8,
@@ -259,14 +319,17 @@ class _TabBar extends StatelessWidget {
       color: Colors.white,
       child: TabBar(
         controller: controller,
-        labelColor: _primary,
-        unselectedLabelColor: _mutedFg,
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.mutedFg,
         labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        indicatorColor: _primary,
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+        indicatorColor: AppColors.primary,
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorWeight: 2,
-        dividerColor: _border,
+        dividerColor: AppColors.border,
         tabs: const [
           Tab(text: 'Home'),
           Tab(text: 'Category'),
@@ -331,7 +394,7 @@ class _HomeTabState extends State<_HomeTab> {
                     width: _slide == i ? 20 : 6,
                     height: 6,
                     decoration: BoxDecoration(
-                      color: _slide == i ? _dark : _border,
+                      color: _slide == i ? AppColors.dark : AppColors.border,
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
@@ -352,8 +415,11 @@ class _HomeTabState extends State<_HomeTab> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 6),
-              const Icon(Icons.local_fire_department_rounded,
-                  color: Colors.orange, size: 18),
+              const Icon(
+                Icons.local_fire_department_rounded,
+                color: Colors.orange,
+                size: 18,
+              ),
               const Spacer(),
               GestureDetector(
                 onTap: () {},
@@ -362,7 +428,7 @@ class _HomeTabState extends State<_HomeTab> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: _primary,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -438,7 +504,7 @@ class _PromoCard extends StatelessWidget {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                color: _primary.withOpacity(0.2),
+                color: AppColors.primary.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
             ),
@@ -472,7 +538,10 @@ class _PromoCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         promo.vendor,
-                        style: const TextStyle(fontSize: 11, color: _mutedFg),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.mutedFg,
+                        ),
                       ),
                     ],
                   ),
@@ -482,11 +551,14 @@ class _PromoCard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: _primary.withOpacity(0.12),
+                    color: AppColors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(CupertinoIcons.gift_fill,
-                      color: _primary, size: 36),
+                  child: const Icon(
+                    CupertinoIcons.gift_fill,
+                    color: AppColors.primary,
+                    size: 36,
+                  ),
                 ),
               ],
             ),
@@ -511,9 +583,9 @@ class _MentorCard extends StatelessWidget {
       onTap: () {},
       child: Container(
         decoration: BoxDecoration(
-          color: _cardBg,
+          color: AppColors.cardBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _border),
+          border: Border.all(color: AppColors.border),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -530,13 +602,17 @@ class _MentorCard extends StatelessWidget {
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                     child: Container(
                       width: double.infinity,
-                      color: _primarySoft,
-                      child: const Icon(CupertinoIcons.person_fill,
-                          color: _primary, size: 48),
+                      color: AppColors.primarySoft,
+                      child: const Icon(
+                        CupertinoIcons.person_fill,
+                        color: AppColors.primary,
+                        size: 48,
+                      ),
                     ),
                   ),
                   // Online badge
@@ -544,8 +620,10 @@ class _MentorCard extends StatelessWidget {
                     bottom: 8,
                     left: 8,
                     child: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(20),
@@ -553,7 +631,7 @@ class _MentorCard extends StatelessWidget {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.08),
                             blurRadius: 4,
-                          )
+                          ),
                         ],
                       ),
                       child: Row(
@@ -606,13 +684,18 @@ class _MentorCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Icon(Icons.star_rounded,
-                          color: Color(0xFFFFC107), size: 13),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFFFC107),
+                        size: 13,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         mentor.rating.toStringAsFixed(1),
                         style: const TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w600),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -621,8 +704,10 @@ class _MentorCard extends StatelessWidget {
                     mentor.skill,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        const TextStyle(fontSize: 11, color: _mutedFg),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.mutedFg,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -630,7 +715,7 @@ class _MentorCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: _primary,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],

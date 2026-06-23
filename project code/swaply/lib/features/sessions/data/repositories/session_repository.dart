@@ -8,15 +8,15 @@ class SessionRepository {
   final _uuid = const Uuid();
 
   SessionRepository({SessionRemoteDataSource? remote})
-      : _remote = remote ?? SessionRemoteDataSource();
+    : _remote = remote ?? SessionRemoteDataSource();
 
   // ── Streams ──────────────────────────────────
 
-  Stream<List<SessionModel>> watchIncomingRequests(String uid) =>
-      _remote.watchIncomingRequests(uid);
+  // Stream<List<SessionItem>> watchIncomingRequests(String uid) =>
+  // _remote.watchIncomingRequests(uid);
 
-  Stream<List<SessionModel>> watchMyRequests(String uid) =>
-      _remote.watchMyRequests(uid);
+  // Stream<List<SessionItem>> watchMyRequests(String uid) =>
+  //     _remote.watchMyRequests(uid);
 
   // ── Create ───────────────────────────────────
 
@@ -30,24 +30,26 @@ class SessionRepository {
     required String skill,
     required DateTime scheduledAt,
     required int durationMinutes,
-    required int cost,
+    required int points,
+    required bool isOutgoing,
     String? message,
   }) async {
-    final session = SessionModel(
-      id:              _uuid.v4(),
-      studentId:       studentId,
-      teacherId:       teacherId,
-      studentName:     studentName,
-      teacherName:     teacherName,
-      studentAvatar:   studentAvatar,
-      teacherAvatar:   teacherAvatar,
-      skill:           skill,
-      scheduledAt:     scheduledAt,
+    final session = SessionItem(
+      id: _uuid.v4(),
+      studentId: studentId,
+      teacherId: teacherId,
+      studentName: studentName,
+      teacherName: teacherName,
+      studentAvatar: studentAvatar,
+      teacherAvatar: teacherAvatar,
+      skill: skill,
+      scheduledAt: scheduledAt,
       durationMinutes: durationMinutes,
-      cost:            cost,
-      status:          SessionStatus.pending,
-      message:         message,
-      createdAt:       DateTime.now(),
+      points: points,
+      status: SessionStatus.pending,
+      message: message,
+      createdAt: DateTime.now(),
+      isOutgoing: isOutgoing,
     );
     await _remote.createSession(session);
   }
@@ -64,10 +66,10 @@ class SessionRepository {
       _remote.updateStatus(sessionId, SessionStatus.completed);
 
   Future<void> cancelSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.cancelled);
+      _remote.updateStatus(sessionId, SessionStatus.rejected);
 
   // ── Fetch once ───────────────────────────────
 
-  Future<SessionModel?> fetchSession(String sessionId) =>
-      _remote.fetchSession(sessionId);
+  // Future<SessionItem?> fetchSession(String sessionId) =>
+  //     _remote.fetchSession(sessionId);
 }
