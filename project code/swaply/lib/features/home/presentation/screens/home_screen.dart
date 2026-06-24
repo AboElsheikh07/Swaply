@@ -10,11 +10,11 @@ import '../cubit/home_state.dart';
 import 'category_screen.dart';
 
 // ── Colors ──────────────────────────────
-const _primary     = Color(0xFF5B4CB8);
+const _primary = Color(0xFF5B4CB8);
 const _primarySoft = Color(0xFFEEECFB);
-const _mutedFg     = Color(0xFF8A8A9A);
-const _border      = Color(0xFFEAEAF0);
-const _dark        = Color(0xFF1A1A2E);
+const _mutedFg = Color(0xFF8A8A9A);
+const _border = Color(0xFFEAEAF0);
+const _dark = Color(0xFF1A1A2E);
 
 // ════════════════════════════════════════
 //  Entry point - يحقن الـ Cubit
@@ -72,17 +72,24 @@ class _HomeViewState extends State<_HomeView>
                 Expanded(
                   child: switch (state) {
                     HomeLoading() => const Center(
-                        child: CircularProgressIndicator(color: _primary),
-                      ),
+                      child: CircularProgressIndicator(color: _primary),
+                    ),
                     HomeError(:final message) => _ErrorView(
-                        message: message,
-                        onRetry: () => context.read<HomeCubit>().refresh(),
-                      ),
-                    HomeLoaded(:final topMentors, :final recommended, :final categories) =>
+                      message: message,
+                      onRetry: () => context.read<HomeCubit>().refresh(),
+                    ),
+                    HomeLoaded(
+                      :final topMentors,
+                      :final recommended,
+                      :final categories,
+                    ) =>
                       TabBarView(
                         controller: _tabController,
                         children: [
-                          _HomeTab(topMentors: topMentors, recommended: recommended),
+                          _HomeTab(
+                            topMentors: topMentors,
+                            recommended: recommended,
+                          ),
                           CategoryTab(categories: categories),
                         ],
                       ),
@@ -105,12 +112,18 @@ class _HomeViewState extends State<_HomeView>
         labelColor: _primary,
         unselectedLabelColor: _mutedFg,
         labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
         indicatorColor: _primary,
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorWeight: 2,
         dividerColor: _border,
-        tabs: const [Tab(text: 'Home'), Tab(text: 'Category')],
+        tabs: const [
+          Tab(text: 'Home'),
+          Tab(text: 'Category'),
+        ],
       ),
     );
   }
@@ -130,7 +143,11 @@ class _Header extends StatelessWidget {
           CircleAvatar(
             radius: 22,
             backgroundColor: _primarySoft,
-            child: const Icon(CupertinoIcons.person_fill, color: _primary, size: 22),
+            child: const Icon(
+              CupertinoIcons.person_fill,
+              color: _primary,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -138,10 +155,14 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ✅ لما Auth يخلص، استبدل النص ده بـ user.displayName
-                const Text('Hi, Jonathan',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                Text("Let's learn something today",
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                const Text(
+                  'Hi, Jonathan',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "Let's learn something today",
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
               ],
             ),
           ),
@@ -270,7 +291,11 @@ class _HomeTabState extends State<_HomeTab> {
           const SizedBox(height: 24),
 
           // ── Top Mentors ──
-          _SectionHeader(title: 'Top Mentors', icon: Icons.local_fire_department_rounded, onSeeAll: () {}),
+          _SectionHeader(
+            title: 'Top Mentors',
+            icon: Icons.local_fire_department_rounded,
+            onSeeAll: () {},
+          ),
           const SizedBox(height: 12),
           _MentorGrid(mentors: widget.topMentors),
           const SizedBox(height: 24),
@@ -290,7 +315,11 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final IconData? icon;
   final VoidCallback onSeeAll;
-  const _SectionHeader({required this.title, this.icon, required this.onSeeAll});
+  const _SectionHeader({
+    required this.title,
+    this.icon,
+    required this.onSeeAll,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -298,7 +327,10 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           if (icon != null) ...[
             const SizedBox(width: 6),
             Icon(icon, color: Colors.orange, size: 18),
@@ -306,8 +338,14 @@ class _SectionHeader extends StatelessWidget {
           const Spacer(),
           GestureDetector(
             onTap: onSeeAll,
-            child: const Text('See All',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _primary)),
+            child: const Text(
+              'See All',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: _primary,
+              ),
+            ),
           ),
         ],
       ),
@@ -371,14 +409,28 @@ class _PromoCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(title,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, height: 1.3)),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          height: 1.3,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(subtitle,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF444466))),
+                      Text(
+                        subtitle,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF444466),
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      const Text('By Swaply',
-                          style: TextStyle(fontSize: 11, color: _mutedFg)),
+                      const Text(
+                        'By Swaply',
+                        style: TextStyle(fontSize: 11, color: _mutedFg),
+                      ),
                     ],
                   ),
                 ),
@@ -389,7 +441,11 @@ class _PromoCard extends StatelessWidget {
                     color: _primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(CupertinoIcons.gift_fill, color: _primary, size: 36),
+                  child: const Icon(
+                    CupertinoIcons.gift_fill,
+                    color: _primary,
+                    size: 36,
+                  ),
                 ),
               ],
             ),
@@ -423,7 +479,9 @@ class _MentorCard extends StatelessWidget {
               child: Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
                     child: Container(
                       width: double.infinity,
                       color: _primarySoft,
@@ -431,17 +489,29 @@ class _MentorCard extends StatelessWidget {
                       // child: mentor.imageUrl != null
                       //     ? Image.network(mentor.imageUrl!, fit: BoxFit.cover)
                       //     : Icon(...)
-                      child: const Icon(CupertinoIcons.person_fill, color: _primary, size: 48),
+                      child: const Icon(
+                        CupertinoIcons.person_fill,
+                        color: _primary,
+                        size: 48,
+                      ),
                     ),
                   ),
                   Positioned(
                     bottom: 8, left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4)],
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -481,17 +551,28 @@ class _MentorCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                       ),
-                      const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 13),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFFFC107),
+                        size: 13,
+                      ),
                       const SizedBox(width: 2),
-                      Text(mentor.rating.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                      Text(
+                        mentor.rating.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(mentor.skill,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: _mutedFg)),
+                  Text(
+                    mentor.skill,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: _mutedFg),
+                  ),
                   const SizedBox(height: 4),
                   Text(mentor.rate,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _primary)),
@@ -523,7 +604,10 @@ class _ErrorView extends StatelessWidget {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
-            style: ElevatedButton.styleFrom(backgroundColor: _primary, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primary,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Try Again'),
           ),
         ],

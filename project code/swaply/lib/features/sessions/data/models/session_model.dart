@@ -1,18 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-enum SessionStatus { pending, accepted, rejected, completed, ongoing, cancelled }
+enum SessionStatus { accepted, ongoing, pending, completed, rejected }
 
 enum SessionRole { teacher, student }
 
 extension SessionStatusX on SessionStatus {
   String get label {
     switch (this) {
-      case SessionStatus.pending:   return 'Pending';
-      case SessionStatus.accepted:  return 'Accepted';
-      case SessionStatus.rejected:  return 'Rejected';
-      case SessionStatus.completed: return 'Completed';
-      case SessionStatus.ongoing:   return 'Ongoing';
-      case SessionStatus.cancelled: return 'Cancelled';
+      case SessionStatus.pending:
+        return 'Pending';
+      case SessionStatus.accepted:
+        return 'Accepted';
+      case SessionStatus.rejected:
+        return 'Rejected';
+      case SessionStatus.completed:
+        return 'Completed';
+      case SessionStatus.ongoing:
+        return 'Ongoing';
+
     }
   }
 
@@ -24,7 +30,7 @@ extension SessionStatusX on SessionStatus {
   }
 }
 
-class SessionModel {
+class SessionItem {
   final String id;
   final String studentId;
   final String teacherId;
@@ -35,12 +41,13 @@ class SessionModel {
   final String skill;
   final DateTime scheduledAt;
   final int durationMinutes;
-  final int cost;            // in points
+  final bool isOutgoing;
+  final int points; // in points
   final SessionStatus status;
-  final String? message;    // optional message from student
+  final String? message; // optional message from student
   final DateTime createdAt;
 
-  const SessionModel({
+  const SessionItem({
     required this.id,
     required this.studentId,
     required this.teacherId,
@@ -51,8 +58,9 @@ class SessionModel {
     required this.skill,
     required this.scheduledAt,
     required this.durationMinutes,
-    required this.cost,
+    required this.points,
     required this.status,
+    required this.isOutgoing,
     this.message,
     required this.createdAt,
   });
@@ -68,21 +76,9 @@ class SessionModel {
       uid == teacherId ? studentAvatar : teacherAvatar;
 
   // ── Formatted helpers ────────────────────────
-  String get formattedDate {
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const weekdays = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    final w = weekdays[scheduledAt.weekday - 1];
-    final m = months[scheduledAt.month - 1];
-    return '$w, $m ${scheduledAt.day}';
-  }
+  String get formattedDate => DateFormat('EEE, MMM d').format(scheduledAt);
 
-  String get formattedTime {
-    final h = scheduledAt.hour;
-    final m = scheduledAt.minute.toString().padLeft(2, '0');
-    final period = h >= 12 ? 'PM' : 'AM';
-    final hour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
-    return '$hour:$m $period';
-  }
+  String get formattedTime => DateFormat('h:mm a').format(scheduledAt);
 
   String get formattedDuration {
     if (durationMinutes < 60) return '$durationMinutes min';
@@ -92,56 +88,57 @@ class SessionModel {
   }
 
   // ── Firestore ────────────────────────────────
-  factory SessionModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return SessionModel(
-      id: doc.id,
-      studentId:     data['studentId']     ?? '',
-      teacherId:     data['teacherId']     ?? '',
-      studentName:   data['studentName']   ?? '',
-      teacherName:   data['teacherName']   ?? '',
-      studentAvatar: data['studentAvatar'] ?? '',
-      teacherAvatar: data['teacherAvatar'] ?? '',
-      skill:         data['skill']         ?? '',
-      scheduledAt:   (data['scheduledAt'] as Timestamp).toDate(),
-      durationMinutes: data['durationMinutes'] ?? 60,
-      cost:          data['cost']          ?? 0,
-      status: SessionStatusX.fromString(data['status'] ?? 'pending'),
-      message:       data['message'],
-      createdAt:     (data['createdAt'] as Timestamp).toDate(),
-    );
-  }
+  // factory SessionModel.fromFirestore(DocumentSnapshot doc) {
+  //   final data = doc.data() as Map<String, dynamic>;
+  //   return SessionModel(
+  //     id: doc.id,
+  //     studentId:     data['studentId']     ?? '',
+  //     teacherId:     data['teacherId']     ?? '',
+  //     studentName:   data['studentName']   ?? '',
+  //     teacherName:   data['teacherName']   ?? '',
+  //     studentAvatar: data['studentAvatar'] ?? '',
+  //     teacherAvatar: data['teacherAvatar'] ?? '',
+  //     skill:         data['skill']         ?? '',
+  //     scheduledAt:   (data['scheduledAt'] as Timestamp).toDate(),
+  //     durationMinutes: data['durationMinutes'] ?? 60,
+  //     cost:          data['cost']          ?? 0,
+  //     status: SessionStatusX.fromString(data['status'] ?? 'pending'),
+  //     message:       data['message'],
+  //     createdAt:     (data['createdAt'] as Timestamp).toDate(),
+  //   );
+  // }
 
   Map<String, dynamic> toFirestore() => {
-    'studentId':       studentId,
-    'teacherId':       teacherId,
-    'studentName':     studentName,
-    'teacherName':     teacherName,
-    'studentAvatar':   studentAvatar,
-    'teacherAvatar':   teacherAvatar,
-    'skill':           skill,
-    'scheduledAt':     Timestamp.fromDate(scheduledAt),
+    'studentId': studentId,
+    'teacherId': teacherId,
+    'studentName': studentName,
+    'teacherName': teacherName,
+    'studentAvatar': studentAvatar,
+    'teacherAvatar': teacherAvatar,
+    'skill': skill,
+    'scheduledAt': Timestamp.fromDate(scheduledAt),
     'durationMinutes': durationMinutes,
-    'cost':            cost,
-    'status':          status.name,
-    'message':         message,
-    'createdAt':       Timestamp.fromDate(createdAt),
+    'points': points,
+    'status': status.name,
+    'message': message,
+    'createdAt': Timestamp.fromDate(createdAt),
   };
 
-  SessionModel copyWith({SessionStatus? status}) => SessionModel(
-    id:              id,
-    studentId:       studentId,
-    teacherId:       teacherId,
-    studentName:     studentName,
-    teacherName:     teacherName,
-    studentAvatar:   studentAvatar,
-    teacherAvatar:   teacherAvatar,
-    skill:           skill,
-    scheduledAt:     scheduledAt,
+  SessionItem copyWith({SessionStatus? status}) => SessionItem(
+    id: id,
+    studentId: studentId,
+    teacherId: teacherId,
+    studentName: studentName,
+    teacherName: teacherName,
+    studentAvatar: studentAvatar,
+    teacherAvatar: teacherAvatar,
+    skill: skill,
+    scheduledAt: scheduledAt,
     durationMinutes: durationMinutes,
-    cost:            cost,
-    status:          status ?? this.status,
-    message:         message,
-    createdAt:       createdAt,
+    points: points,
+    status: status ?? this.status,
+    message: message,
+    createdAt: createdAt,
+    isOutgoing: isOutgoing
   );
 }
