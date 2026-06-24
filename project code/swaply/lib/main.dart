@@ -1,15 +1,11 @@
+// main.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
-// import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
-import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
-// import 'package:swaply/root.dart';
+import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
+import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+void main() {
   runApp(const MyApp());
 }
 
@@ -22,7 +18,7 @@ class MyApp extends StatelessWidget {
       providers: [
         // ── Auth ─────────────────────────────
         // BlocProvider(
-          // create: (_) => AuthCubit()..checkAuth(),
+        //   create: (_) => AuthCubit()..checkAuth(),
         // ),
 
         // ── Sessions ─────────────────────────

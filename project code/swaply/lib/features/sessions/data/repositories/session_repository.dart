@@ -8,7 +8,7 @@ class SessionRepository {
   final _uuid = const Uuid();
 
   SessionRepository({SessionRemoteDataSource? remote})
-      : _remote = remote ?? SessionRemoteDataSource();
+    : _remote = remote ?? SessionRemoteDataSource();
 
   // ── Streams ──────────────────────────────────
 
@@ -96,49 +96,46 @@ class SessionRepository {
   // ── Reschedule ───────────────────────────────
 
   /// Update the scheduled date/time of a pending session.
-  // Future<void> rescheduleSession({
-  //   required String sessionId,
-  //   required DateTime newScheduledAt,
-  // }) =>
-  //     _remote.rescheduleSession(
-  //       sessionId: sessionId,
-  //       newScheduledAt: newScheduledAt,
-  //     );
+  Future<void> rescheduleSession({
+    required String sessionId,
+    required DateTime newScheduledAt,
+  }) => _remote.rescheduleSession(
+    sessionId: sessionId,
+    newScheduledAt: newScheduledAt,
+  );
 
   // ── Rating ───────────────────────────────────
 
   /// Submit a star rating + optional review after a completed session.
   /// [role] is either 'student' or 'teacher' — who is being rated.
-  // Future<void> submitRating({
-  //   required String sessionId,
-  //   required String raterId,
-  //   required String rateeId,
-  //   required String role,
-  //   required int stars,
-  //   String? review,
-  // }) =>
-  //     _remote.submitRating(
-  //       sessionId: sessionId,
-  //       raterId: raterId,
-  //       rateeId: rateeId,
-  //       role: role,
-  //       stars: stars,
-  //       review: review,
-  //     );
+  Future<void> submitRating({
+    required String sessionId,
+    required String raterId,
+    required String rateeId,
+    required String role,
+    required int stars,
+    String? review,
+  }) => _remote.submitRating(
+    sessionId: sessionId,
+    raterId: raterId,
+    rateeId: rateeId,
+    role: role,
+    stars: stars,
+    review: review,
+  );
 
   // ── Points ───────────────────────────────────
 
   /// Deduct points from student and credit teacher after session completes.
-  // Future<void> transferPoints({
-  //   required String studentId,
-  //   required String teacherId,
-  //   required int points,
-  // }) =>
-  //     _remote.transferPoints(
-  //       studentId: studentId,
-  //       teacherId: teacherId,
-  //       points: points,
-  //     );
+  Future<void> transferPoints({
+    required String studentId,
+    required String teacherId,
+    required int points,
+  }) => _remote.transferPoints(
+    studentId: studentId,
+    teacherId: teacherId,
+    points: points,
+  );
 
   // ── Delete ───────────────────────────────────
 

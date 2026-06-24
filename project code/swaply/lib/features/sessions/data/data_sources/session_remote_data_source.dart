@@ -6,7 +6,7 @@ class SessionRemoteDataSource {
   final FirebaseFirestore _db;
 
   SessionRemoteDataSource({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
+    : _db = db ?? FirebaseFirestore.instance;
 
   CollectionReference<Map<String, dynamic>> get _sessions =>
       _db.collection('sessions');
@@ -128,8 +128,7 @@ class SessionRemoteDataSource {
       final currentAvg = (data['ratingAvg'] as num?)?.toDouble() ?? 0.0;
 
       final newCount = currentCount + 1;
-      final newAvg =
-          ((currentAvg * currentCount) + stars) / newCount;
+      final newAvg = ((currentAvg * currentCount) + stars) / newCount;
 
       tx.update(userRef, {
         'ratingCount': newCount,
