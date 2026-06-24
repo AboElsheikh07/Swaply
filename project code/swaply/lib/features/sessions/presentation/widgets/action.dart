@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/features/sessions/presentation/widgets/rate_dialog.dart';
 import '../../data/models/session_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'buttons.dart';
@@ -17,23 +18,6 @@ class ActionWidget extends StatelessWidget {
           icon: CupertinoIcons.videocam_fill,
           label: 'Join Session',
           onTap: () {},
-        );
-
-      case SessionStatus.waiting:
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: const Text(
-            'Waiting',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.muted,
-            ),
-          ),
         );
 
       case SessionStatus.pending:
@@ -57,18 +41,28 @@ class ActionWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: const Text(
-            'Rejected',
+            'Cancelled',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.rose,
+              color: AppColors.muted,
             ),
           ),
         );
 
       case SessionStatus.completed:
         return GestureDetector(
-          onTap: () {},
+          onTap: () {
+            RateDialog.show(
+              context,
+              name: session.teacherName, // or studentName
+              skill: session.skill,
+              role: 'teacher', // or 'student'
+              onSubmit: (stars, review) {
+                // call your backend here
+              },
+            );
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(

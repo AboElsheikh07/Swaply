@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
-enum SessionStatus { accepted, waiting, ongoing, pending, completed, rejected }
+enum SessionStatus { accepted, ongoing, pending, completed, rejected }
 
 enum SessionRole { teacher, student }
 
@@ -17,8 +18,7 @@ extension SessionStatusX on SessionStatus {
         return 'Completed';
       case SessionStatus.ongoing:
         return 'Ongoing';
-      case SessionStatus.waiting:
-        return 'Waiting';
+
     }
   }
 
@@ -76,34 +76,9 @@ class SessionItem {
       uid == teacherId ? studentAvatar : teacherAvatar;
 
   // ── Formatted helpers ────────────────────────
-  String get formattedDate {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final w = weekdays[scheduledAt.weekday - 1];
-    final m = months[scheduledAt.month - 1];
-    return '$w, $m ${scheduledAt.day}';
-  }
+  String get formattedDate => DateFormat('EEE, MMM d').format(scheduledAt);
 
-  String get formattedTime {
-    final h = scheduledAt.hour;
-    final m = scheduledAt.minute.toString().padLeft(2, '0');
-    final period = h >= 12 ? 'PM' : 'AM';
-    final hour = h > 12 ? h - 12 : (h == 0 ? 12 : h);
-    return '$hour:$m $period';
-  }
+  String get formattedTime => DateFormat('h:mm a').format(scheduledAt);
 
   String get formattedDuration {
     if (durationMinutes < 60) return '$durationMinutes min';

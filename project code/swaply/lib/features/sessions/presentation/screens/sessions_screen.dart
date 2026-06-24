@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../data/models/session_model.dart';
-import '../widgets/session_card.dart';
-import '../../../../core/constants/app_colors.dart';
+import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:swaply/features/sessions/presentation/widgets/session_card.dart';
+import 'package:swaply/core/constants/app_colors.dart';
 
 // ─────────────────────────────────────────
 //  Mock Data
@@ -37,7 +37,7 @@ final _myRequests = [
     scheduledAt: DateTime(2024, 4, 26, 10, 0),
     durationMinutes: 45,
     points: 30,
-    status: SessionStatus.waiting,
+    status: SessionStatus.pending,
     message: 'Hi! I would love to practice conversational Spanish.',
     createdAt: DateTime(2024, 4, 21),
     isOutgoing: true,
@@ -169,7 +169,7 @@ class _SessionsScreenState extends State<SessionsScreen>
             // ── Header + Tab Bar ─────────────────
             Container(
               color: Colors.white,
-              width: double.infinity, // ← takes full width
+              width: double.infinity, 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

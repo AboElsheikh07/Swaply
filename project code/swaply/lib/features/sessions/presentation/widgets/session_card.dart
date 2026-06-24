@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:swaply/features/sessions/presentation/widgets/action.dart';
 import 'session_status_badge.dart';
 import 'points_label.dart';
-import '../../data/models/session_model.dart';
-import '../../../../core/constants/app_colors.dart';
-import '../widgets/buttons.dart';
+import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:swaply/core/constants/app_colors.dart';
+import 'package:swaply/features/sessions/presentation/widgets/buttons.dart';
 
 class SessionCard extends StatelessWidget {
   final SessionItem session;
@@ -132,7 +133,9 @@ class SessionCard extends StatelessWidget {
                               child: OutlineBtn(
                                 label: 'Decline',
                                 icon: Icons.close,
-                                onTap: () {},
+                                onTap: () {
+                                  
+                                },
                               ),
                             ),
                           ),
@@ -155,7 +158,7 @@ class SessionCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       PointsLabel(session: session),
-                      // ActionWidget(session: session),
+                      ActionWidget(session: session),
                     ],
                   ),
           ),

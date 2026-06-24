@@ -48,8 +48,6 @@ class StatusBadge extends StatelessWidget {
     switch (s) {
       case SessionStatus.accepted:
         return _BadgeCfg(AppColors.skyBg, AppColors.sky, 'Accepted');
-      case SessionStatus.waiting:
-        return _BadgeCfg(AppColors.amberBg, AppColors.amber, 'Waiting');
       case SessionStatus.ongoing:
         return _BadgeCfg(AppColors.greenBg, AppColors.green, 'Ongoing');
       case SessionStatus.pending:
