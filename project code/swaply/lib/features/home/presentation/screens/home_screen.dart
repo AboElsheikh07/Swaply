@@ -186,8 +186,7 @@ class _IconBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40,
-        height: 40,
+        width: 40, height: 40,
         decoration: BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
@@ -199,15 +198,11 @@ class _IconBtn extends StatelessWidget {
             Icon(icon, size: 20, color: _dark),
             if (badge)
               Positioned(
-                top: 8,
-                right: 8,
+                top: 8, right: 8,
                 child: Container(
-                  width: 8,
-                  height: 8,
+                  width: 8, height: 8,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFE53935),
-                    shape: BoxShape.circle,
-                  ),
+                    color: Color(0xFFE53935), shape: BoxShape.circle),
                 ),
               ),
           ],
@@ -396,11 +391,9 @@ class _PromoCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            left: -30,
-            top: -40,
+            left: -30, top: -40,
             child: Container(
-              width: 110,
-              height: 110,
+              width: 110, height: 110,
               decoration: BoxDecoration(
                 color: _primary.withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -443,8 +436,7 @@ class _PromoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: 80, height: 80,
                   decoration: BoxDecoration(
                     color: _primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
@@ -478,13 +470,7 @@ class _MentorCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: _border),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,8 +497,7 @@ class _MentorCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    bottom: 8,
-                    left: 8,
+                    bottom: 8, left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -532,24 +517,18 @@ class _MentorCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6,
-                            height: 6,
+                            width: 6, height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: mentor.online
-                                  ? const Color(0xFF2ECC71)
-                                  : const Color(0xFFAAAAAA),
+                              color: mentor.online ? const Color(0xFF2ECC71) : const Color(0xFFAAAAAA),
                             ),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             mentor.online ? 'Online' : 'Offline',
                             style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: mentor.online
-                                  ? const Color(0xFF27AE60)
-                                  : const Color(0xFF888888),
+                              fontSize: 10, fontWeight: FontWeight.w600,
+                              color: mentor.online ? const Color(0xFF27AE60) : const Color(0xFF888888),
                             ),
                           ),
                         ],
@@ -567,15 +546,10 @@ class _MentorCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          mentor.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                        child: Text(mentor.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                       ),
                       const Icon(
                         Icons.star_rounded,
@@ -600,14 +574,8 @@ class _MentorCard extends StatelessWidget {
                     style: const TextStyle(fontSize: 11, color: _mutedFg),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    mentor.rate,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: _primary,
-                    ),
-                  ),
+                  Text(mentor.rate,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _primary)),
                 ],
               ),
             ),
