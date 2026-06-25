@@ -1,6 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/auth/presentation/screens/login_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Swaply',
-        home: const SessionsScreen(),
+        home: const LoginScreen(),
       ),
     );
   }
