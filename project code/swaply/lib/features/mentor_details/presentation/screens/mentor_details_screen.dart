@@ -1,0 +1,455 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/models/mentor_details_model.dart';
+import '../../data/repositories/mentor_details_repository_mock.dart';
+import '../cubit/mentor_details_cubit.dart';
+import '../cubit/mentor_details_state.dart';
+
+const mdPrimary     = Color(0xFF5B4CB8);
+const mdPrimarySoft = Color(0xFFEEECFB);
+const mdBorder      = Color(0xFFEAEAF0);
+const mdMutedFg     = Color(0xFF8A8A9A);
+const mdDark        = Color(0xFF1A1A2E);
+
+class MentorDetailsScreen extends StatelessWidget {
+  final String mentorId;
+
+  const MentorDetailsScreen({super.key, required this.mentorId});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      // ✅ بدّل MockMentorDetailsRepository بـ FirebaseMentorDetailsRepository لما Firebase يتجهز
+      create: (_) => MentorDetailsCubit(MockMentorDetailsRepository())
+        ..loadMentor(mentorId: mentorId),
+      child: const MentorDetailsView(),
+    );
+  }
+}
+
+class MentorDetailsView extends StatelessWidget {
+  const MentorDetailsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: BlocBuilder<MentorDetailsCubit, MentorDetailsState>(
+        builder: (context, state) {
+          return switch (state) {
+            MentorDetailsLoading() => const Center(
+                child: CircularProgressIndicator(color: mdPrimary)),
+            MentorDetailsError(:final message) => Center(
+                child: Text(message, style: const TextStyle(color: mdMutedFg))),
+            MentorDetailsLoaded(:final mentor, :final reviews) =>
+              MentorDetailsContent(mentor: mentor, reviews: reviews),
+            _ => const SizedBox(),
+          };
+        },
+      ),
+    );
+  }
+}
+
+class MentorDetailsContent extends StatelessWidget {
+  final MentorDetailsModel mentor;
+  final List<ReviewModel> reviews;
+
+  const MentorDetailsContent({
+    super.key,
+    required this.mentor,
+    required this.reviews,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Stack(
+                children: [
+                  Container(
+                    height: 280, width: double.infinity,
+                    color: mdPrimarySoft,
+                    child: const Icon(Icons.person_outline_rounded, color: mdPrimary, size: 80),
+                  ),
+                  Container(
+                    height: 280,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.white],
+                        stops: [0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0, left: 0, right: 0,
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            MdCircleBtn(icon: Icons.arrow_back_ios_new_rounded,
+                                onTap: () => Navigator.of(context).maybePop()),
+                            MdCircleBtn(icon: Icons.share_outlined, onTap: () {}),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 120),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name + rate
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(mentor.name,
+                                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  if (mentor.online) ...[
+                                    const SizedBox(width: 8),
+                                    MdOnlineBadge(),
+                                  ],
+                                ],
+                              ),
+                              Text(mentor.skill,
+                                  style: const TextStyle(fontSize: 13, color: mdMutedFg)),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(mentor.rate,
+                                style: const TextStyle(
+                                    fontSize: 17, fontWeight: FontWeight.bold, color: mdDark)),
+                            const Text('session rate',
+                                style: TextStyle(fontSize: 11, color: mdMutedFg)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Stats
+                    Row(
+                      children: [
+                        MdStatCard(
+                          value: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 16),
+                              const SizedBox(width: 2),
+                              Text(mentor.rating.toStringAsFixed(1),
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          label: 'Rating',
+                        ),
+                        const SizedBox(width: 8),
+                        MdStatCard(
+                          value: Text('${mentor.reviews}',
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          label: 'Reviews',
+                        ),
+                        const SizedBox(width: 8),
+                        const MdStatCard(
+                          value: Text('120+',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          label: 'Sessions',
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
+                    // About
+                    const Text('About',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 6),
+                    Text(mentor.bio,
+                        style: const TextStyle(fontSize: 13, color: mdMutedFg, height: 1.6)),
+                    const SizedBox(height: 20),
+
+                    // Price box
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: mdPrimarySoft,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: mdBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36, height: 36,
+                            decoration: BoxDecoration(
+                              color: mdPrimary.withOpacity(0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.toll_rounded, color: mdPrimary, size: 18),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Price per hour',
+                                    style: TextStyle(fontSize: 11, color: mdMutedFg)),
+                                Text('Set by ${mentor.name.split(' ').first}',
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                          ),
+                          Text('${mentor.pricePerHour} pts',
+                              style: const TextStyle(
+                                  fontSize: 17, fontWeight: FontWeight.bold, color: mdPrimary)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Skills
+                    const Text('Skills offered',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8, runSpacing: 8,
+                      children: mentor.skills.map((s) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: mdPrimarySoft,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(s,
+                            style: const TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600, color: mdPrimary)),
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Availability
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: mdBorder),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Next availability',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 4),
+                          Text('Today 4:00 PM · Tomorrow 10:00 AM · Thu 2:30 PM',
+                              style: TextStyle(fontSize: 12, color: mdMutedFg)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Reviews
+                    Row(
+                      children: [
+                        const Text('Recent reviews',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () {},
+                          child: const Text('See all',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w600, color: mdPrimary)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    ...reviews.map((r) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: MdReviewCard(review: r),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        // Bottom action bar
+        Positioned(
+          bottom: 0, left: 0, right: 0,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(
+                20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: mdBorder)),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {},
+                  child: Container(
+                    width: 48, height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: mdBorder),
+                    ),
+                    child: const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigator.push -> RequestSessionScreen(mentorId: mentor.id)
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: mdPrimary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(32)),
+                      ),
+                      child: const Text('Request Session',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class MdCircleBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const MdCircleBtn({super.key, required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40, height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.92),
+          shape: BoxShape.circle,
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
+        ),
+        child: Icon(icon, size: 18),
+      ),
+    );
+  }
+}
+
+class MdOnlineBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(radius: 3, backgroundColor: Color(0xFF2E7D32)),
+          SizedBox(width: 4),
+          Text('Online',
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32))),
+        ],
+      ),
+    );
+  }
+}
+
+class MdStatCard extends StatelessWidget {
+  final Widget value;
+  final String label;
+  const MdStatCard({super.key, required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: mdBorder),
+        ),
+        child: Column(
+          children: [
+            value,
+            const SizedBox(height: 2),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 10, color: mdMutedFg,
+                    letterSpacing: 0.5, fontWeight: FontWeight.w500)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MdReviewCard extends StatelessWidget {
+  final ReviewModel review;
+  const MdReviewCard({super.key, required this.review});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: mdBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(review.name,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+              const Spacer(),
+              const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 13),
+              const SizedBox(width: 2),
+              Text(review.rating.toStringAsFixed(1),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(review.text,
+              style: const TextStyle(fontSize: 12, color: mdMutedFg, height: 1.5)),
+        ],
+      ),
+    );
+  }
+}

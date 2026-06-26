@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/forgot_password/presentation/screens/forgot_password_screen.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../data/repositories/auth_repository_mock.dart';
@@ -150,7 +151,11 @@ class LoginViewState extends State<LoginView> {
                       ),
                       const Spacer(),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                          );
+                        },
                         child: const Text('Forgot password?',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: authPrimary)),
                       ),
