@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/forgot_password/presentation/screens/forgot_password_screen.dart';
 import 'package:swaply/root.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
@@ -12,10 +11,10 @@ import 'auth_widgets.dart';
 
 
 
-const authPrimary = AppColors.primary;
-const authMutedFg = AppColors.mutedFg;
-const authBorder = AppColors.border;
-const authErrorColor = AppColors.rose;
+// const authPrimary = AppColors.primary;
+// const authMutedFg = AppColors.mutedFg;
+// const authBorder = AppColors.border;
+// const authErrorColor = AppColors.rose;
 
 // ════════════════════════════════════════
 //  Entry point

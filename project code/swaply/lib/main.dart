@@ -1,6 +1,7 @@
 // main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:swaply/root.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('is_dark_mode') ?? false;
@@ -38,9 +41,10 @@ class MyApp extends StatelessWidget {
 
         // ── Sessions ─────────────────────────
         BlocProvider(
-          create: (_) =>
-              SessionsCubit(currentUid: uuid!, repo: SessionRepository())
-                ..loadSessions(),
+          create: (_) => SessionsCubit(
+            currentUid: FirebaseAuth.instance.currentUser!.uid,
+            repo: SessionRepository(),
+          )..loadSessions(),
         ),
 
         // ── Your teammate's cubits go here ───
@@ -97,7 +101,9 @@ class MyApp extends StatelessWidget {
               ),
               extensions: <ThemeExtension<dynamic>>[AppColors.dark],
             ),
-            home: const WelcomeScreen(),
+            home: FirebaseAuth.instance.currentUser == null
+                ? const WelcomeScreen()
+                : const RootView(),
           );
         },
       ),
