@@ -24,4 +24,6 @@ abstract class AppColors {
   static const Color cardBg = Colors.white;
   static const Color mutedFg = Color(0xFF8A8A9A);
   static const Color dark = Color(0xFF1A1A2E);
+
+
 }
