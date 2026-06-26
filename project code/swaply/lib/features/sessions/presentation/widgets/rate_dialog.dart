@@ -45,13 +45,13 @@ class _RateDialogContentState extends State<_RateDialogContent> {
   final _reviewController = TextEditingController();
 
   static const _labels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
-  static const _labelColors = [
+  List<Color> get _labelColors => [
     Colors.transparent,
-    AppColors.rose,
-    AppColors.amber,
-    AppColors.green,
-    AppColors.sky,
-    AppColors.primary,
+    Theme.of(context).extension<AppColorTheme>()!.rose,
+    Theme.of(context).extension<AppColorTheme>()!.amber,
+    Theme.of(context).extension<AppColorTheme>()!.green,
+    Theme.of(context).extension<AppColorTheme>()!.sky,
+    Theme.of(context).extension<AppColorTheme>()!.primary,
   ];
 
   @override
@@ -69,11 +69,11 @@ class _RateDialogContentState extends State<_RateDialogContent> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: Theme.of(context).extension<AppColorTheme>()!.card,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: Theme.of(context).extension<AppColorTheme>()!.primary.withValues(alpha: 0.12),
               blurRadius: 40,
               offset: const Offset(0, 12),
             ),
@@ -100,10 +100,10 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                       color: const Color(0xFFF3F4F6),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       size: 16,
-                      color: AppColors.muted,
+                      color: Theme.of(context).extension<AppColorTheme>()!.muted,
                     ),
                   ),
                 ),
@@ -119,9 +119,9 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                   color: const Color(0xFFEEECFB),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.person_rounded,
-                  color: AppColors.primary,
+                  color: Theme.of(context).extension<AppColorTheme>()!.primary,
                   size: 36,
                 ),
               ),
@@ -131,10 +131,10 @@ class _RateDialogContentState extends State<_RateDialogContent> {
               // ── Name ────────────────────────
               Text(
                 widget.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.text,
+                  color: Theme.of(context).extension<AppColorTheme>()!.text,
                 ),
               ),
 
@@ -153,35 +153,35 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.bolt_rounded,
                       size: 14,
-                      color: AppColors.primary,
+                      color: Theme.of(context).extension<AppColorTheme>()!.primary,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 4),
                     Text(
                       widget.skill,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: Theme.of(context).extension<AppColorTheme>()!.primary,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 20),
-              const Divider(height: 1, color: AppColors.border),
+              SizedBox(height: 20),
+              Divider(height: 1, color: Theme.of(context).extension<AppColorTheme>()!.border),
               const SizedBox(height: 20),
 
               // ── Question ────────────────────
               Text(
                 'How was your session with\n${widget.name}?',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.muted,
+                  color: Theme.of(context).extension<AppColorTheme>()!.muted,
                   height: 1.5,
                 ),
               ),
@@ -207,7 +207,7 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                               ? Icons.star_rounded
                               : Icons.star_outline_rounded,
                           size: filled ? 42 : 38,
-                          color: filled ? AppColors.amber : AppColors.border,
+                          color: filled ? Theme.of(context).extension<AppColorTheme>()!.amber : Theme.of(context).extension<AppColorTheme>()!.border,
                         ),
                       ),
                     ),
@@ -240,54 +240,54 @@ class _RateDialogContentState extends State<_RateDialogContent> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: RichText(
-                  text: const TextSpan(
+                  text: TextSpan(
                     children: [
                       TextSpan(
                         text: 'Leave a review ',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.text,
+                          color: Theme.of(context).extension<AppColorTheme>()!.text,
                         ),
                       ),
                       TextSpan(
                         text: '(optional)',
-                        style: TextStyle(fontSize: 13, color: AppColors.muted),
+                        style: TextStyle(fontSize: 13, color: Theme.of(context).extension<AppColorTheme>()!.muted),
                       ),
                     ],
                   ),
                 ),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               TextField(
                 controller: _reviewController,
                 maxLines: 3,
                 maxLength: 300,
-                style: const TextStyle(fontSize: 13, color: AppColors.text),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).extension<AppColorTheme>()!.text),
                 decoration: InputDecoration(
                   hintText: 'Share your experience with this ${widget.role}…',
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontSize: 13,
-                    color: AppColors.muted,
+                    color: Theme.of(context).extension<AppColorTheme>()!.muted,
                   ),
-                  counterStyle: const TextStyle(
+                  counterStyle: TextStyle(
                     fontSize: 11,
-                    color: AppColors.muted,
+                    color: Theme.of(context).extension<AppColorTheme>()!.muted,
                   ),
                   contentPadding: const EdgeInsets.all(12),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.border,
+                    borderSide: BorderSide(
+                      color: Theme.of(context).extension<AppColorTheme>()!.border,
                       width: 1.5,
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppColors.primary,
+                    borderSide: BorderSide(
+                      color: Theme.of(context).extension<AppColorTheme>()!.primary,
                       width: 1.5,
                     ),
                   ),
@@ -306,20 +306,20 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         decoration: BoxDecoration(
-                          color: AppColors.card,
+                          color: Theme.of(context).extension<AppColorTheme>()!.card,
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(
-                            color: AppColors.border,
+                            color: Theme.of(context).extension<AppColorTheme>()!.border,
                             width: 1.5,
                           ),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
                             'Cancel',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.text,
+                              color: Theme.of(context).extension<AppColorTheme>()!.text,
                             ),
                           ),
                         ),
@@ -349,11 +349,11 @@ class _RateDialogContentState extends State<_RateDialogContent> {
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         decoration: BoxDecoration(
                           color: _selected == 0
-                              ? AppColors.primary.withValues(alpha: 0.35)
-                              : AppColors.primary,
+                              ? Theme.of(context).extension<AppColorTheme>()!.primary.withValues(alpha: 0.35)
+                              : Theme.of(context).extension<AppColorTheme>()!.primary,
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
                             'Submit Rating',
                             style: TextStyle(

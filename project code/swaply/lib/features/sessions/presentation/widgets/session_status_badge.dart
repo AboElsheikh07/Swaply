@@ -10,7 +10,7 @@ class StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cfg = _badgeConfig(status);
+    final cfg = _badgeConfig(context, status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -24,8 +24,8 @@ class StatusBadge extends StatelessWidget {
             Container(
               width: 7,
               height: 7,
-              decoration: const BoxDecoration(
-                color: AppColors.green,
+              decoration: BoxDecoration(
+                color: Theme.of(context).extension<AppColorTheme>()!.green,
                 shape: BoxShape.circle,
               ),
             ),
@@ -44,19 +44,19 @@ class StatusBadge extends StatelessWidget {
     );
   }
 
-  _BadgeCfg _badgeConfig(SessionStatus s) {
+  _BadgeCfg _badgeConfig(BuildContext context, SessionStatus s) {
     switch (s) {
       case SessionStatus.accepted:
-        return _BadgeCfg(AppColors.skyBg, AppColors.sky, 'Accepted');
+        return _BadgeCfg(Theme.of(context).extension<AppColorTheme>()!.skyBg, Theme.of(context).extension<AppColorTheme>()!.sky, 'Accepted');
       case SessionStatus.ongoing:
-        return _BadgeCfg(AppColors.greenBg, AppColors.green, 'Ongoing');
+        return _BadgeCfg(Theme.of(context).extension<AppColorTheme>()!.greenBg, Theme.of(context).extension<AppColorTheme>()!.green, 'Ongoing');
       case SessionStatus.pending:
-        return _BadgeCfg(AppColors.amberBg, AppColors.amber, 'Pending');
+        return _BadgeCfg(Theme.of(context).extension<AppColorTheme>()!.amberBg, Theme.of(context).extension<AppColorTheme>()!.amber, 'Pending');
       case SessionStatus.completed:
-        return _BadgeCfg(const Color(0xFFF3F4F6), AppColors.muted, 'Completed');
+        return _BadgeCfg(const Color(0xFFF3F4F6), Theme.of(context).extension<AppColorTheme>()!.muted, 'Completed');
 
       case SessionStatus.rejected:
-        return _BadgeCfg(const Color(0xFFF3F4F6), AppColors.rose, 'Rejected');  
+        return _BadgeCfg(const Color(0xFFF3F4F6), Theme.of(context).extension<AppColorTheme>()!.rose, 'Rejected');  
 
     }
   }

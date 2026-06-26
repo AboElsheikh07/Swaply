@@ -101,7 +101,7 @@
 //       if (_ctrl.confirmed.value) return _ConfirmedView(mentorName: widget.mentor.name);
 
 //       return Scaffold(
-//         backgroundColor: AppColors.background,
+//         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 //         body: SafeArea(
 //           child: Column(
 //             children: [
@@ -129,10 +129,10 @@
 //                         canAfford:    _canAfford,
 //                       ),
 //                       if (_ctrl.errorMsg.value != null) ...[
-//                         const SizedBox(height: 12),
+//                         SizedBox(height: 12),
 //                         Text(
 //                           _ctrl.errorMsg.value!,
-//                           style: const TextStyle(fontSize: 12, color: AppColors.rose),
+//                           style: TextStyle(fontSize: 12, color: Theme.of(context).extension<AppColorTheme>()!.rose),
 //                         ),
 //                       ],
 //                     ],
@@ -145,9 +145,9 @@
 //         bottomNavigationBar: SafeArea(
 //           child: Container(
 //             padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-//             decoration: const BoxDecoration(
-//               color:  AppColors.card,
-//               border: Border(top: BorderSide(color: AppColors.border)),
+//             decoration: BoxDecoration(
+//               color:  Theme.of(context).extension<AppColorTheme>()!.card,
+//               border: Border(top: BorderSide(color: Theme.of(context).extension<AppColorTheme>()!.border)),
 //             ),
 //             child: Obx(() => GestureDetector(
 //               onTap: (_canAfford && !_ctrl.isLoading.value) ? _confirm : null,
@@ -156,8 +156,8 @@
 //                 height:   52,
 //                 decoration: BoxDecoration(
 //                   color: _canAfford
-//                       ? AppColors.primary
-//                       : AppColors.primary.withValues(alpha: 0.4),
+//                       ? Theme.of(context).extension<AppColorTheme>()!.primary
+//                       : Theme.of(context).extension<AppColorTheme>()!.primary.withValues(alpha: 0.4),
 //                   borderRadius: BorderRadius.circular(26),
 //                 ),
 //                 alignment: Alignment.center,
@@ -196,14 +196,14 @@
 //           children: [
 //             IconButton(
 //               onPressed: () => Get.back(),
-//               icon: const Icon(Icons.arrow_back, color: AppColors.text),
+//               icon: Icon(Icons.arrow_back, color: Theme.of(context).extension<AppColorTheme>()!.text),
 //             ),
-//             const SizedBox(width: 4),
+//             SizedBox(width: 4),
 //             Column(
 //               crossAxisAlignment: CrossAxisAlignment.start,
 //               children: [
-//                 const Text('Request Session', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.text)),
-//                 Text('with $mentorName', style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+//                 Text('Request Session', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Theme.of(context).extension<AppColorTheme>()!.text)),
+//                 Text('with $mentorName', style: TextStyle(fontSize: 12, color: Theme.of(context).extension<AppColorTheme>()!.muted)),
 //               ],
 //             ),
 //           ],
@@ -265,16 +265,16 @@
 //                     duration:    const Duration(milliseconds: 150),
 //                     width:       54,
 //                     decoration: BoxDecoration(
-//                       color:        sel ? AppColors.primary : AppColors.card,
+//                       color:        sel ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.card,
 //                       borderRadius: BorderRadius.circular(14),
-//                       border:       Border.all(color: sel ? AppColors.primary : AppColors.border),
+//                       border:       Border.all(color: sel ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.border),
 //                     ),
 //                     child: Column(
 //                       mainAxisAlignment: MainAxisAlignment.center,
 //                       children: [
-//                         Text(d.dow,   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: sel ? Colors.white70 : AppColors.muted)),
-//                         const SizedBox(height: 2),
-//                         Text('${d.date.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: sel ? Colors.white : AppColors.text)),
+//                         Text(d.dow,   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: sel ? Colors.white70 : Theme.of(context).extension<AppColorTheme>()!.muted)),
+//                         SizedBox(height: 2),
+//                         Text('${d.date.day}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: sel ? Colors.white : Theme.of(context).extension<AppColorTheme>()!.text)),
 //                       ],
 //                     ),
 //                   ),
@@ -355,19 +355,19 @@
 //         crossAxisAlignment: CrossAxisAlignment.start,
 //         children: [
 //           const _SectionLabel(text: 'Message (optional)'),
-//           const SizedBox(height: 8),
+//           SizedBox(height: 8),
 //           Container(
 //             decoration: BoxDecoration(
-//               color:        AppColors.card,
+//               color:        Theme.of(context).extension<AppColorTheme>()!.card,
 //               borderRadius: BorderRadius.circular(16),
-//               border:       Border.all(color: AppColors.border),
+//               border:       Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
 //             ),
 //             child: TextField(
 //               controller: controller,
 //               maxLines:   3,
 //               decoration: const InputDecoration(
 //                 hintText:        'Tell the mentor what you want to work on...',
-//                 hintStyle:       TextStyle(color: AppColors.muted, fontSize: 13),
+//                 hintStyle:       TextStyle(color: Theme.of(context).extension<AppColorTheme>()!.muted, fontSize: 13),
 //                 contentPadding:  EdgeInsets.all(14),
 //                 border:          InputBorder.none,
 //               ),
@@ -396,37 +396,37 @@
 //     return Obx(() => Container(
 //       padding: const EdgeInsets.all(16),
 //       decoration: BoxDecoration(
-//         color:        AppColors.card,
+//         color:        Theme.of(context).extension<AppColorTheme>()!.card,
 //         borderRadius: BorderRadius.circular(16),
-//         border:       Border.all(color: AppColors.border),
+//         border:       Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
 //       ),
 //       child: Column(
 //         children: [
 //           _CostRow(icon: Icons.monetization_on_outlined, label: 'Price per hour', value: '$pricePerHour pts'),
 //           const SizedBox(height: 8),
 //           _CostRow(icon: Icons.access_time_outlined, label: 'Duration', value: '${ctrl.selectedMinutes.value} min'),
-//           const Padding(
+//           Padding(
 //             padding:  EdgeInsets.symmetric(vertical: 10),
-//             child:    Divider(color: AppColors.border, height: 1),
+//             child:    Divider(color: Theme.of(context).extension<AppColorTheme>()!.border, height: 1),
 //           ),
 //           Row(
 //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //             children: [
-//               const Text('Total cost', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.text)),
-//               Text('$cost pts', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
+//               Text('Total cost', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.text)),
+//               Text('$cost pts', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Theme.of(context).extension<AppColorTheme>()!.primary)),
 //             ],
 //           ),
-//           const Padding(
+//           Padding(
 //             padding: EdgeInsets.symmetric(vertical: 10),
-//             child:   Divider(color: AppColors.border, height: 1),
+//             child:   Divider(color: Theme.of(context).extension<AppColorTheme>()!.border, height: 1),
 //           ),
 //           Row(
 //             children: [
-//               const Text('Your balance: ', style: TextStyle(fontSize: 12, color: AppColors.muted)),
-//               Text('$userPoints pts', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text)),
+//               Text('Your balance: ', style: TextStyle(fontSize: 12, color: Theme.of(context).extension<AppColorTheme>()!.muted)),
+//               Text('$userPoints pts', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.text)),
 //               if (!canAfford) ...[
-//                 const SizedBox(width: 8),
-//                 const Text('Not enough points', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.rose)),
+//                 SizedBox(width: 8),
+//                 Text('Not enough points', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.rose)),
 //               ],
 //             ],
 //           ),
@@ -444,7 +444,7 @@
 
 //   @override
 //   Widget build(BuildContext context) => Scaffold(
-//         backgroundColor: AppColors.background,
+//         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 //         body: SafeArea(
 //           child: Padding(
 //             padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -453,16 +453,16 @@
 //               children: [
 //                 Container(
 //                   width: 80, height: 80,
-//                   decoration: const BoxDecoration(color: Color(0xFFECFDF5), shape: BoxShape.circle),
-//                   child: const Icon(Icons.check, size: 40, color: AppColors.green),
+//                   decoration: BoxDecoration(color: Color(0xFFECFDF5), shape: BoxShape.circle),
+//                   child: Icon(Icons.check, size: 40, color: Theme.of(context).extension<AppColorTheme>()!.green),
 //                 ),
-//                 const SizedBox(height: 20),
-//                 const Text('Request sent!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.text)),
-//                 const SizedBox(height: 8),
+//                 SizedBox(height: 20),
+//                 Text('Request sent!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Theme.of(context).extension<AppColorTheme>()!.text)),
+//                 SizedBox(height: 8),
 //                 Text(
 //                   'We notified $mentorName. You\'ll see this in Sessions once they accept.',
 //                   textAlign: TextAlign.center,
-//                   style: const TextStyle(fontSize: 13, color: AppColors.muted),
+//                   style: TextStyle(fontSize: 13, color: Theme.of(context).extension<AppColorTheme>()!.muted),
 //                 ),
 //                 const SizedBox(height: 32),
 //                 _BigBtn(label: 'View Sessions', filled: true,  onTap: () => Get.offNamed('/sessions')),
@@ -484,11 +484,11 @@
 //   @override
 //   Widget build(BuildContext context) => Text(
 //         text.toUpperCase(),
-//         style: const TextStyle(
+//         style: TextStyle(
 //           fontSize:    10,
 //           fontWeight:  FontWeight.w700,
 //           letterSpacing: 0.8,
-//           color:       AppColors.muted,
+//           color:       Theme.of(context).extension<AppColorTheme>()!.muted,
 //         ),
 //       );
 // }
@@ -514,16 +514,16 @@
 //           padding:   const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
 //           alignment: Alignment.center,
 //           decoration: BoxDecoration(
-//             color:        selected ? AppColors.primary : AppColors.card,
+//             color:        selected ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.card,
 //             borderRadius: BorderRadius.circular(radius),
-//             border:       Border.all(color: selected ? AppColors.primary : AppColors.border),
+//             border:       Border.all(color: selected ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.border),
 //           ),
 //           child: Text(
 //             label,
 //             style: TextStyle(
 //               fontSize:   12,
 //               fontWeight: FontWeight.w600,
-//               color:      selected ? Colors.white : AppColors.text,
+//               color:      selected ? Colors.white : Theme.of(context).extension<AppColorTheme>()!.text,
 //             ),
 //           ),
 //         ),
@@ -541,11 +541,11 @@
 //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //         children: [
 //           Row(children: [
-//             Icon(icon, size: 15, color: AppColors.muted),
-//             const SizedBox(width: 6),
-//             Text(label, style: const TextStyle(fontSize: 13, color: AppColors.muted)),
+//             Icon(icon, size: 15, color: Theme.of(context).extension<AppColorTheme>()!.muted),
+//             SizedBox(width: 6),
+//             Text(label, style: TextStyle(fontSize: 13, color: Theme.of(context).extension<AppColorTheme>()!.muted)),
 //           ]),
-//           Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.text)),
+//           Text(value, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.text)),
 //         ],
 //       );
 // }
@@ -564,7 +564,7 @@
 //           width:      double.infinity,
 //           alignment:  Alignment.center,
 //           decoration: BoxDecoration(
-//             color:        filled ? AppColors.primary : AppColors.background,
+//             color:        filled ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.background,
 //             borderRadius: BorderRadius.circular(26),
 //           ),
 //           child: Text(
@@ -572,7 +572,7 @@
 //             style: TextStyle(
 //               fontSize:   14,
 //               fontWeight: FontWeight.w700,
-//               color:      filled ? Colors.white : AppColors.text,
+//               color:      filled ? Colors.white : Theme.of(context).extension<AppColorTheme>()!.text,
 //             ),
 //           ),
 //         ),

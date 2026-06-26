@@ -8,7 +8,7 @@ class VoiceCallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1D1D27),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -16,12 +16,12 @@ class VoiceCallScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Column(
               children: [
-                const Icon(Icons.mic, size: 88, color: Colors.white),
-                const SizedBox(height: 24),
+                Icon(Icons.mic, size: 88, color: Colors.white),
+                SizedBox(height: 24),
                 Text(
                   callerName,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).cardColor,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),

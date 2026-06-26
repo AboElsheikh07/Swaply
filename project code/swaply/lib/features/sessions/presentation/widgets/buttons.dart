@@ -19,20 +19,20 @@ class PrimaryBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: Theme.of(context).extension<AppColorTheme>()!.primary,
           borderRadius: BorderRadius.circular(22),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, color: Colors.white, size: 16),
-            const SizedBox(width: 6),
+            SizedBox(width: 6),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
               ),
             ),
           ],
@@ -59,21 +59,21 @@ class OutlineBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.border, width: 1.2),
+          border: Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border, width: 1.2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 15, color: AppColors.text),
-            const SizedBox(width: 5),
+            Icon(icon, size: 15, color: Theme.of(context).extension<AppColorTheme>()!.text),
+            SizedBox(width: 5),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.text,
+                color: Theme.of(context).extension<AppColorTheme>()!.text,
               ),
             ),
           ],

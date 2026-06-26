@@ -8,7 +8,7 @@ class VideoCallScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF11141B),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -21,11 +21,11 @@ class VideoCallScreen extends StatelessWidget {
                   backgroundColor: Color(0xFF2C2F38),
                   child: Icon(Icons.videocam, size: 56, color: Colors.white),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Text(
                   callerName,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).cardColor,
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),

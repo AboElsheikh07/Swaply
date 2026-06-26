@@ -16,12 +16,12 @@ class WelcomeScreen extends StatelessWidget {
             child: Stack(
               children: [
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.primary,
+                        Theme.of(context).extension<AppColorTheme>()!.primary,
                         Color(0xFF6556C8),
                         Color(0xFF4338CA),
                       ],
@@ -70,12 +70,12 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Swaply',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: Theme.of(context).cardColor,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -99,8 +99,8 @@ class WelcomeScreen extends StatelessWidget {
 
           // ── Bottom white section ──
           Container(
-            decoration: const BoxDecoration(
-              color: AppColors.background,
+            decoration: BoxDecoration(
+              color: Theme.of(context).extension<AppColorTheme>()!.background,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
@@ -118,10 +118,10 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SignupScreen()),
                     );
                   },
-                  bg: AppColors.primary,
+                  bg: Theme.of(context).extension<AppColorTheme>()!.primary,
                   fg: Colors.white,
                   elevation: 4,
-                  shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                  shadowColor: Theme.of(context).extension<AppColorTheme>()!.primary.withValues(alpha: 0.4),
                 ),
                 const SizedBox(height: 12),
                 _btn(
@@ -132,8 +132,8 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                     );
                   },
-                  bg: AppColors.primarySoft,
-                  fg: AppColors.primary,
+                  bg: Theme.of(context).extension<AppColorTheme>()!.primarySoft,
+                  fg: Theme.of(context).extension<AppColorTheme>()!.primary,
                 ),
               ],
             ),

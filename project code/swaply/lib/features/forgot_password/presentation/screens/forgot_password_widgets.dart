@@ -15,7 +15,7 @@ class FpBackButton extends StatelessWidget {
       child: Container(
         width: 40, height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           shape: BoxShape.circle,
           border: Border.all(color: fpBorder),
         ),
@@ -55,13 +55,13 @@ class FpInputField extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         if (hasError) ...[
-          const SizedBox(height: 4),
-          Text(error!, style: const TextStyle(fontSize: 11, color: fpErrorColor)),
+          SizedBox(height: 4),
+          Text(error!, style: TextStyle(fontSize: 11, color: fpErrorColor)),
         ],
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: hasError ? fpErrorColor : fpBorder),
           ),

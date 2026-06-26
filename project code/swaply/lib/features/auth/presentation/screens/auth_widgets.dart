@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 
-const authPrimary = AppColors.primary;
-const authMutedFg = AppColors.mutedFg;
-const authBorder = AppColors.border;
-const authErrorColor = AppColors.rose;
+
 
 // ── Back Button ──────────────────────────
 class AuthBackButton extends StatelessWidget {
@@ -19,9 +16,9 @@ class AuthBackButton extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: Theme.of(context).extension<AppColorTheme>()!.card,
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.border),
+                border: Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
             ),
@@ -61,39 +58,39 @@ class AuthInputField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
         if (hasError) ...[
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             error!,
-            style: const TextStyle(fontSize: 11, color: AppColors.rose),
+            style: TextStyle(fontSize: 11, color: Theme.of(context).extension<AppColorTheme>()!.rose),
           ),
         ],
-        const SizedBox(height: 6),
+        SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: Theme.of(context).extension<AppColorTheme>()!.card,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: hasError ? AppColors.rose : AppColors.border,
+              color: hasError ? Theme.of(context).extension<AppColorTheme>()!.rose : Theme.of(context).extension<AppColorTheme>()!.border,
             ),
           ),
           child: Row(
             children: [
-              const SizedBox(width: 14),
-              Icon(icon, size: 20, color: AppColors.mutedFg),
+              SizedBox(width: 14),
+              Icon(icon, size: 20, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
                   controller: controller,
                   obscureText: obscureText,
                   keyboardType: keyboardType,
-                  style: const TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     hintText: placeholder,
-                    hintStyle: const TextStyle(
-                      color: AppColors.mutedFg,
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
                       fontSize: 14,
                     ),
                     border: InputBorder.none,
@@ -123,10 +120,10 @@ class AuthCheckbox extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: value ? AppColors.primary : AppColors.card,
+        color: value ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.card,
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: value ? AppColors.primary : AppColors.border,
+          color: value ? Theme.of(context).extension<AppColorTheme>()!.primary : Theme.of(context).extension<AppColorTheme>()!.border,
           width: 1.5,
         ),
       ),
@@ -158,10 +155,10 @@ class AuthPrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: Theme.of(context).extension<AppColorTheme>()!.primary,
           foregroundColor: Colors.white,
           elevation: 4,
-          shadowColor: AppColors.primary.withOpacity(0.35),
+          shadowColor: Theme.of(context).extension<AppColorTheme>()!.primary.withOpacity(0.35),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32),
           ),
@@ -195,15 +192,15 @@ class AuthDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: Theme.of(context).extension<AppColorTheme>()!.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
             'or',
-            style: TextStyle(fontSize: 12, color: AppColors.muted),
+            style: TextStyle(fontSize: 12, color: Theme.of(context).extension<AppColorTheme>()!.muted),
           ),
         ),
-        const Expanded(child: Divider(color: AppColors.border)),
+        Expanded(child: Divider(color: Theme.of(context).extension<AppColorTheme>()!.border)),
       ],
     );
   }
@@ -224,7 +221,7 @@ class AuthSocialButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: Theme.of(context).extension<AppColorTheme>()!.border),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32),
           ),
@@ -233,13 +230,13 @@ class AuthSocialButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.g_mobiledata_rounded, size: 24, color: Colors.red),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: AppColors.dark,
+                color: Theme.of(context).extension<AppColorTheme>()!.text,
               ),
             ),
           ],

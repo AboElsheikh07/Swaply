@@ -18,14 +18,14 @@ class PointsLabel extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: session.isOutgoing ? AppColors.text : AppColors.green,
+              color: session.isOutgoing ? Theme.of(context).extension<AppColorTheme>()!.text : Theme.of(context).extension<AppColorTheme>()!.green,
             ),
           ),
           TextSpan(
             text: session.isOutgoing ? ' total' : ' earnings',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.muted,
+              color: Theme.of(context).extension<AppColorTheme>()!.muted,
               fontWeight: FontWeight.w400,
             ),
           ),

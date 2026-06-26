@@ -161,14 +161,14 @@ class _SessionsScreenState extends State<SessionsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Header + Tab Bar ─────────────────
             Container(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               width: double.infinity, 
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,15 +184,15 @@ class _SessionsScreenState extends State<SessionsScreen>
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.text,
+                            color: Theme.of(context).extension<AppColorTheme>()!.text,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4),
                         Text(
                           'Manage skill swap requests sent to and from you.',
                           style: TextStyle(
                             fontSize: 13,
-                            color: AppColors.muted,
+                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
                           ),
                         ),
                       ],
@@ -202,20 +202,20 @@ class _SessionsScreenState extends State<SessionsScreen>
                   // Tab Bar
                   TabBar(
                     controller: _tab,
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor: AppColors.muted,
+                    labelColor: Theme.of(context).extension<AppColorTheme>()!.primary,
+                    unselectedLabelColor: Theme.of(context).extension<AppColorTheme>()!.muted,
                     labelStyle: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
-                    unselectedLabelStyle: const TextStyle(
+                    unselectedLabelStyle: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
-                    indicatorColor: AppColors.primary,
+                    indicatorColor: Theme.of(context).extension<AppColorTheme>()!.primary,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorWeight: 2,
-                    dividerColor: AppColors.border,
+                    dividerColor: Theme.of(context).extension<AppColorTheme>()!.border,
                     tabs: const [
                       Tab(text: 'Incoming Requests'),
                       Tab(text: 'My Requests'),

@@ -27,7 +27,7 @@ class NotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -58,10 +58,10 @@ class NotificationsView extends StatelessWidget {
                           letterSpacing: 0.8, color: notifMutedFg,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: notifBorder),
                         ),
@@ -143,8 +143,8 @@ class AppSwitch extends StatelessWidget {
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           child: Container(
             width: 22, height: 22,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
             ),

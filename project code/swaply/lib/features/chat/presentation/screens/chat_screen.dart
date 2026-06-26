@@ -94,7 +94,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final c = widget.conversation;
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -272,7 +272,7 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
@@ -323,13 +323,13 @@ class _InputBar extends StatelessWidget {
             child: Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFF5B4FCF),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.send_rounded,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 size: 18,
               ),
             ),
