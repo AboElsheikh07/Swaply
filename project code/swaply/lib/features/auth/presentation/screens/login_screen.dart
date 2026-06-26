@@ -80,8 +80,10 @@ class LoginViewState extends State<LoginView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacement(
+            Navigator.pushAndRemoveUntil(
+              context,
               MaterialPageRoute(builder: (_) => const RootView()),
+              (route) => false, // removes all previous routes
             );
           }
           if (state is AuthError) {
@@ -211,7 +213,8 @@ class LoginViewState extends State<LoginView> {
                         style: TextStyle(fontSize: 14, color: authMutedFg),
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.of(context).push(
+                        onTap: () => Navigator.pushReplacement(
+                          context,
                           MaterialPageRoute(
                             builder: (_) => const SignupScreen(),
                           ),
