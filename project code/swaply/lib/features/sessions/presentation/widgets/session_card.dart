@@ -15,9 +15,9 @@ class SessionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -42,9 +42,9 @@ class SessionCard extends StatelessWidget {
                     color: const Color(0xFFEEECFB),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     CupertinoIcons.person_fill,
-                    color: AppColors.primary,
+                    color: Theme.of(context).extension<AppColorTheme>()!.primary,
                     size: 26,
                   ),
                 ),
@@ -56,18 +56,18 @@ class SessionCard extends StatelessWidget {
                     children: [
                       Text(
                         session.teacherName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.text,
+                          color: Theme.of(context).extension<AppColorTheme>()!.text,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2),
                       Text(
                         session.skill,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AppColors.muted,
+                          color: Theme.of(context).extension<AppColorTheme>()!.muted,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -77,29 +77,29 @@ class SessionCard extends StatelessWidget {
                         runSpacing: 4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          const Icon(
+                          Icon(
                             CupertinoIcons.calendar,
                             size: 13,
-                            color: AppColors.muted,
+                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
                           ),
                           Text(
                             session.skill,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.muted,
+                              color: Theme.of(context).extension<AppColorTheme>()!.muted,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          const Icon(
+                          SizedBox(width: 6),
+                          Icon(
                             CupertinoIcons.clock,
                             size: 13,
-                            color: AppColors.muted,
+                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
                           ),
                           Text(
                             session.durationMinutes.toString(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.muted,
+                              color: Theme.of(context).extension<AppColorTheme>()!.muted,
                             ),
                           ),
                         ],
@@ -114,7 +114,7 @@ class SessionCard extends StatelessWidget {
           ),
 
           // ── Divider ──────────────────────
-          const Divider(height: 1, color: AppColors.border),
+          Divider(height: 1, color: Theme.of(context).extension<AppColorTheme>()!.border),
 
           // ── Bottom section ───────────────
           Padding(

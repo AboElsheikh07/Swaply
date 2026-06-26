@@ -67,7 +67,7 @@ class SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -81,19 +81,19 @@ class SearchViewState extends State<SearchView> {
                     child: Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         shape: BoxShape.circle,
                         border: Border.all(color: searchBorder),
                       ),
                       child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(
                           color: isSearching ? searchPrimary : searchBorder,
@@ -134,11 +134,11 @@ class SearchViewState extends State<SearchView> {
                     ),
                   ),
                   if (isSearching) ...[
-                    const SizedBox(width: 10),
+                    SizedBox(width: 10),
                     Container(
                       width: 40, height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         shape: BoxShape.circle,
                         border: Border.all(color: searchBorder),
                       ),
@@ -235,7 +235,7 @@ class SearchIdleView extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: searchBorder),
                 ),
@@ -376,7 +376,7 @@ class SearchMentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: searchBorder),
       ),

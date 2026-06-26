@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
+import 'top_up_screen.dart';
+import 'withdraw_points_screen.dart';
 
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
@@ -13,10 +17,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ProfileCubit(),
-      child: const _ProfileView(),
-    );
+    return const _ProfileView();
   }
 }
 
@@ -36,12 +37,12 @@ class _ProfileView extends StatelessWidget {
             scrolledUnderElevation: 0,
             elevation: 0,
             titleSpacing: 16,
-            title: const Text(
+            title: Text(
               'My Profile',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
-                color: _ProfileColors.title,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),
@@ -54,8 +55,8 @@ class _ProfileView extends StatelessWidget {
                 const SizedBox(height: 18),
                 _PointsCard(
                   points: state.points,
-                  onTopUp: () => _showPointsDialog(context, true),
-                  onWithdraw: () => _showPointsDialog(context, false),
+                  onTopUp: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TopUpScreen())),
+                  onWithdraw: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WithdrawPointsScreen())),
                 ),
                 const SizedBox(height: 14),
                 _StatsRow(state: state),
@@ -79,9 +80,9 @@ class _ProfileView extends StatelessWidget {
                   ),
                   onPrivacy: () => _showPrivacyDialog(context),
                   onLanguage: () => _showLanguageDialog(context),
-                  onDarkModeChanged: context
+                  onDarkModeChanged: (bool _) => context
                       .read<ProfileCubit>()
-                      .toggleDarkMode,
+                      .toggleDarkMode(),
                 ),
                 const SizedBox(height: 18),
                 _LogoutButton(
@@ -218,13 +219,13 @@ class _ProfileView extends StatelessWidget {
                     'Manage Skills',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: 14),
                   if (skills.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
                         'No skills added yet.',
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                       ),
                     )
                   else
@@ -387,60 +388,90 @@ class _AvatarSection extends StatelessWidget {
     return Center(
       child: Column(
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: 92,
-                height: 92,
-                decoration: const BoxDecoration(
-                  color: _ProfileColors.avatarBackground,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Positioned(
-                right: -1,
-                bottom: 2,
-                child: Container(
-                  width: 28,
-                  height: 28,
+          GestureDetector(
+            onTap: () async {
+              final picker = ImagePicker();
+              final file = await picker.pickImage(source: ImageSource.gallery);
+              if (file != null && context.mounted) {
+                context.read<ProfileCubit>().updateProfileImage(file.path);
+              }
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 92,
+                  height: 92,
                   decoration: BoxDecoration(
-                    color: _ProfileColors.primary,
+                    color: Theme.of(context).cardColor,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2.5),
+                    image: state.profileImagePath != null
+                        ? DecorationImage(
+                            image: FileImage(File(state.profileImagePath!)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                    border: Border.all(color: Theme.of(context).cardColor, width: 3),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.edit_outlined,
-                    size: 14,
-                    color: Colors.white,
+                  child: state.profileImagePath == null
+                      ? Icon(
+                          Icons.person,
+                          size: 40,
+                          color: Theme.of(context).unselectedWidgetColor,
+                        )
+                      : null,
+                ),
+                Positioned(
+                  right: -1,
+                  bottom: 2,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Theme.of(context).cardColor, width: 2.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             state.name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: _ProfileColors.title,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             state.email,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: _ProfileColors.subtleText,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ],
@@ -659,26 +690,26 @@ class _StatCard extends StatelessWidget {
             children: [
               if (icon != null) ...[
                 Icon(icon, size: 16, color: iconColor),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
               ],
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w800,
-                  color: _ProfileColors.title,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.7,
-              color: _ProfileColors.subtleText,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ],
@@ -691,20 +722,20 @@ class _SkillsSection extends StatelessWidget {
   final List<String> skills;
   final VoidCallback onAddSkill;
 
-  const _SkillsSection({required this.skills, required this.onAddSkill});
+  _SkillsSection({required this.skills, required this.onAddSkill});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'SKILLS YOU OFFER',
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w800,
             letterSpacing: 0.8,
-            color: _ProfileColors.subtleText,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
           ),
         ),
         const SizedBox(height: 10),
@@ -762,12 +793,12 @@ class _AddSkillChip extends StatelessWidget {
         ),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: const Text(
+          child: Text(
             '+ Add skill',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: _ProfileColors.subtleText,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
           ),
         ),
@@ -846,17 +877,17 @@ class _SettingsSection extends StatelessWidget {
               children: [
                 Text(
                   state.language,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: _ProfileColors.subtleText,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(
+                SizedBox(width: 8),
+                Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: _ProfileColors.subtleText,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ],
             ),
@@ -866,7 +897,7 @@ class _SettingsSection extends StatelessWidget {
             icon: CupertinoIcons.moon,
             label: 'Dark Mode',
             trailing: CupertinoSwitch(
-              value: state.isDarkModeEnabled,
+              value: state.isDarkMode,
               onChanged: onDarkModeChanged,
               activeTrackColor: _ProfileColors.primary,
               thumbColor: Colors.white,
@@ -908,22 +939,22 @@ class _SettingsTile extends StatelessWidget {
               ),
               child: Icon(icon, size: 15, color: _ProfileColors.primary),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: _ProfileColors.title,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
             trailing ??
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: _ProfileColors.subtleText,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
           ],
         ),

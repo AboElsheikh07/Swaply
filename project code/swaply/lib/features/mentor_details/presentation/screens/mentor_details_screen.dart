@@ -33,7 +33,7 @@ class MentorDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<MentorDetailsCubit, MentorDetailsState>(
         builder: (context, state) {
           return switch (state) {
@@ -249,7 +249,7 @@ class MentorDetailsContent extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: mdBorder),
                       ),
@@ -298,8 +298,8 @@ class MentorDetailsContent extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.fromLTRB(
                 20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
               border: Border(top: BorderSide(color: mdBorder)),
             ),
             child: Row(
@@ -399,7 +399,7 @@ class MdStatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: mdBorder),
         ),
@@ -427,7 +427,7 @@ class MdReviewCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: mdBorder),
       ),

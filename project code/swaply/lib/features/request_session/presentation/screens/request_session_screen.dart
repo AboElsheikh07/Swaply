@@ -109,7 +109,7 @@ class RequestSessionViewState extends State<RequestSessionView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocConsumer<SessionRequestCubit, SessionRequestState>(
         listener: (context, state) {
           if (state is SessionRequestSuccess) {
@@ -255,10 +255,10 @@ class RequestSessionViewState extends State<RequestSessionView> {
 
                           // ── Message ──
                           const RsSectionLabel(label: 'Message (optional)'),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: rsBorder),
                             ),
@@ -280,7 +280,7 @@ class RequestSessionViewState extends State<RequestSessionView> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: rsBorder),
                             ),
@@ -334,8 +334,8 @@ class RequestSessionViewState extends State<RequestSessionView> {
                 child: Container(
                   padding: EdgeInsets.fromLTRB(
                       20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
                     border: Border(top: BorderSide(color: rsBorder)),
                   ),
                   child: SizedBox(
@@ -378,7 +378,7 @@ class SessionConfirmedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

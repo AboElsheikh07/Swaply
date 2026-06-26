@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/forgot_password/presentation/screens/forgot_password_screen.dart';
@@ -83,7 +84,7 @@ class LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
@@ -97,7 +98,7 @@ class LoginViewState extends State<LoginView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: authErrorColor,
+                backgroundColor: Theme.of(context).extension<AppColorTheme>()!.rose,
               ),
             );
             context.read<AuthCubit>().resetState();
@@ -118,10 +119,10 @@ class LoginViewState extends State<LoginView> {
                     'Welcome back',
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
+                  SizedBox(height: 8),
+                  Text(
                     'Sign in to continue trading skills on Swaply.',
-                    style: TextStyle(fontSize: 14, color: authMutedFg),
+                    style: TextStyle(fontSize: 14, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
                   ),
                   const SizedBox(height: 32),
 
@@ -150,7 +151,7 @@ class LoginViewState extends State<LoginView> {
                         showPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: authMutedFg,
+                        color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
                         size: 20,
                       ),
                     ),
@@ -166,12 +167,12 @@ class LoginViewState extends State<LoginView> {
                         child: Row(
                           children: [
                             AuthCheckbox(value: savePassword),
-                            const SizedBox(width: 8),
-                            const Text(
+                            SizedBox(width: 8),
+                            Text(
                               'Save password',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: authMutedFg,
+                                color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
                               ),
                             ),
                           ],
@@ -186,12 +187,12 @@ class LoginViewState extends State<LoginView> {
                             ),
                           );
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot password?',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: authPrimary,
+                            color: Theme.of(context).extension<AppColorTheme>()!.primary,
                           ),
                         ),
                       ),
@@ -215,9 +216,9 @@ class LoginViewState extends State<LoginView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
+                      Text(
                         "Don't have an account? ",
-                        style: TextStyle(fontSize: 14, color: authMutedFg),
+                        style: TextStyle(fontSize: 14, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pushReplacement(
@@ -226,12 +227,12 @@ class LoginViewState extends State<LoginView> {
                             builder: (_) => const SignupScreen(),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Sign Up',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: authPrimary,
+                            color: Theme.of(context).extension<AppColorTheme>()!.primary,
                           ),
                         ),
                       ),

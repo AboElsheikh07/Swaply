@@ -61,7 +61,7 @@ class _HomeViewState extends State<_HomeView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
@@ -93,7 +93,7 @@ class _HomeViewState extends State<_HomeView>
                           CategoryTab(categories: categories),
                         ],
                       ),
-                    _ => const SizedBox(),
+                    _ => SizedBox(),
                   },
                 ),
               ],
@@ -106,7 +106,7 @@ class _HomeViewState extends State<_HomeView>
 
   Widget _buildTabBar() {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       child: TabBar(
         controller: _tabController,
         labelColor: _primary,
@@ -155,13 +155,13 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ✅ لما Auth يخلص، استبدل النص ده بـ user.displayName
-                const Text(
+                Text(
                   'Hi, Jonathan',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "Let's learn something today",
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color),
                 ),
               ],
             ),
@@ -179,7 +179,7 @@ class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool badge;
-  const _IconBtn({required this.icon, required this.onTap, this.badge = false});
+  _IconBtn({required this.icon, required this.onTap, this.badge = false});
 
   @override
   Widget build(BuildContext context) {
@@ -188,14 +188,14 @@ class _IconBtn extends StatelessWidget {
       child: Container(
         width: 40, height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           shape: BoxShape.circle,
           border: Border.all(color: _border),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(icon, size: 20, color: _dark),
+            Icon(icon, size: 20, color: Theme.of(context).iconTheme.color),
             if (badge)
               Positioned(
                 top: 8, right: 8,
@@ -459,7 +459,7 @@ class _PromoCard extends StatelessWidget {
 // ── Mentor Card ──────────────────────────
 class _MentorCard extends StatelessWidget {
   final MentorModel mentor;
-  const _MentorCard({required this.mentor});
+  _MentorCard({required this.mentor});
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +467,7 @@ class _MentorCard extends StatelessWidget {
       onTap: () {},
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: _border),
           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],

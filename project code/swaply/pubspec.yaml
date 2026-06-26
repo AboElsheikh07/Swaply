@@ -22,7 +22,8 @@ dependencies:
   intl: ^0.20.2
   onesignal_flutter: ^5.6.2
   equatable: ^2.0.8
-
+  shared_preferences: ^2.3.0
+  image_picker: 1.1.2
 
 dev_dependencies:
   flutter_test:

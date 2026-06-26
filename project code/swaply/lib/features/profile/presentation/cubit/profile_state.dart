@@ -7,7 +7,8 @@ class ProfileState {
   final int learned;
   final List<String> offeredSkills;
   final String language;
-  final bool isDarkModeEnabled;
+  final bool isDarkMode;
+  final String? profileImagePath;
 
   const ProfileState({
     required this.name,
@@ -18,20 +19,22 @@ class ProfileState {
     required this.learned,
     required this.offeredSkills,
     required this.language,
-    required this.isDarkModeEnabled,
+    required this.isDarkMode,
+    this.profileImagePath,
   });
 
-  factory ProfileState.initial() {
-    return const ProfileState(
+  factory ProfileState.initial({bool isDarkMode = false}) {
+    return ProfileState(
       name: 'Jonathan Patterson',
       email: 'jonathan@swaply.app',
       points: 480,
       rating: 4.9,
       taught: 22,
       learned: 15,
-      offeredSkills: ['UI Design', 'Figma', 'Design Systems'],
+      offeredSkills: const ['UI Design', 'Figma', 'Design Systems'],
       language: 'English',
-      isDarkModeEnabled: false,
+      isDarkMode: isDarkMode,
+      profileImagePath: null,
     );
   }
 
@@ -44,7 +47,8 @@ class ProfileState {
     int? learned,
     List<String>? offeredSkills,
     String? language,
-    bool? isDarkModeEnabled,
+    bool? isDarkMode,
+    String? profileImagePath,
   }) {
     return ProfileState(
       name: name ?? this.name,
@@ -55,7 +59,8 @@ class ProfileState {
       learned: learned ?? this.learned,
       offeredSkills: offeredSkills ?? this.offeredSkills,
       language: language ?? this.language,
-      isDarkModeEnabled: isDarkModeEnabled ?? this.isDarkModeEnabled,
+      isDarkMode: isDarkMode ?? this.isDarkMode,
+      profileImagePath: profileImagePath ?? this.profileImagePath,
     );
   }
 }

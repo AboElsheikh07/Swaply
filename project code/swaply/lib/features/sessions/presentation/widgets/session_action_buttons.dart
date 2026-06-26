@@ -99,7 +99,7 @@
 //         child: Container(
 //           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 //           decoration: BoxDecoration(
-//             color:        AppColors.primary,
+//             color:        Theme.of(context).extension<AppColorTheme>()!.primary,
 //             borderRadius: BorderRadius.circular(20),
 //           ),
 //           child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -124,14 +124,14 @@
 //         child: Container(
 //           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
 //           decoration: BoxDecoration(
-//             color:        AppColors.card,
+//             color:        Theme.of(context).extension<AppColorTheme>()!.card,
 //             borderRadius: BorderRadius.circular(20),
-//             border:       Border.all(color: AppColors.border),
+//             border:       Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
 //           ),
 //           child: Row(mainAxisSize: MainAxisSize.min, children: [
-//             Icon(icon, size: 13, color: AppColors.text),
-//             const SizedBox(width: 5),
-//             Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.text)),
+//             Icon(icon, size: 13, color: Theme.of(context).extension<AppColorTheme>()!.text),
+//             SizedBox(width: 5),
+//             Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.text)),
 //           ]),
 //         ),
 //       );
@@ -150,13 +150,13 @@
 //         child: Container(
 //           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 //           decoration: BoxDecoration(
-//             color:        AppColors.amberBg,
+//             color:        Theme.of(context).extension<AppColorTheme>()!.amberBg,
 //             borderRadius: BorderRadius.circular(20),
 //           ),
 //           child: Row(mainAxisSize: MainAxisSize.min, children: [
-//             Icon(icon, size: 13, color: AppColors.amber),
-//             const SizedBox(width: 5),
-//             Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.amber)),
+//             Icon(icon, size: 13, color: Theme.of(context).extension<AppColorTheme>()!.amber),
+//             SizedBox(width: 5),
+//             Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.amber)),
 //           ]),
 //         ),
 //       );
@@ -170,9 +170,9 @@
 //   Widget build(BuildContext context) => Container(
 //         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
 //         decoration: BoxDecoration(
-//           color:        AppColors.background,
+//           color:        Theme.of(context).extension<AppColorTheme>()!.background,
 //           borderRadius: BorderRadius.circular(20),
 //         ),
-//         child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.muted)),
+//         child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).extension<AppColorTheme>()!.muted)),
 //       );
 // }

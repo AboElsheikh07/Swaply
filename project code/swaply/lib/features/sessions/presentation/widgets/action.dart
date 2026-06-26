@@ -40,12 +40,12 @@ class ActionWidget extends StatelessWidget {
             color: const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Text(
+          child: Text(
             'Cancelled',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.muted,
+              color: Theme.of(context).extension<AppColorTheme>()!.muted,
             ),
           ),
         );
@@ -66,15 +66,15 @@ class ActionWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.amberBg,
+              color: Theme.of(context).extension<AppColorTheme>()!.amberBg,
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.star_outline_rounded,
-                  color: AppColors.amber,
+                  color: Theme.of(context).extension<AppColorTheme>()!.amber,
                   size: 16,
                 ),
                 SizedBox(width: 6),
@@ -83,7 +83,7 @@ class ActionWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.amber,
+                    color: Theme.of(context).extension<AppColorTheme>()!.amber,
                   ),
                 ),
               ],

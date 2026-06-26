@@ -54,12 +54,12 @@ final List<Conversation> conversations = [
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class ConversationsScreen extends StatelessWidget {
-  const ConversationsScreen({super.key});
+  ConversationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,23 +77,23 @@ class ConversationsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(22),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     SizedBox(width: 14),
-                    Icon(Icons.search, color: Color(0xFF8E8E93), size: 20),
+                    Icon(Icons.search, color: Theme.of(context).iconTheme.color, size: 20),
                     SizedBox(width: 8),
                     Text(
                       'Search conversations',
-                      style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                      style: TextStyle(fontSize: 15, color: Theme.of(context).iconTheme.color),
                     ),
                   ],
                 ),
@@ -136,7 +136,7 @@ class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final VoidCallback onTap;
 
-  const _ConversationTile({required this.conversation, required this.onTap});
+  _ConversationTile({required this.conversation, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +144,7 @@ class _ConversationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
@@ -152,11 +152,11 @@ class _ConversationTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: const Color(0xFFD1D1D6),
+                  backgroundColor: Color(0xFFD1D1D6),
                   child: Text(
                     c.name[0],
-                    style: const TextStyle(
-                      color: Color(0xFF8E8E93),
+                    style: TextStyle(
+                      color: Theme.of(context).iconTheme.color,
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
@@ -206,15 +206,15 @@ class _ConversationTile extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   c.time,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF8E8E93),
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -222,15 +222,15 @@ class _ConversationTile extends StatelessWidget {
                   Container(
                     width: 22,
                     height: 22,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Color(0xFF5B4FCF),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${c.unread}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).cardColor,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),

@@ -41,8 +41,8 @@ class _RootViewState extends State<RootView> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.only(
+          color: Theme.of(context).bottomAppBarTheme.color,
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
@@ -61,8 +61,8 @@ class _RootViewState extends State<RootView> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: Colors.grey.shade700,
+          selectedItemColor: Theme.of(context).primaryColor,
+          unselectedItemColor: Theme.of(context).unselectedWidgetColor,
           showUnselectedLabels: false,
           items: [
             BottomNavigationBarItem(
