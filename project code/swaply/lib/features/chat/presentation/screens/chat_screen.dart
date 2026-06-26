@@ -1,51 +1,7 @@
 import 'package:flutter/material.dart';
-import 'messages_screen.dart';
-
-// ── Data model ────────────────────────────────────────────────────────────────
-
-class ChatMessage {
-  final String text;
-  final String time;
-  final bool isMine;
-
-  const ChatMessage({
-    required this.text,
-    required this.time,
-    required this.isMine,
-  });
-}
-
-// ── Sample messages (replace with your data source) ───────────────────────────
-
-final List<ChatMessage> sarahMessages = [
-  ChatMessage(
-    text: "Hey! Excited for our session.",
-    time: '10:21 AM',
-    isMine: false,
-  ),
-  ChatMessage(
-    text: "Me too! I prepared some questions.",
-    time: '10:22 AM',
-    isMine: true,
-  ),
-  ChatMessage(
-    text: "Great — share them whenever you're ready.",
-    time: '10:23 AM',
-    isMine: false,
-  ),
-  ChatMessage(
-    text: "Is Thursday 4pm still good for you?",
-    time: '10:24 AM',
-    isMine: true,
-  ),
-  ChatMessage(
-    text: "Sounds great, let's schedule for Thursday!",
-    time: '10:25 AM',
-    isMine: false,
-  ),
-];
-
-// ── Screen ────────────────────────────────────────────────────────────────────
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../controllers/chat_cubit.dart';
+import '../../data/models/chat_models.dart';
 
 class ChatScreen extends StatefulWidget {
   final Conversation conversation;
@@ -59,7 +15,15 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
-  final List<ChatMessage> _messages = List.from(sarahMessages);
+
+  @override
+  void initState() {
+    super.initState();
+    // Load messages for this conversation
+    context.read<ChatCubit>().loadMessages(widget.conversation.id);
+    // Mark messages as read
+    context.read<ChatCubit>().markAsRead(widget.conversation.id);
+  }
 
   @override
   void dispose() {
@@ -68,25 +32,25 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          text: text,
-          time: TimeOfDay.now().format(context),
-          isMine: true,
-        ),
-      );
-      _controller.clear();
-    });
+
+    _controller.clear();
+
+    await context.read<ChatCubit>().sendMessage(
+      conversationId: widget.conversation.id,
+      text: text,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -188,11 +152,45 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: _messages.length,
-              itemBuilder: (context, i) => _ChatBubble(message: _messages[i]),
+            child: BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                if (state is ChatLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state is ChatError) {
+                  return Center(
+                    child: Text(
+                      'Error: ${state.message}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+
+                if (state is MessagesLoaded) {
+                  final messages = state.messages;
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scroll.hasClients &&
+                        _scroll.position.maxScrollExtent > 0) {
+                      _scroll.jumpTo(_scroll.position.maxScrollExtent);
+                    }
+                  });
+
+                  return ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    itemCount: messages.length,
+                    itemBuilder: (context, i) =>
+                        _ChatBubble(message: messages[i]),
+                  );
+                }
+
+                return const SizedBox();
+              },
             ),
           ),
           _InputBar(controller: _controller, onSend: _sendMessage),
@@ -252,7 +250,7 @@ class _ChatBubble extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            message.time,
+            message.formattedTime,
             style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
           ),
         ],

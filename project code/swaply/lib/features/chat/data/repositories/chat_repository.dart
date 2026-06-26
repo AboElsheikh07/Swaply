@@ -15,18 +15,22 @@ class ChatRepository {
   }) {
     return _conversations
         .where('members', arrayContains: currentUserId)
-        .orderBy('updatedAt', descending: true)
         .snapshots()
-        .map(
-          (snap) => snap.docs
+        .map((snap) {
+          final conversations = snap.docs
               .map(
                 (doc) => Conversation.fromFirestore(
                   doc,
                   currentUserId: currentUserId,
                 ),
               )
-              .toList(),
-        );
+              .toList();
+
+          // Sort in memory by updatedAt descending (newest first)
+          conversations.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+          return conversations;
+        });
   }
 
   Stream<List<ChatMessage>> watchMessages({
@@ -100,16 +104,35 @@ class ChatRepository {
     return ref.id;
   }
 
-  Future<void> markConversationRead({
+  Future<void> markMessagesAsRead({
     required String conversationId,
-    required String currentUserId,
+    required String userId,
   }) async {
     final doc = _conversations.doc(conversationId);
     final snapshot = await doc.get();
     final unreadCounts =
         (snapshot.data()?['unreadCounts'] as Map<String, dynamic>?) ?? {};
-    if (unreadCounts[currentUserId] == null) return;
+    if (unreadCounts[userId] == null) return;
 
-    await doc.update({'unreadCounts.$currentUserId': 0});
+    await doc.update({'unreadCounts.$userId': 0});
+  }
+
+  Future<void> deleteConversation(String conversationId) async {
+    try {
+      // Delete all messages in the conversation
+      final messagesSnapshot = await _conversations
+          .doc(conversationId)
+          .collection('messages')
+          .get();
+
+      for (final doc in messagesSnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      // Delete the conversation document
+      await _conversations.doc(conversationId).delete();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

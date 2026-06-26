@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users can only read/write their own document
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Sessions rules
+    match /sessions/{sessionId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Conversations and Messages rules (Chat Feature)
+    match /conversations/{conversationId} {
+      // Users can read/write conversations they're members of
+      allow read, write: if request.auth.uid in resource.data.members;
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        // Users who are members of the conversation can read messages
+        allow read: if request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+        
+        // Only the sender can create messages, and they must be a conversation member
+        allow create: if request.auth.uid == request.resource.data.senderId &&
+                      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+        
+        // Users can only update/delete their own messages
+        allow update, delete: if request.auth.uid == resource.data.senderId;
+      }
+    }
+
+  }
+}

@@ -1,60 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../controllers/chat_cubit.dart';
+import '../../data/models/chat_models.dart';
 import 'chat_screen.dart';
-
-// ── Data model ────────────────────────────────────────────────────────────────
-
-class Conversation {
-  final String name;
-  final String lastMessage;
-  final String time;
-  final int unread;
-  final bool online;
-
-  const Conversation({
-    required this.name,
-    required this.lastMessage,
-    required this.time,
-    this.unread = 0,
-    this.online = false,
-  });
-}
-
-final List<Conversation> conversations = [
-  Conversation(
-    name: 'Sarah Chen',
-    lastMessage: "Sounds great, let's schedule for Thursday!",
-    time: '2m',
-    unread: 2,
-    online: true,
-  ),
-  Conversation(
-    name: 'James Wilson',
-    lastMessage: 'I sent over the Flutter resources.',
-    time: '1h',
-  ),
-  Conversation(
-    name: 'Maria Lopez',
-    lastMessage: 'Perfecto! See you tomorrow.',
-    time: '3h',
-    unread: 1,
-    online: true,
-  ),
-  Conversation(
-    name: 'Derek Knight',
-    lastMessage: 'Try practicing those chords tonight.',
-    time: 'Yesterday',
-  ),
-  Conversation(
-    name: 'Priya Patel',
-    lastMessage: 'Namaste! Great session today.',
-    time: '2d',
-  ),
-];
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
-class ConversationsScreen extends StatelessWidget {
+class ConversationsScreen extends StatefulWidget {
   const ConversationsScreen({super.key});
+
+  @override
+  State<ConversationsScreen> createState() => _ConversationsScreenState();
+}
+
+class _ConversationsScreenState extends State<ConversationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load conversations when the screen initializes
+    context.read<ChatCubit>().loadConversations();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,25 +67,71 @@ class ConversationsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                itemCount: conversations.length,
-                separatorBuilder: (_, __) => const Divider(
-                  height: 1,
-                  indent: 82,
-                  color: Color(0xFFE5E5EA),
-                ),
-                itemBuilder: (context, index) {
-                  final c = conversations[index];
-                  return _ConversationTile(
-                    conversation: c,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(conversation: c),
+              child: BlocBuilder<ChatCubit, ChatState>(
+                builder: (context, state) {
+                  if (state is ChatLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (state is ChatError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${state.message}',
+                        style: const TextStyle(color: Colors.red),
                       ),
-                    ),
-                  );
+                    );
+                  }
+
+                  if (state is ConversationsLoaded) {
+                    final conversations = state.conversations;
+
+                    if (conversations.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.chat_bubble_outline,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No conversations yet',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      padding: EdgeInsets.zero,
+                      itemCount: conversations.length,
+                      separatorBuilder: (_, __) => const Divider(
+                        height: 1,
+                        indent: 82,
+                        color: Color(0xFFE5E5EA),
+                      ),
+                      itemBuilder: (context, index) {
+                        final c = conversations[index];
+                        return _ConversationTile(
+                          conversation: c,
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ChatScreen(conversation: c),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+
+                  return const Center(child: Text('No data'));
                 },
               ),
             ),
@@ -198,8 +210,9 @@ class _ConversationTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          c.unread > 0 ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: c.unread > 0
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: const Color(0xFF6E6E73),
                     ),
                   ),
@@ -211,7 +224,7 @@ class _ConversationTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  c.time,
+                  c.formattedTime,
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF8E8E93),
