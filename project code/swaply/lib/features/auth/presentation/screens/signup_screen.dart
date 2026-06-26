@@ -5,7 +5,7 @@ import 'package:swaply/features/auth/presentation/screens/login_screen.dart';
 import 'package:swaply/root.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
-import 'package:swaply/features/auth/data/repositories/auth_repository_mock.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
 import 'auth_widgets.dart';
 
 // ════════════════════════════════════════
@@ -17,7 +17,7 @@ class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AuthCubit(MockAuthRepository()),
+      create: (_) => AuthCubit(FirebaseAuthRepository()),
       child: const SignupView(),
     );
   }

@@ -17,8 +17,9 @@ abstract class FirestoreKeys {
   static const String skill           = 'skill';
   static const String scheduledAt     = 'scheduledAt';
   static const String durationMinutes = 'durationMinutes';
-  static const String cost            = 'cost';
+  static const String points            = 'points';
   static const String status          = 'status';
   static const String message         = 'message';
   static const String createdAt       = 'createdAt';
+  static const bool isOngoing       = true;
 }

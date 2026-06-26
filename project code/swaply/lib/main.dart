@@ -1,4 +1,7 @@
 // main.dart
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
@@ -8,12 +11,11 @@ import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_state.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/data/repositories/session_repository.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('is_dark_mode') ?? false;
 
@@ -36,15 +38,17 @@ class MyApp extends StatelessWidget {
 
         // ── Sessions ─────────────────────────
         BlocProvider(
-          create: (_) => SessionsCubit(
-            currentUid: 'demo-uid', // replace with real uid from AuthCubit
-            repo: SessionRepository(),
-          )..loadSessions(),
+          create: (_) =>
+              SessionsCubit(currentUid: uuid!, repo: SessionRepository())
+                ..loadSessions(),
         ),
 
         // ── Your teammate's cubits go here ───
         BlocProvider(
-          create: (_) => ProfileCubit(ProfileLocalDataSource(), initialDarkMode: initialDarkMode)..loadData(),
+          create: (_) => ProfileCubit(
+            ProfileLocalDataSource(),
+            initialDarkMode: initialDarkMode,
+          )..loadData(),
         ),
         // BlocProvider(create: (_) => ChatCubit()),
         // BlocProvider(create: (_) => ExploresCubit()),
@@ -54,13 +58,17 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Swaply',
-            themeMode: profileState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            themeMode: profileState.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light,
             theme: ThemeData.light().copyWith(
               primaryColor: const Color(0xFF5B4CB8),
               canvasColor: Colors.white,
               scaffoldBackgroundColor: const Color(0xFFF9FAFB),
               cardColor: Colors.white,
-              bottomAppBarTheme: const BottomAppBarThemeData(color: Colors.white),
+              bottomAppBarTheme: const BottomAppBarThemeData(
+                color: Colors.white,
+              ),
               unselectedWidgetColor: Colors.grey.shade700,
               iconTheme: const IconThemeData(color: Colors.black87),
               textTheme: const TextTheme(
@@ -69,16 +77,16 @@ class MyApp extends StatelessWidget {
                 titleLarge: TextStyle(color: Colors.black87),
                 titleMedium: TextStyle(color: Colors.black87),
               ),
-              extensions: <ThemeExtension<dynamic>>[
-                AppColors.light,
-              ],
+              extensions: <ThemeExtension<dynamic>>[AppColors.light],
             ),
             darkTheme: ThemeData.dark().copyWith(
               primaryColor: const Color(0xFF8A7DE4),
               canvasColor: const Color(0xFF1E1E1E),
               scaffoldBackgroundColor: const Color(0xFF121212),
               cardColor: const Color(0xFF1E1E1E),
-              bottomAppBarTheme: const BottomAppBarThemeData(color: Color(0xFF2C2C2C)),
+              bottomAppBarTheme: const BottomAppBarThemeData(
+                color: Color(0xFF2C2C2C),
+              ),
               unselectedWidgetColor: Colors.grey.shade400,
               iconTheme: const IconThemeData(color: Colors.white),
               textTheme: const TextTheme(
@@ -87,9 +95,7 @@ class MyApp extends StatelessWidget {
                 titleLarge: TextStyle(color: Colors.white),
                 titleMedium: TextStyle(color: Colors.white),
               ),
-              extensions: <ThemeExtension<dynamic>>[
-                AppColors.dark,
-              ],
+              extensions: <ThemeExtension<dynamic>>[AppColors.dark],
             ),
             home: const WelcomeScreen(),
           );
