@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/forgot_password/presentation/screens/forgot_password_screen.dart';
 import 'package:swaply/root.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import '../../data/repositories/auth_repository_mock.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_mock.dart';
 import 'signup_screen.dart';
 import 'auth_widgets.dart';
 

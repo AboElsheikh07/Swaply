@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/root.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import '../../data/repositories/auth_repository_mock.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_mock.dart';
 import 'auth_widgets.dart';
 
 // ════════════════════════════════════════
@@ -54,8 +54,9 @@ class SignupViewState extends State<SignupView> {
     setState(() {
       nameError = passwordError = emailError = termsError = null;
       if (nameCtrl.text.trim().isEmpty) nameError = 'Please enter your name';
-      if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(emailCtrl.text))
+      if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(emailCtrl.text)) {
         emailError = 'Please enter a valid email';
+      }
       if (passwordCtrl.text.length < 8) passwordError = 'At least 8 characters';
       if (!agreed) termsError = 'Please accept the terms to continue';
     });
