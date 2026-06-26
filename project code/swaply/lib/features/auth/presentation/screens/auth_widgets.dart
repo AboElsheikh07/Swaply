@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 
-const authPrimary    = AppColors.primary;
-const authMutedFg    = AppColors.mutedFg;
-const authBorder     = AppColors.border;
+const authPrimary = AppColors.primary;
+const authMutedFg = AppColors.mutedFg;
+const authBorder = AppColors.border;
 const authErrorColor = AppColors.rose;
 
 // ── Back Button ──────────────────────────
@@ -12,18 +12,21 @@ class AuthBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).maybePop(),
-      child: Container(
-        width: 40, height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          shape: BoxShape.circle,
-          border: Border.all(color: AppColors.border),
-        ),
-        child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
-      ),
-    );
+    return Navigator.canPop(context) == true
+        ? GestureDetector(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+            ),
+          )
+        : Container();
   }
 }
 
@@ -56,18 +59,25 @@ class AuthInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        ),
         if (hasError) ...[
           const SizedBox(height: 4),
-          Text(error!, style: const TextStyle(fontSize: 11, color: AppColors.rose)),
+          Text(
+            error!,
+            style: const TextStyle(fontSize: 11, color: AppColors.rose),
+          ),
         ],
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
             color: AppColors.card,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: hasError ? AppColors.rose : AppColors.border),
+            border: Border.all(
+              color: hasError ? AppColors.rose : AppColors.border,
+            ),
           ),
           child: Row(
             children: [
@@ -82,16 +92,16 @@ class AuthInputField extends StatelessWidget {
                   style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     hintText: placeholder,
-                    hintStyle: const TextStyle(color: AppColors.mutedFg, fontSize: 14),
+                    hintStyle: const TextStyle(
+                      color: AppColors.mutedFg,
+                      fontSize: 14,
+                    ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),
               ),
-              if (trailing != null) ...[
-                trailing!,
-                const SizedBox(width: 14),
-              ],
+              if (trailing != null) ...[trailing!, const SizedBox(width: 14)],
             ],
           ),
         ),
@@ -110,7 +120,8 @@ class AuthCheckbox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size, height: size,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: value ? AppColors.primary : AppColors.card,
         borderRadius: BorderRadius.circular(4),
@@ -151,14 +162,26 @@ class AuthPrimaryButton extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 4,
           shadowColor: AppColors.primary.withOpacity(0.35),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          ),
         ),
         child: isLoading
             ? const SizedBox(
-                width: 22, height: 22,
-                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
               )
-            : Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            : Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
@@ -175,7 +198,10 @@ class AuthDivider extends StatelessWidget {
         const Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('or', style: TextStyle(fontSize: 12, color: AppColors.muted)),
+          child: Text(
+            'or',
+            style: TextStyle(fontSize: 12, color: AppColors.muted),
+          ),
         ),
         const Expanded(child: Divider(color: AppColors.border)),
       ],
@@ -199,16 +225,23 @@ class AuthSocialButton extends StatelessWidget {
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColors.border),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.g_mobiledata_rounded, size: 24, color: Colors.red),
             const SizedBox(width: 10),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.dark)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.dark,
+              ),
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/auth/presentation/screens/login_screen.dart';
 import 'package:swaply/root.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
@@ -82,8 +83,10 @@ class SignupViewState extends State<SignupView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacement(
+            Navigator.pushAndRemoveUntil(
+              context,
               MaterialPageRoute(builder: (_) => const RootView()),
+              (route) => false, // removes all previous routes
             );
           }
           if (state is AuthError) {
@@ -233,7 +236,12 @@ class SignupViewState extends State<SignupView> {
                         style: TextStyle(fontSize: 14, color: authMutedFg),
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
+                        onTap: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        ),
                         child: const Text(
                           'Sign In',
                           style: TextStyle(
