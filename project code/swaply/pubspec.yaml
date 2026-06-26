@@ -14,7 +14,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   get: ^4.7.3
   flutter_bloc: ^9.1.1
-  firebase_core: ^4.7.0
+  firebase_core: ^4.11.0
+  firebase_auth: ^6.5.4
   cloud_firestore: ^6.3.0
   uuid: ^4.5.3
   flutter_native_splash: ^2.4.7

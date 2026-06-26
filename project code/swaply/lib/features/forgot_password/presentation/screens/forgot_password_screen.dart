@@ -53,14 +53,17 @@ class ForgotPasswordViewState extends State<ForgotPasswordView> {
       body: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(
         listener: (context, state) {
           if (state is CodeSentSuccess) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const VerifyCodeScreen()),
-            );
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const VerifyCodeScreen()));
             context.read<ForgotPasswordCubit>().resetState();
           }
           if (state is ForgotPasswordError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: fpErrorColor),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: fpErrorColor,
+              ),
             );
             context.read<ForgotPasswordCubit>().resetState();
           }
@@ -75,8 +78,10 @@ class ForgotPasswordViewState extends State<ForgotPasswordView> {
                   const SizedBox(height: 16),
                   const FpBackButton(),
                   const SizedBox(height: 32),
-                  const Text('Forgot Password?',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Forgot Password?',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   const Text(
                     "Enter your email and we'll send you a verification code.",

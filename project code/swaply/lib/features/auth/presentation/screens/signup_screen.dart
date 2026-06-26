@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/root.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../data/repositories/auth_repository_mock.dart';
@@ -31,11 +32,11 @@ class SignupView extends StatefulWidget {
 }
 
 class SignupViewState extends State<SignupView> {
-  final nameCtrl     = TextEditingController();
-  final emailCtrl    = TextEditingController();
+  final nameCtrl = TextEditingController();
+  final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
-  bool showPassword  = false;
-  bool agreed        = false;
+  bool showPassword = false;
+  bool agreed = false;
   String? nameError;
   String? emailError;
   String? passwordError;
@@ -53,11 +54,15 @@ class SignupViewState extends State<SignupView> {
     setState(() {
       nameError = passwordError = emailError = termsError = null;
       if (nameCtrl.text.trim().isEmpty) nameError = 'Please enter your name';
-      if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(emailCtrl.text)) emailError = 'Please enter a valid email';
+      if (!RegExp(r'^\S+@\S+\.\S+$').hasMatch(emailCtrl.text))
+        emailError = 'Please enter a valid email';
       if (passwordCtrl.text.length < 8) passwordError = 'At least 8 characters';
       if (!agreed) termsError = 'Please accept the terms to continue';
     });
-    return nameError == null && emailError == null && passwordError == null && termsError == null;
+    return nameError == null &&
+        emailError == null &&
+        passwordError == null &&
+        termsError == null;
   }
 
   void submit(BuildContext context) {
@@ -76,11 +81,16 @@ class SignupViewState extends State<SignupView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacementNamed('/home');
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const RootView()),
+            );
           }
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: authErrorColor),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: authErrorColor,
+              ),
             );
             context.read<AuthCubit>().resetState();
           }
@@ -96,11 +106,15 @@ class SignupViewState extends State<SignupView> {
                   const SizedBox(height: 16),
                   const AuthBackButton(),
                   const SizedBox(height: 32),
-                  const Text('Create Account',
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Create Account',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Join Swaply and start trading your skills with people around you.',
-                      style: TextStyle(fontSize: 14, color: authMutedFg)),
+                  const Text(
+                    'Join Swaply and start trading your skills with people around you.',
+                    style: TextStyle(fontSize: 14, color: authMutedFg),
+                  ),
                   const SizedBox(height: 32),
 
                   // Name
@@ -135,8 +149,11 @@ class SignupViewState extends State<SignupView> {
                     trailing: GestureDetector(
                       onTap: () => setState(() => showPassword = !showPassword),
                       child: Icon(
-                        showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: authMutedFg, size: 20,
+                        showPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: authMutedFg,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -153,14 +170,27 @@ class SignupViewState extends State<SignupView> {
                         Expanded(
                           child: RichText(
                             text: const TextSpan(
-                              style: TextStyle(fontSize: 12, color: authMutedFg),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: authMutedFg,
+                              ),
                               children: [
                                 TextSpan(text: 'I agree to the '),
-                                TextSpan(text: 'Terms of Service',
-                                    style: TextStyle(color: authPrimary, fontWeight: FontWeight.w600)),
+                                TextSpan(
+                                  text: 'Terms of Service',
+                                  style: TextStyle(
+                                    color: authPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 TextSpan(text: ' and '),
-                                TextSpan(text: 'Privacy Policy',
-                                    style: TextStyle(color: authPrimary, fontWeight: FontWeight.w600)),
+                                TextSpan(
+                                  text: 'Privacy Policy',
+                                  style: TextStyle(
+                                    color: authPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 TextSpan(text: '.'),
                               ],
                             ),
@@ -171,7 +201,13 @@ class SignupViewState extends State<SignupView> {
                   ),
                   if (termsError != null) ...[
                     const SizedBox(height: 4),
-                    Text(termsError!, style: const TextStyle(fontSize: 11, color: authErrorColor)),
+                    Text(
+                      termsError!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: authErrorColor,
+                      ),
+                    ),
                   ],
                   const SizedBox(height: 24),
 
@@ -191,12 +227,20 @@ class SignupViewState extends State<SignupView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('Already have an account? ',
-                          style: TextStyle(fontSize: 14, color: authMutedFg)),
+                      const Text(
+                        'Already have an account? ',
+                        style: TextStyle(fontSize: 14, color: authMutedFg),
+                      ),
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
-                        child: const Text('Sign In',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: authPrimary)),
+                        child: const Text(
+                          'Sign In',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: authPrimary,
+                          ),
+                        ),
                       ),
                     ],
                   ),

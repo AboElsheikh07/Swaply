@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/forgot_password/presentation/screens/forgot_password_screen.dart';
+import 'package:swaply/root.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../data/repositories/auth_repository_mock.dart';
@@ -34,10 +35,10 @@ class LoginView extends StatefulWidget {
 }
 
 class LoginViewState extends State<LoginView> {
-  final emailCtrl    = TextEditingController();
+  final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
-  bool showPassword  = false;
-  bool savePassword  = true;
+  bool showPassword = false;
+  bool savePassword = true;
   String? emailError;
   String? passwordError;
 
@@ -79,11 +80,16 @@ class LoginViewState extends State<LoginView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.of(context).pushReplacementNamed('/home');
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const RootView()),
+            );
           }
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message), backgroundColor: authErrorColor),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: authErrorColor,
+              ),
             );
             context.read<AuthCubit>().resetState();
           }
@@ -99,11 +105,15 @@ class LoginViewState extends State<LoginView> {
                   const SizedBox(height: 16),
                   const AuthBackButton(),
                   const SizedBox(height: 32),
-                  const Text('Welcome back',
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const Text(
+                    'Welcome back',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Sign in to continue trading skills on Swaply.',
-                      style: TextStyle(fontSize: 14, color: authMutedFg)),
+                  const Text(
+                    'Sign in to continue trading skills on Swaply.',
+                    style: TextStyle(fontSize: 14, color: authMutedFg),
+                  ),
                   const SizedBox(height: 32),
 
                   // Email
@@ -128,8 +138,11 @@ class LoginViewState extends State<LoginView> {
                     trailing: GestureDetector(
                       onTap: () => setState(() => showPassword = !showPassword),
                       child: Icon(
-                        showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                        color: authMutedFg, size: 20,
+                        showPassword
+                            ? Icons.visibility_off_outlined
+                            : Icons.visibility_outlined,
+                        color: authMutedFg,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -139,13 +152,19 @@ class LoginViewState extends State<LoginView> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => setState(() => savePassword = !savePassword),
+                        onTap: () =>
+                            setState(() => savePassword = !savePassword),
                         child: Row(
                           children: [
                             AuthCheckbox(value: savePassword),
                             const SizedBox(width: 8),
-                            const Text('Save password',
-                                style: TextStyle(fontSize: 12, color: authMutedFg)),
+                            const Text(
+                              'Save password',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: authMutedFg,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -153,11 +172,19 @@ class LoginViewState extends State<LoginView> {
                       GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen(),
+                            ),
                           );
                         },
-                        child: const Text('Forgot password?',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: authPrimary)),
+                        child: const Text(
+                          'Forgot password?',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: authPrimary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -179,14 +206,24 @@ class LoginViewState extends State<LoginView> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account? ",
-                          style: TextStyle(fontSize: 14, color: authMutedFg)),
+                      const Text(
+                        "Don't have an account? ",
+                        style: TextStyle(fontSize: 14, color: authMutedFg),
+                      ),
                       GestureDetector(
                         onTap: () => Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const SignupScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const SignupScreen(),
+                          ),
                         ),
-                        child: const Text('Sign Up',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: authPrimary)),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: authPrimary,
+                          ),
+                        ),
                       ),
                     ],
                   ),

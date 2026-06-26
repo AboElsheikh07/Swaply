@@ -24,7 +24,7 @@ class _RootViewState extends State<RootView> {
     screens = [
       HomeScreen(),
       SessionsScreen(),
-      MessagesScreen(),
+      ConversationsScreen(),
       ProfileScreen(),
     ];
     super.initState();
