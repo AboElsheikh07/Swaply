@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/auth/data/repositories/auth_repository.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
 import 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  final AuthRepository _repo;
+  final FirebaseAuthRepository _repo;
 
   AuthCubit(this._repo) : super(AuthInitial());
 
