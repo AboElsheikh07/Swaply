@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 
-const authPrimary = AppColors.primary;
-const authMutedFg = AppColors.mutedFg;
-const authBorder = AppColors.border;
-const authErrorColor = AppColors.rose;
+
 
 // ── Back Button ──────────────────────────
 class AuthBackButton extends StatelessWidget {

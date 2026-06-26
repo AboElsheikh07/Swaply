@@ -14,8 +14,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 
   void addSkill(String skill) {
-    if (skill.trim().isEmpty || state.offeredSkills.contains(skill.trim()))
+    if (skill.trim().isEmpty || state.offeredSkills.contains(skill.trim())) {
       return;
+    }
     final updatedSkills = List<String>.from(state.offeredSkills)
       ..add(skill.trim());
     emit(state.copyWith(offeredSkills: updatedSkills));
