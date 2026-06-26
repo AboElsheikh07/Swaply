@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/app_colors.dart';
 
-const authPrimary    = Color(0xFF5B4CB8);
-const authMutedFg    = Color(0xFF8A8A9A);
-const authBorder     = Color(0xFFEAEAF0);
-const authErrorColor = Color(0xFFE53935);
+const authPrimary    = AppColors.primary;
+const authMutedFg    = AppColors.mutedFg;
+const authBorder     = AppColors.border;
+const authErrorColor = AppColors.rose;
 
 // ── Back Button ──────────────────────────
 class AuthBackButton extends StatelessWidget {
@@ -16,9 +17,9 @@ class AuthBackButton extends StatelessWidget {
       child: Container(
         width: 40, height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.card,
           shape: BoxShape.circle,
-          border: Border.all(color: authBorder),
+          border: Border.all(color: AppColors.border),
         ),
         child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
       ),
@@ -59,19 +60,19 @@ class AuthInputField extends StatelessWidget {
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
         if (hasError) ...[
           const SizedBox(height: 4),
-          Text(error!, style: const TextStyle(fontSize: 11, color: authErrorColor)),
+          Text(error!, style: const TextStyle(fontSize: 11, color: AppColors.rose)),
         ],
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.card,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: hasError ? authErrorColor : authBorder),
+            border: Border.all(color: hasError ? AppColors.rose : AppColors.border),
           ),
           child: Row(
             children: [
               const SizedBox(width: 14),
-              Icon(icon, size: 20, color: authMutedFg),
+              Icon(icon, size: 20, color: AppColors.mutedFg),
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
@@ -81,7 +82,7 @@ class AuthInputField extends StatelessWidget {
                   style: const TextStyle(fontSize: 14),
                   decoration: InputDecoration(
                     hintText: placeholder,
-                    hintStyle: const TextStyle(color: authMutedFg, fontSize: 14),
+                    hintStyle: const TextStyle(color: AppColors.mutedFg, fontSize: 14),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
                   ),
@@ -111,9 +112,12 @@ class AuthCheckbox extends StatelessWidget {
     return Container(
       width: size, height: size,
       decoration: BoxDecoration(
-        color: value ? authPrimary : Colors.white,
+        color: value ? AppColors.primary : AppColors.card,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: value ? authPrimary : authBorder, width: 1.5),
+        border: Border.all(
+          color: value ? AppColors.primary : AppColors.border,
+          width: 1.5,
+        ),
       ),
       child: value
           ? const Icon(Icons.check_rounded, color: Colors.white, size: 12)
@@ -143,10 +147,10 @@ class AuthPrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: authPrimary,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           elevation: 4,
-          shadowColor: authPrimary.withOpacity(0.35),
+          shadowColor: AppColors.primary.withOpacity(0.35),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: isLoading
@@ -168,12 +172,12 @@ class AuthDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Expanded(child: Divider(color: authBorder)),
+        const Expanded(child: Divider(color: AppColors.border)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text('or', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
+          child: Text('or', style: TextStyle(fontSize: 12, color: AppColors.muted)),
         ),
-        const Expanded(child: Divider(color: authBorder)),
+        const Expanded(child: Divider(color: AppColors.border)),
       ],
     );
   }
@@ -194,18 +198,17 @@ class AuthSocialButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: authBorder),
+          side: const BorderSide(color: AppColors.border),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // استبدل بـ Image.asset('assets/icons/google.png') لما يكون عندك الأيقونة
             const Icon(Icons.g_mobiledata_rounded, size: 24, color: Colors.red),
             const SizedBox(width: 10),
             Text(label,
                 style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87)),
+                    fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.dark)),
           ],
         ),
       ),
