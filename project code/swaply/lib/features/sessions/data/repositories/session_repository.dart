@@ -13,26 +13,26 @@ class SessionRepository {
   // ── Streams ──────────────────────────────────
 
   /// Live list of requests sent TO the current user (they are the teacher).
-  // Stream<List<SessionItem>> watchIncomingRequests(String uid) =>
-  //     _remote.watchIncomingRequests(uid);
+  Stream<List<SessionItem>> watchIncomingRequests(String uid) =>
+      _remote.watchIncomingRequests(uid);
 
   /// Live list of requests sent BY the current user (they are the student).
-  // Stream<List<SessionItem>> watchMyRequests(String uid) =>
-  //     _remote.watchMyRequests(uid);
+  Stream<List<SessionItem>> watchMyRequests(String uid) =>
+      _remote.watchMyRequests(uid);
 
   // ── Fetch once ───────────────────────────────
 
   /// Fetch all incoming requests once (no real-time updates).
-  // Future<List<SessionItem>> fetchIncomingRequests(String uid) =>
-  //     _remote.fetchIncomingRequests(uid);
+  Future<List<SessionItem>> fetchIncomingRequests(String uid) =>
+      _remote.fetchIncomingRequests(uid);
 
   /// Fetch all my requests once (no real-time updates).
-  // Future<List<SessionItem>> fetchMyRequests(String uid) =>
-  //     _remote.fetchMyRequests(uid);
+  Future<List<SessionItem>> fetchMyRequests(String uid) =>
+      _remote.fetchMyRequests(uid);
 
   /// Fetch a single session by ID (for deep-link / notification open).
-  // Future<SessionItem?> fetchSession(String sessionId) =>
-  //     _remote.fetchSession(sessionId);
+  Future<SessionItem?> fetchSession(String sessionId, String uid) =>
+      _remote.fetchSession(sessionId, uid);
 
   // ── Create ───────────────────────────────────
 
