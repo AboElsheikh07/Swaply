@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:swaply/features/sessions/presentation/widgets/action.dart';
-import 'session_status_badge.dart';
-import 'points_label.dart';
-import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
+import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
+import 'package:swaply/features/sessions/presentation/widgets/action.dart';
 import 'package:swaply/features/sessions/presentation/widgets/buttons.dart';
+import 'package:swaply/features/sessions/presentation/widgets/points_label.dart';
+import 'package:swaply/features/sessions/presentation/widgets/session_status_badge.dart';
 
 class SessionCard extends StatelessWidget {
   final SessionItem session;
@@ -13,22 +15,30 @@ class SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final cubit  = context.read<SessionsCubit>(); // ✅ captured before any async
+
+    // Show the other party's name depending on direction
+    final otherName = session.isOutgoing
+        ? session.teacherName
+        : session.studentName;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color:        Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Theme.of(context).extension<AppColorTheme>()!.border),
+        border:       Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color:      Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset:     const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         children: [
-          // ── Top section ──────────────────
+          // ── Top section ───────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
             child: Row(
@@ -36,91 +46,76 @@ class SessionCard extends StatelessWidget {
               children: [
                 // Avatar
                 Container(
-                  width: 52,
+                  width:  52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEEECFB),
+                    color:        colors.primarySoft,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     CupertinoIcons.person_fill,
-                    color: Theme.of(context).extension<AppColorTheme>()!.primary,
-                    size: 26,
+                    color: colors.primary,
+                    size:  26,
                   ),
                 ),
                 const SizedBox(width: 12),
+
                 // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        session.teacherName,
+                        otherName,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize:   15,
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).extension<AppColorTheme>()!.text,
+                          color:      colors.text,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         session.skill,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                        ),
+                        style: TextStyle(fontSize: 13, color: colors.muted),
                       ),
                       const SizedBox(height: 8),
-                      // AFTER — wraps to next line if needed
                       Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
+                        spacing:            4,
+                        runSpacing:         4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Icon(
-                            CupertinoIcons.calendar,
-                            size: 13,
-                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                          ),
+                          Icon(CupertinoIcons.calendar,
+                              size: 13, color: colors.muted),
                           Text(
-                            session.skill,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                            ),
+                            session.formattedDate, // ✅ uses model helper
+                            style: TextStyle(fontSize: 12, color: colors.muted),
                           ),
-                          SizedBox(width: 6),
-                          Icon(
-                            CupertinoIcons.clock,
-                            size: 13,
-                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                          ),
+                          const SizedBox(width: 6),
+                          Icon(CupertinoIcons.clock,
+                              size: 13, color: colors.muted),
                           Text(
-                            session.durationMinutes.toString(),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                            ),
+                            session.formattedDuration, // ✅ uses model helper
+                            style: TextStyle(fontSize: 12, color: colors.muted),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                // Status badge
+
                 StatusBadge(status: session.status),
               ],
             ),
           ),
 
-          // ── Divider ──────────────────────
-          Divider(height: 1, color: Theme.of(context).extension<AppColorTheme>()!.border),
+          // ── Divider ───────────────────────
+          Divider(height: 1, color: colors.border),
 
-          // ── Bottom section ───────────────
+          // ── Bottom section ────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-            child: session.status == SessionStatus.pending
-                // Pending: stack points on top, buttons on bottom full-width
+            child: session.status == SessionStatus.pending && !session.isOutgoing
+                // ✅ Only incoming pending sessions show Accept/Decline
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -129,31 +124,24 @@ class SessionCard extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Center(
-                              child: OutlineBtn(
-                                label: 'Decline',
-                                icon: Icons.close,
-                                onTap: () {
-                                  
-                                },
-                              ),
+                            child: OutlineBtn(
+                              label: 'Decline',
+                              icon:  Icons.close,
+                              onTap: () => cubit.decline(session.id),
                             ),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Center(
-                              child: PrimaryBtn(
-                                icon: Icons.check_rounded,
-                                label: 'Accept',
-                                onTap: () {},
-                              ),
+                            child: PrimaryBtn(
+                              icon:  Icons.check_rounded,
+                              label: 'Accept',
+                              onTap: () => cubit.accept(session.id),
                             ),
                           ),
                         ],
                       ),
                     ],
                   )
-                // All other statuses: points left, action right
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

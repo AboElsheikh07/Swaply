@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:swaply/core/constants/firestore_keys.dart';
-import 'package:swaply/features/auth/data/models/user_model.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
+import 'package:swaply/features/user/data/repositories/user_repository.dart';
 
 class FirebaseAuthRepository {
   final _auth = FirebaseAuth.instance;
@@ -26,19 +27,12 @@ class FirebaseAuthRepository {
         password: password,
       );
 
-      final uid = credential.user!.uid;
+    
 
-      // Save user profile to Firestore
-      await _db.collection(FirestoreKeys.users).doc(uid).set({
-        'uid': uid,
-        'name': name,
-        'email': email,
-        'avatarUrl': '',
-        'points': 0,
-        'skills': [],
-        FirestoreKeys.createdAt: FieldValue.serverTimestamp(),
-      });
-
+      await UserRepository().createUser(
+        uid: credential.user!.uid,
+        username: name, // from signup form
+      );
       // Update Firebase display name
       await credential.user!.updateDisplayName(name);
     } on FirebaseAuthException catch (e) {
@@ -51,9 +45,9 @@ class FirebaseAuthRepository {
   Future<UserModel> getCurrentUser() async {
     final uid = _auth.currentUser!.uid;
 
-    final doc = await _db.collection(FirestoreKeys.users).doc(uid).get();
+    final docRef = await _db.collection(FirestoreKeys.users).doc(uid).get();
 
-    return UserModel.fromJson(doc.data()!);
+    return UserModel.fromFirestore(docRef);
   }
 
   // Turns Firebase error codes into readable messages

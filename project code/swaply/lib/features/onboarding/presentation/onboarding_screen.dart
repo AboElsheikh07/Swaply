@@ -1,24 +1,47 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:swaply/features/on%20boarding/onboarding_cubit.dart';
-import 'package:swaply/features/on%20boarding/onboarding_state.dart';
-
-const _primary     = Color(0xFF5B4CB8);
-const _primarySoft = Color(0xFFEEECFB);
-const _mutedFg     = Color(0xFF8A8A9A);
-const _border      = Color(0xFFEAEAF0);
-const _dark        = Color(0xFF1A1A2E);
-const _errorColor  = Color(0xFFE53935);
+import 'package:swaply/core/constants/app_colors.dart';
+import 'package:swaply/root.dart';
+import 'controllers/cubit/onboarding_cubit.dart';
+import 'controllers/cubit/onboarding_state.dart';
 
 const _skillPool = [
-  'UI Design', 'UX Research', 'Figma', 'Design Systems', 'Illustration',
-  'Branding', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Flutter',
-  'Python', 'Public Speaking', 'Copywriting', 'Video Editing', 'Photography',
-  'Spanish', 'French', 'Mandarin', 'Guitar', 'Piano', 'Yoga',
-  'Meditation', 'Cooking', 'Marketing', 'SEO', 'Data Science', 'Figma',
-  'Adobe XD', 'After Effects', 'Kotlin', 'Swift', 'Node.js',
+  'UI Design',
+  'UX Research',
+  'Figma',
+  'Design Systems',
+  'Illustration',
+  'Branding',
+  'JavaScript',
+  'TypeScript',
+  'React',
+  'Next.js',
+  'Flutter',
+  'Python',
+  'Public Speaking',
+  'Copywriting',
+  'Video Editing',
+  'Photography',
+  'Spanish',
+  'French',
+  'Mandarin',
+  'Guitar',
+  'Piano',
+  'Yoga',
+  'Meditation',
+  'Cooking',
+  'Marketing',
+  'SEO',
+  'Data Science',
+  'Adobe XD',
+  'After Effects',
+  'Kotlin',
+  'Swift',
+  'Node.js',
 ];
 
 // ════════════════════════════════════════
@@ -47,9 +70,8 @@ class OnboardingFlow extends StatefulWidget {
 }
 
 class OnboardingFlowState extends State<OnboardingFlow> {
-  int step = 0; // 0=photo, 1=skills, 2=price
+  int step = 0;
 
-  // Shared state across steps
   File? profileImage;
   List<String> teachSkills = [];
   List<String> learnSkills = [];
@@ -60,50 +82,54 @@ class OnboardingFlowState extends State<OnboardingFlow> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
         if (state is OnboardingSuccess) {
-          // Navigate to home after onboarding completes
-          Navigator.of(context).pushReplacementNamed('/home');
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const RootView()),
+          );
         }
         if (state is OnboardingError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: _errorColor,
+              backgroundColor: colors.rose,
             ),
           );
           context.read<OnboardingCubit>().resetState();
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: switch (step) {
             0 => StepPhotoScreen(
-                profileImage: profileImage,
-                onImagePicked: (f) => setState(() => profileImage = f),
-                onNext: nextStep,
-              ),
+              profileImage: profileImage,
+              onImagePicked: (f) => setState(() => profileImage = f),
+              onNext: nextStep,
+            ),
             1 => StepSkillsScreen(
-                teachSkills: teachSkills,
-                learnSkills: learnSkills,
-                onTeachChanged: (s) => setState(() => teachSkills = s),
-                onLearnChanged: (s) => setState(() => learnSkills = s),
-                onNext: nextStep,
-                onBack: prevStep,
-              ),
+              teachSkills: teachSkills,
+              learnSkills: learnSkills,
+              onTeachChanged: (s) => setState(() => teachSkills = s),
+              onLearnChanged: (s) => setState(() => learnSkills = s),
+              onNext: nextStep,
+              onBack: prevStep,
+            ),
             2 => StepPriceScreen(
-                price: pricePerHour,
-                onPriceChanged: (p) => setState(() => pricePerHour = p),
-                onBack: prevStep,
-                onFinish: () => context.read<OnboardingCubit>().completeOnboarding(
-                  teachSkills: teachSkills,
-                  learnSkills: learnSkills,
-                  pricePerHour: pricePerHour,
-                  profileImage: profileImage,
-                ),
-              ),
+              price: pricePerHour,
+              onPriceChanged: (p) => setState(() => pricePerHour = p),
+              onBack: prevStep,
+              onFinish: () =>
+                  context.read<OnboardingCubit>().completeOnboarding(
+                    teachSkills: teachSkills,
+                    learnSkills: learnSkills,
+                    pricePerHour: pricePerHour,
+                    profileImage: profileImage,
+                  ),
+            ),
             _ => const SizedBox(),
           },
         ),
@@ -119,7 +145,7 @@ class OnboardingHeader extends StatelessWidget {
   final String step;
   final String title;
   final String subtitle;
-  final double progress; // 0.0 → 1.0
+  final double progress;
   final VoidCallback? onBack;
 
   const OnboardingHeader({
@@ -133,49 +159,63 @@ class OnboardingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back button
           if (onBack != null)
             GestureDetector(
               onTap: onBack,
               child: Container(
-                width: 40, height: 40,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5FA),
+                  color: colors.card,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 16,
+                  color: colors.text,
+                ),
               ),
             )
           else
             const SizedBox(height: 40),
           const SizedBox(height: 16),
-
-          Text(step,
-              style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.8,
-                  color: _primary)),
+          Text(
+            step,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+              color: colors.primary,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text(title,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(subtitle,
-              style: const TextStyle(fontSize: 13, color: _mutedFg, height: 1.4)),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 13, color: colors.mutedFg, height: 1.4),
+          ),
           const SizedBox(height: 16),
-
-          // Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
-              backgroundColor: const Color(0xFFEAEAF0),
-              valueColor: const AlwaysStoppedAnimation(_primary),
+              backgroundColor: colors.border,
+              valueColor: AlwaysStoppedAnimation(colors.primary),
               minHeight: 4,
             ),
           ),
@@ -188,7 +228,7 @@ class OnboardingHeader extends StatelessWidget {
 // ════════════════════════════════════════
 //  STEP 1 — Profile Photo
 // ════════════════════════════════════════
-class StepPhotoScreen extends StatelessWidget {
+class StepPhotoScreen extends StatefulWidget {
   final File? profileImage;
   final ValueChanged<File> onImagePicked;
   final VoidCallback onNext;
@@ -200,31 +240,52 @@ class StepPhotoScreen extends StatelessWidget {
     required this.onNext,
   });
 
-  Future<void> pickImage(BuildContext context) async {
+  @override
+  State<StepPhotoScreen> createState() => _StepPhotoScreenState();
+}
+
+class _StepPhotoScreenState extends State<StepPhotoScreen> {
+  Future<void> _pickImage() async {
+    // Capture everything synchronously before the first await
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final nav = Navigator.of(context);
     final picker = ImagePicker();
+
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => SafeArea(
+      // Use sheetCtx for pop — never touch parent context inside an async gap
+      builder: (sheetCtx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            Container(width: 40, height: 4,
-                decoration: BoxDecoration(
-                    color: _border, borderRadius: BorderRadius.circular(2))),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: colors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined, color: _primary),
-              title: const Text('Take a photo'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
+              leading: Icon(Icons.camera_alt_outlined, color: colors.primary),
+              title: Text('Take a photo', style: TextStyle(color: colors.text)),
+              onTap: () => Navigator.pop(sheetCtx, ImageSource.camera),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: _primary),
-              title: const Text('Choose from gallery'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
+              leading: Icon(
+                Icons.photo_library_outlined,
+                color: colors.primary,
+              ),
+              title: Text(
+                'Choose from gallery',
+                style: TextStyle(color: colors.text),
+              ),
+              onTap: () => Navigator.pop(sheetCtx, ImageSource.gallery),
             ),
             const SizedBox(height: 8),
           ],
@@ -232,52 +293,104 @@ class StepPhotoScreen extends StatelessWidget {
       ),
     );
 
-    if (source == null) return;
-    final picked = await picker.pickImage(source: source, imageQuality: 85);
-    if (picked != null) onImagePicked(File(picked.path));
+    // Sheet closed — verify widget is still alive before proceeding
+    if (!mounted || source == null) return;
+
+    XFile? picked;
+    try {
+      picked = await picker.pickImage(source: source, imageQuality: 85);
+    } on PlatformException catch (e) {
+      if (!mounted) return;
+      if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
+        _showPermissionDialog(nav);
+      }
+      return;
+    }
+
+    // pickImage can take a long time — check mounted again before touching widget
+    if (!mounted || picked == null) return;
+    widget.onImagePicked(File(picked.path));
+  }
+
+  void _showPermissionDialog(NavigatorState nav) {
+    nav.push(
+      DialogRoute(
+        context: nav.context,
+        builder: (_) => AlertDialog(
+          title: const Text('Permission Required'),
+          content: const Text(
+            'Please allow access in your device settings to continue.',
+          ),
+          actions: [
+            TextButton(onPressed: () => nav.pop(), child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                nav.pop();
+                openAppSettings();
+              },
+              child: const Text('Open Settings'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return Column(
       children: [
         OnboardingHeader(
           step: 'STEP 1 OF 3',
           title: 'Add a profile photo',
-          subtitle: 'A photo helps other members recognize you and builds trust.',
+          subtitle:
+              'A photo helps other members recognize you and builds trust.',
           progress: 1 / 3,
         ),
         const SizedBox(height: 48),
-
-        // Avatar picker
         GestureDetector(
-          onTap: () => pickImage(context),
+          onTap: _pickImage,
           child: Stack(
             children: [
               Container(
-                width: 120, height: 120,
+                width: 120,
+                height: 120,
                 decoration: BoxDecoration(
-                  color: _primarySoft,
+                  color: colors.primarySoft,
                   shape: BoxShape.circle,
-                  border: Border.all(color: _border, width: 2),
+                  border: Border.all(color: colors.border, width: 2),
                 ),
-                child: profileImage != null
+                child: widget.profileImage != null
                     ? ClipOval(
-                        child: Image.file(profileImage!, fit: BoxFit.cover))
-                    : const Icon(Icons.person_outline_rounded,
-                        color: _primary, size: 52),
+                        child: Image.file(
+                          widget.profileImage!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Icon(
+                        Icons.person_outline_rounded,
+                        color: colors.primary,
+                        size: 52,
+                      ),
               ),
               Positioned(
-                bottom: 0, right: 0,
+                bottom: 0,
+                right: 0,
                 child: Container(
-                  width: 34, height: 34,
+                  width: 34,
+                  height: 34,
                   decoration: BoxDecoration(
-                    color: _primary,
+                    color: colors.primary,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
+                    border: Border.all(color: colors.card, width: 2),
                   ),
-                  child: const Icon(Icons.camera_alt_rounded,
-                      color: Colors.white, size: 16),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ),
             ],
@@ -285,36 +398,37 @@ class StepPhotoScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          profileImage != null ? 'Tap to change photo' : 'Tap to add a photo',
-          style: const TextStyle(fontSize: 13, color: _mutedFg),
+          widget.profileImage != null
+              ? 'Tap to change photo'
+              : 'Tap to add a photo',
+          style: TextStyle(fontSize: 13, color: colors.mutedFg),
         ),
         const Spacer(),
-
-        // Footer
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: onNext,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
-                  ),
-                  child: Text(
-                    profileImage != null ? 'Continue' : 'Continue without photo',
-                    style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: widget.onNext,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
                 ),
               ),
-            ],
+              child: Text(
+                widget.profileImage != null
+                    ? 'Continue'
+                    : 'Continue without photo',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -349,23 +463,17 @@ class StepSkillsScreen extends StatefulWidget {
 
 class StepSkillsScreenState extends State<StepSkillsScreen> {
   bool isTeachTab = true;
-  String query    = '';
+  String query = '';
 
   List<String> get activeList =>
       isTeachTab ? widget.teachSkills : widget.learnSkills;
 
   void toggle(String skill) {
     final current = List<String>.from(activeList);
-    if (current.contains(skill)) {
-      current.remove(skill);
-    } else {
-      current.add(skill);
-    }
-    if (isTeachTab) {
-      widget.onTeachChanged(current);
-    } else {
-      widget.onLearnChanged(current);
-    }
+    current.contains(skill) ? current.remove(skill) : current.add(skill);
+    isTeachTab
+        ? widget.onTeachChanged(current)
+        : widget.onLearnChanged(current);
   }
 
   List<String> get filtered => _skillPool
@@ -377,6 +485,8 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return Column(
       children: [
         OnboardingHeader(
@@ -387,58 +497,61 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
           onBack: widget.onBack,
         ),
         const SizedBox(height: 16),
-
-        // Toggle tabs
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5FA),
+              color: colors.card,
               borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: colors.border),
             ),
             child: Row(
               children: [
-                Expanded(child: _TabBtn(
-                  label: 'I can teach'
-                      '${widget.teachSkills.isNotEmpty ? " · ${widget.teachSkills.length}" : ""}',
-                  active: isTeachTab,
-                  onTap: () => setState(() => isTeachTab = true),
-                )),
-                Expanded(child: _TabBtn(
-                  label: 'I want to learn'
-                      '${widget.learnSkills.isNotEmpty ? " · ${widget.learnSkills.length}" : ""}',
-                  active: !isTeachTab,
-                  onTap: () => setState(() => isTeachTab = false),
-                )),
+                Expanded(
+                  child: _TabBtn(
+                    label:
+                        'I can teach'
+                        '${widget.teachSkills.isNotEmpty ? " · ${widget.teachSkills.length}" : ""}',
+                    active: isTeachTab,
+                    onTap: () => setState(() => isTeachTab = true),
+                  ),
+                ),
+                Expanded(
+                  child: _TabBtn(
+                    label:
+                        'I want to learn'
+                        '${widget.learnSkills.isNotEmpty ? " · ${widget.learnSkills.length}" : ""}',
+                    active: !isTeachTab,
+                    onTap: () => setState(() => isTeachTab = false),
+                  ),
+                ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 12),
-
-        // Search
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.card,
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: _border),
+              border: Border.all(color: colors.border),
             ),
             child: Row(
               children: [
                 const SizedBox(width: 14),
-                const Icon(Icons.search_rounded, size: 18, color: _mutedFg),
+                Icon(Icons.search_rounded, size: 18, color: colors.mutedFg),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     onChanged: (v) => setState(() => query = v),
-                    style: const TextStyle(fontSize: 13),
-                    decoration: const InputDecoration(
+                    style: TextStyle(fontSize: 13, color: colors.text),
+                    decoration: InputDecoration(
                       hintText: 'Search skills...',
-                      hintStyle: TextStyle(color: _mutedFg, fontSize: 13),
+                      hintStyle: TextStyle(color: colors.mutedFg, fontSize: 13),
                       border: InputBorder.none,
                       isDense: true,
                     ),
@@ -449,8 +562,6 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-
-        // Count label
         if (activeList.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 20, bottom: 8),
@@ -458,12 +569,10 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 '${activeList.length} skill${activeList.length == 1 ? "" : "s"} selected',
-                style: const TextStyle(fontSize: 12, color: _mutedFg),
+                style: TextStyle(fontSize: 12, color: colors.mutedFg),
               ),
             ),
           ),
-
-        // Skills chips
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -477,19 +586,25 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 9),
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
                     decoration: BoxDecoration(
-                      color: selected ? _primary : Colors.white,
+                      color: selected ? colors.primary : colors.card,
                       borderRadius: BorderRadius.circular(32),
-                      border:
-                          Border.all(color: selected ? _primary : _border),
+                      border: Border.all(
+                        color: selected ? colors.primary : colors.border,
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (selected) ...[
-                          const Icon(Icons.check_rounded,
-                              color: Colors.white, size: 14),
+                          const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                           const SizedBox(width: 4),
                         ],
                         Text(
@@ -497,7 +612,7 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: selected ? Colors.white : _dark,
+                            color: selected ? Colors.white : colors.text,
                           ),
                         ),
                       ],
@@ -508,23 +623,24 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
             ),
           ),
         ),
-
-        // Footer
         Container(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: _border)),
+          decoration: BoxDecoration(
+            color: colors.card,
+            border: Border(top: BorderSide(color: colors.border)),
           ),
           child: Row(
             children: [
               GestureDetector(
                 onTap: widget.onNext,
-                child: const Text('Skip for now',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: _mutedFg)),
+                child: Text(
+                  'Skip for now',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: colors.mutedFg,
+                  ),
+                ),
               ),
               const Spacer(),
               SizedBox(
@@ -532,17 +648,19 @@ class StepSkillsScreenState extends State<StepSkillsScreen> {
                 child: ElevatedButton(
                   onPressed: canContinue ? widget.onNext : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
+                    backgroundColor: colors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: _border,
+                    disabledBackgroundColor: colors.border,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
                   ),
-                  child: const Text('Continue',
-                      style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: const Text(
+                    'Continue',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
             ],
@@ -557,25 +675,31 @@ class _TabBtn extends StatelessWidget {
   final String label;
   final bool active;
   final VoidCallback onTap;
-  const _TabBtn(
-      {required this.label, required this.active, required this.onTap});
+  const _TabBtn({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 9),
         decoration: BoxDecoration(
-          color: active ? Colors.white : Colors.transparent,
+          color: active ? colors.card : Colors.transparent,
           borderRadius: BorderRadius.circular(28),
           boxShadow: active
               ? [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
-                      blurRadius: 6,
-                      offset: const Offset(0, 1))
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
                 ]
               : null,
         ),
@@ -585,7 +709,7 @@ class _TabBtn extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: active ? _dark : _mutedFg,
+            color: active ? colors.text : colors.mutedFg,
           ),
         ),
       ),
@@ -615,8 +739,8 @@ class StepPriceScreen extends StatefulWidget {
 }
 
 class StepPriceScreenState extends State<StepPriceScreen> {
-  static const _min       = 5;
-  static const _max       = 150;
+  static const _min = 5;
+  static const _max = 150;
   static const _suggested = [10, 25, 50, 75];
 
   late final TextEditingController _ctrl;
@@ -639,12 +763,13 @@ class StepPriceScreenState extends State<StepPriceScreen> {
     final clamped = clamp(val);
     widget.onPriceChanged(clamped);
     _ctrl.text = '$clamped';
-    _ctrl.selection =
-        TextSelection.collapsed(offset: _ctrl.text.length);
+    _ctrl.selection = TextSelection.collapsed(offset: _ctrl.text.length);
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return BlocBuilder<OnboardingCubit, OnboardingState>(
       builder: (context, state) {
         final isLoading = state is OnboardingLoading;
@@ -660,43 +785,45 @@ class StepPriceScreenState extends State<StepPriceScreen> {
               onBack: widget.onBack,
             ),
             const SizedBox(height: 24),
-
-            // Price display card
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: _primarySoft,
+                  color: colors.primarySoft,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: _border),
+                  border: Border.all(color: colors.border),
                 ),
                 child: Column(
                   children: [
-                    const Text('YOUR RATE',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                            color: _mutedFg)),
+                    Text(
+                      'YOUR RATE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                        color: colors.mutedFg,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Minus button
                         _PriceBtn(
                           icon: Icons.remove_rounded,
                           onTap: () => setPrice(widget.price - 5),
                         ),
                         const SizedBox(width: 20),
-                        // Price input
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            const Icon(Icons.toll_rounded,
-                                color: _primary, size: 24),
+                            Icon(
+                              Icons.toll_rounded,
+                              color: colors.primary,
+                              size: 24,
+                            ),
                             const SizedBox(width: 4),
                             SizedBox(
                               width: 90,
@@ -704,13 +831,14 @@ class StepPriceScreenState extends State<StepPriceScreen> {
                                 controller: _ctrl,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 48,
                                   fontWeight: FontWeight.bold,
-                                  color: _dark,
+                                  color: colors.text,
                                 ),
                                 decoration: const InputDecoration(
-                                    border: InputBorder.none),
+                                  border: InputBorder.none,
+                                ),
                                 onChanged: (v) {
                                   final n = int.tryParse(v);
                                   if (n != null) setPrice(n);
@@ -720,35 +848,35 @@ class StepPriceScreenState extends State<StepPriceScreen> {
                           ],
                         ),
                         const SizedBox(width: 20),
-                        // Plus button
                         _PriceBtn(
                           icon: Icons.add_rounded,
                           onTap: () => setPrice(widget.price + 5),
                         ),
                       ],
                     ),
-                    const Text('points per hour',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _primary)),
+                    Text(
+                      'points per hour',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: colors.primary,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
-            // Slider
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 children: [
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: _primary,
-                      inactiveTrackColor: _border,
-                      thumbColor: _primary,
-                      overlayColor: _primary.withOpacity(0.12),
+                      activeTrackColor: colors.primary,
+                      inactiveTrackColor: colors.border,
+                      thumbColor: colors.primary,
+                      overlayColor: colors.primary.withOpacity(0.12),
                       trackHeight: 4,
                     ),
                     child: Slider(
@@ -763,13 +891,15 @@ class StepPriceScreenState extends State<StepPriceScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text('$_min pts',
-                            style:
-                                TextStyle(fontSize: 11, color: _mutedFg)),
-                        Text('$_max pts',
-                            style:
-                                TextStyle(fontSize: 11, color: _mutedFg)),
+                      children: [
+                        Text(
+                          '$_min pts',
+                          style: TextStyle(fontSize: 11, color: colors.mutedFg),
+                        ),
+                        Text(
+                          '$_max pts',
+                          style: TextStyle(fontSize: 11, color: colors.mutedFg),
+                        ),
                       ],
                     ),
                   ),
@@ -777,19 +907,20 @@ class StepPriceScreenState extends State<StepPriceScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Suggested chips
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SUGGESTED',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.8,
-                          color: _mutedFg)),
+                  Text(
+                    'SUGGESTED',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                      color: colors.mutedFg,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -800,19 +931,22 @@ class StepPriceScreenState extends State<StepPriceScreen> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 150),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 7),
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
                           decoration: BoxDecoration(
-                            color: active ? _primary : Colors.white,
+                            color: active ? colors.primary : colors.card,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: active ? _primary : _border),
+                              color: active ? colors.primary : colors.border,
+                            ),
                           ),
                           child: Text(
                             '$s pts/hr',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: active ? Colors.white : _dark,
+                              color: active ? Colors.white : colors.text,
                             ),
                           ),
                         ),
@@ -823,35 +957,34 @@ class StepPriceScreenState extends State<StepPriceScreen> {
               ),
             ),
             const SizedBox(height: 16),
-
-            // Hint
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5FA),
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.border),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info_outline_rounded,
-                        size: 16, color: _mutedFg),
-                    SizedBox(width: 8),
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: colors.mutedFg,
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'You can change this anytime from your profile.',
-                        style: TextStyle(fontSize: 12, color: _mutedFg),
+                        style: TextStyle(fontSize: 12, color: colors.mutedFg),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
             const Spacer(),
-
-            // Finish button
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               child: SizedBox(
@@ -860,20 +993,29 @@ class StepPriceScreenState extends State<StepPriceScreen> {
                 child: ElevatedButton(
                   onPressed: isLoading ? null : widget.onFinish,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
+                    backgroundColor: colors.primary,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
                   ),
                   child: isLoading
                       ? const SizedBox(
-                          width: 22, height: 22,
+                          width: 22,
+                          height: 22,
                           child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2.5))
-                      : const Text('Finish Setup',
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'Finish Setup',
                           style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w600)),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -891,19 +1033,21 @@ class _PriceBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40, height: 40,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.08), blurRadius: 6)
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 6),
           ],
         ),
-        child: Icon(icon, size: 20, color: _dark),
+        child: Icon(icon, size: 20, color: colors.text),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/auth/presentation/screens/login_screen.dart';
-import 'package:swaply/root.dart';
+import 'package:swaply/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
@@ -86,7 +86,7 @@ class SignupViewState extends State<SignupView> {
           if (state is AuthSuccess) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const RootView()),
+              MaterialPageRoute(builder: (_) => const OnboardingScreen()),
               (route) => false, // removes all previous routes
             );
           }
@@ -241,7 +241,7 @@ class SignupViewState extends State<SignupView> {
                       // Navigator.pushReplacement(
                       //   context,
                       //   MaterialPageRoute(
-                      //     builder: (_) => const RootView(),
+                      //     builder: (_) => const OnboardingScreen(),
                       //   ),
                       // );
                     },

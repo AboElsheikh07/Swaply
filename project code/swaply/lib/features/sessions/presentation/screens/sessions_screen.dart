@@ -1,139 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:swaply/features/sessions/data/models/session_model.dart';
-import 'package:swaply/features/sessions/presentation/widgets/session_card.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
-
-// ─────────────────────────────────────────
-//  Mock Data
-// ─────────────────────────────────────────
-
-final _myRequests = [
-  SessionItem(
-    id: 's1',
-    studentId: 'u_me',
-    teacherId: 'u_sarah',
-    studentName: 'Me',
-    teacherName: 'Sarah Chen',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'UI/UX Design',
-    scheduledAt: DateTime(2024, 4, 25, 16, 0),
-    durationMinutes: 60,
-    points: 60,
-    status: SessionStatus.accepted,
-    message: null,
-    createdAt: DateTime(2024, 4, 20),
-    isOutgoing: true,
-  ),
-  SessionItem(
-    id: 's2',
-    studentId: 'u_me',
-    teacherId: 'u_maria',
-    studentName: 'Me',
-    teacherName: 'Maria Lopez',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'Spanish Tutoring',
-    scheduledAt: DateTime(2024, 4, 26, 10, 0),
-    durationMinutes: 45,
-    points: 30,
-    status: SessionStatus.pending,
-    message: 'Hi! I would love to practice conversational Spanish.',
-    createdAt: DateTime(2024, 4, 21),
-    isOutgoing: true,
-  ),
-  SessionItem(
-    id: 's3',
-    studentId: 'u_me',
-    teacherId: 'u_priya',
-    studentName: 'Me',
-    teacherName: 'Priya Patel',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'Yoga & Meditation',
-    scheduledAt: DateTime(2024, 4, 23, 9, 0),
-    durationMinutes: 30,
-    points: 22,
-    status: SessionStatus.rejected,
-    message: null,
-    createdAt: DateTime(2024, 4, 22),
-    isOutgoing: true,
-  ),
-  SessionItem(
-    id: 's4',
-    studentId: 'u_me',
-    teacherId: 'u_james',
-    studentName: 'Me',
-    teacherName: 'James Wilson',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'Flutter & Mobile',
-    scheduledAt: DateTime(2024, 4, 18, 14, 30),
-    durationMinutes: 60,
-    points: 75,
-    status: SessionStatus.completed,
-    message: 'Looking to learn state management basics.',
-    createdAt: DateTime(2024, 4, 10),
-    isOutgoing: true,
-  ),
-];
-
-final _incoming = [
-  SessionItem(
-    id: 's5',
-    studentId: 'u_emma',
-    teacherId: 'u_me',
-    studentName: 'Emma Richardson',
-    teacherName: 'Me',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'Figma Basics',
-    scheduledAt: DateTime(2024, 4, 24, 17, 0),
-    durationMinutes: 60,
-    points: 35,
-    status: SessionStatus.accepted,
-    message: 'I want to learn the basics of Figma for my design class.',
-    createdAt: DateTime(2024, 4, 18),
-    isOutgoing: false,
-  ),
-  SessionItem(
-    id: 's6',
-    studentId: 'u_david',
-    teacherId: 'u_me',
-    studentName: 'David Park',
-    teacherName: 'Me',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'Design Systems',
-    scheduledAt: DateTime(2024, 4, 27, 11, 0),
-    durationMinutes: 90,
-    points: 53,
-    status: SessionStatus.pending,
-    message: 'Interested in learning how to build a scalable design system.',
-    createdAt: DateTime(2024, 4, 22),
-    isOutgoing: false,
-  ),
-  SessionItem(
-    id: 's7',
-    studentId: 'u_rachel',
-    teacherId: 'u_me',
-    studentName: 'Rachel Kim',
-    teacherName: 'Me',
-    studentAvatar: '',
-    teacherAvatar: '',
-    skill: 'UI Design Intro',
-    scheduledAt: DateTime(2024, 4, 15, 15, 0),
-    durationMinutes: 60,
-    points: 35,
-    status: SessionStatus.completed,
-    message: null,
-    createdAt: DateTime(2024, 4, 8),
-    isOutgoing: false,
-  ),
-];
-// ─────────────────────────────────────────
-//  SessionsScreen
-// ─────────────────────────────────────────
+import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
+import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
+import 'package:swaply/features/sessions/presentation/widgets/session_card.dart';
 
 class SessionsScreen extends StatefulWidget {
   const SessionsScreen({super.key});
@@ -150,6 +21,7 @@ class _SessionsScreenState extends State<SessionsScreen>
   void initState() {
     super.initState();
     _tab = TabController(length: 2, vsync: this);
+    context.read<SessionsCubit>().loadSessions();
   }
 
   @override
@@ -160,20 +32,21 @@ class _SessionsScreenState extends State<SessionsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header + Tab Bar ─────────────────
+            // ── Header + Tab Bar ──────────────
             Container(
               color: Theme.of(context).cardColor,
-              width: double.infinity, 
+              width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
                     child: Column(
@@ -184,38 +57,33 @@ class _SessionsScreenState extends State<SessionsScreen>
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).extension<AppColorTheme>()!.text,
+                            color: colors.text,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           'Manage skill swap requests sent to and from you.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(context).extension<AppColorTheme>()!.muted,
-                          ),
+                          style: TextStyle(fontSize: 13, color: colors.muted),
                         ),
                       ],
                     ),
                   ),
-
-                  // Tab Bar
                   TabBar(
                     controller: _tab,
-                    labelColor: Theme.of(context).extension<AppColorTheme>()!.primary,
-                    unselectedLabelColor: Theme.of(context).extension<AppColorTheme>()!.muted,
+                    labelColor: colors.primary,
+                    unselectedLabelColor: colors.muted,
                     labelStyle: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
-                    unselectedLabelStyle: TextStyle(
+                    unselectedLabelStyle: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
-                    indicatorColor: Theme.of(context).extension<AppColorTheme>()!.primary,
+                    indicatorColor: colors.primary,
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorWeight: 2,
-                    dividerColor: Theme.of(context).extension<AppColorTheme>()!.border,
+                    dividerColor: colors.border,
                     tabs: const [
                       Tab(text: 'Incoming Requests'),
                       Tab(text: 'My Requests'),
@@ -225,14 +93,62 @@ class _SessionsScreenState extends State<SessionsScreen>
               ),
             ),
 
-            // ── Tab Views ───────────────────
+            // ── Tab Views ─────────────────────
             Expanded(
-              child: TabBarView(
-                controller: _tab,
-                children: [
-                  _SessionList(sessions: _incoming),
-                  _SessionList(sessions: _myRequests),
-                ],
+              child: BlocBuilder<SessionsCubit, SessionsState>(
+                builder: (context, state) {
+                  if (state is SessionsLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(color: colors.primary),
+                    );
+                  }
+
+                  if (state is SessionsError) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.error_outline, size: 48, color: colors.rose),
+                          const SizedBox(height: 12),
+                          Text(
+                            state.message,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: colors.muted, fontSize: 14),
+                          ),
+                          const SizedBox(height: 16),
+                          TextButton(
+                            onPressed: () =>
+                                context.read<SessionsCubit>().loadSessions(),
+                            child: Text(
+                              'Try again',
+                              style: TextStyle(color: colors.primary),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final incoming = state is SessionsLoaded
+                      ? state.incoming
+                      : state is SessionsActionLoading
+                          ? state.incoming
+                          : <SessionItem>[];
+
+                  final myRequests = state is SessionsLoaded
+                      ? state.myRequests
+                      : state is SessionsActionLoading
+                          ? state.myRequests
+                          : <SessionItem>[];
+
+                  return TabBarView(
+                    controller: _tab,
+                    children: [
+                      _SessionList(sessions: incoming),
+                      _SessionList(sessions: myRequests),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -242,9 +158,7 @@ class _SessionsScreenState extends State<SessionsScreen>
   }
 }
 
-// ─────────────────────────────────────────
-//  Session List
-// ─────────────────────────────────────────
+// ── Session List ──────────────────────────────────────────
 
 class _SessionList extends StatelessWidget {
   final List<SessionItem> sessions;
@@ -252,10 +166,37 @@ class _SessionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+
+    if (sessions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today_outlined, size: 48, color: colors.muted),
+            const SizedBox(height: 12),
+            Text(
+              'No sessions yet',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: colors.text,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Sessions will appear here once created.',
+              style: TextStyle(fontSize: 13, color: colors.muted),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       itemCount: sessions.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, i) => SessionCard(session: sessions[i]),
     );
   }

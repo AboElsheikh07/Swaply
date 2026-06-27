@@ -1,4 +1,5 @@
-import 'package:swaply/features/auth/data/models/user_model.dart';
+
+import 'package:swaply/features/user/data/models/user_model.dart';
 
 import '../../data/models/category_model.dart';
 

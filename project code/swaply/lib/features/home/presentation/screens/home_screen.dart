@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/auth/data/models/user_model.dart';
+
 import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 import 'package:swaply/features/home/data/repositories/home_repository_firebase.dart';
 import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:swaply/features/search/presentation/screens/search_screen.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
@@ -171,7 +172,7 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Hi, ${user?.name.split(" ").first ?? "User"}',
+                  'Hi, ${user?.username.split(" ").first ?? "User"}',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
@@ -606,7 +607,7 @@ class _MentorCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          mentor.name,
+                          mentor.username,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -632,14 +633,16 @@ class _MentorCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    mentor.skills.isNotEmpty ? mentor.skills.first : "No skill",
+                    mentor.skillsCanTeach.isNotEmpty
+                        ? mentor.skillsCanTeach.first
+                        : "No skill",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 11, color: _mutedFg),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "${mentor.points} pts",
+                    "${mentor.balance} pts",
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
