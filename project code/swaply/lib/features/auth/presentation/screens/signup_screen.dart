@@ -94,7 +94,9 @@ class SignupViewState extends State<SignupView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).extension<AppColorTheme>()!.rose,
+                backgroundColor: Theme.of(
+                  context,
+                ).extension<AppColorTheme>()!.rose,
               ),
             );
             context.read<AuthCubit>().resetState();
@@ -118,7 +120,12 @@ class SignupViewState extends State<SignupView> {
                   SizedBox(height: 8),
                   Text(
                     'Join Swaply and start trading your skills with people around you.',
-                    style: TextStyle(fontSize: 14, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(
+                        context,
+                      ).extension<AppColorTheme>()!.mutedFg,
+                    ),
                   ),
                   const SizedBox(height: 32),
 
@@ -157,7 +164,9 @@ class SignupViewState extends State<SignupView> {
                         showPassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
+                        color: Theme.of(
+                          context,
+                        ).extension<AppColorTheme>()!.mutedFg,
                         size: 20,
                       ),
                     ),
@@ -177,14 +186,18 @@ class SignupViewState extends State<SignupView> {
                             text: TextSpan(
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
+                                color: Theme.of(
+                                  context,
+                                ).extension<AppColorTheme>()!.mutedFg,
                               ),
                               children: [
                                 TextSpan(text: 'I agree to the '),
                                 TextSpan(
                                   text: 'Terms of Service',
                                   style: TextStyle(
-                                    color: Theme.of(context).extension<AppColorTheme>()!.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).extension<AppColorTheme>()!.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -192,7 +205,9 @@ class SignupViewState extends State<SignupView> {
                                 TextSpan(
                                   text: 'Privacy Policy',
                                   style: TextStyle(
-                                    color: Theme.of(context).extension<AppColorTheme>()!.primary,
+                                    color: Theme.of(
+                                      context,
+                                    ).extension<AppColorTheme>()!.primary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -210,7 +225,9 @@ class SignupViewState extends State<SignupView> {
                       termsError!,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Theme.of(context).extension<AppColorTheme>()!.rose,
+                        color: Theme.of(
+                          context,
+                        ).extension<AppColorTheme>()!.rose,
                       ),
                     ),
                   ],
@@ -219,7 +236,15 @@ class SignupViewState extends State<SignupView> {
                   AuthPrimaryButton(
                     label: 'Sign Up',
                     isLoading: isLoading,
-                    onTap: () => submit(context),
+                    onTap: () {
+                      submit(context);
+                      // Navigator.pushReplacement(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (_) => const RootView(),
+                      //   ),
+                      // );
+                    },
                   ),
                   const SizedBox(height: 24),
 
@@ -234,7 +259,12 @@ class SignupViewState extends State<SignupView> {
                     children: [
                       Text(
                         'Already have an account? ',
-                        style: TextStyle(fontSize: 14, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(
+                            context,
+                          ).extension<AppColorTheme>()!.mutedFg,
+                        ),
                       ),
                       GestureDetector(
                         onTap: () => Navigator.pushReplacement(
@@ -248,7 +278,9 @@ class SignupViewState extends State<SignupView> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context).extension<AppColorTheme>()!.primary,
+                            color: Theme.of(
+                              context,
+                            ).extension<AppColorTheme>()!.primary,
                           ),
                         ),
                       ),

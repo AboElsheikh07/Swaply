@@ -5,7 +5,6 @@ import 'package:swaply/features/auth/data/models/user_model.dart';
 import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
-import 'package:swaply/features/home/data/repositories/home_repository.dart';
 import 'package:swaply/features/home/data/repositories/home_repository_firebase.dart';
 import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:swaply/features/search/presentation/screens/search_screen.dart';
