@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/auth/data/models/user_model.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
+import 'package:swaply/features/home/data/repositories/home_repository.dart';
+import 'package:swaply/features/home/data/repositories/home_repository_firebase.dart';
+import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:swaply/features/search/presentation/screens/search_screen.dart';
 
-import '../../data/models/mentor_model.dart';
-import '../../data/models/category_model.dart';
-import '../../data/repositories/home_repository_mock.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 import 'category_screen.dart';
@@ -24,9 +29,15 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      // ✅ بدّل MockHomeRepository بـ FirebaseHomeRepository لما Auth يخلص
-      create: (_) => HomeCubit(MockHomeRepository())..loadHome(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => AuthCubit(FirebaseAuthRepository())..getCurrentUser(),
+        ),
+        BlocProvider(
+          create: (_) => HomeCubit(FirebaseHomeRepository())..loadHome(),
+        ),
+      ],
       child: const _HomeView(),
     );
   }
@@ -50,6 +61,7 @@ class _HomeViewState extends State<_HomeView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    context.read<AuthCubit>().getCurrentUser();
   }
 
   @override
@@ -67,7 +79,11 @@ class _HomeViewState extends State<_HomeView>
           builder: (context, state) {
             return Column(
               children: [
-                _Header(state: state),
+                _Header(
+                  user: context.watch<AuthCubit>().state is UserLoaded
+                      ? (context.watch<AuthCubit>().state as UserLoaded).user
+                      : null,
+                ),
                 _buildTabBar(),
                 Expanded(
                   child: switch (state) {
@@ -131,8 +147,9 @@ class _HomeViewState extends State<_HomeView>
 
 // ── Header ──────────────────────────────
 class _Header extends StatelessWidget {
-  final HomeState state;
-  const _Header({required this.state});
+  final UserModel? user;
+
+  const _Header({this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -154,21 +171,40 @@ class _Header extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ✅ لما Auth يخلص، استبدل النص ده بـ user.displayName
                 Text(
-                  'Hi, Jonathan',
+                  'Hi, ${user?.name.split(" ").first ?? "User"}',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "Let's learn something today",
-                  style: TextStyle(fontSize: 12, color: Theme.of(context).textTheme.bodyMedium?.color),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
                 ),
               ],
             ),
           ),
-          _IconBtn(icon: CupertinoIcons.search, onTap: () {}),
+          _IconBtn(
+            icon: CupertinoIcons.search,
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (_) => const SearchScreen()),
+              );
+            },
+          ),
           const SizedBox(width: 8),
-          _IconBtn(icon: CupertinoIcons.bell, onTap: () {}, badge: true),
+          _IconBtn(
+            icon: CupertinoIcons.bell,
+            onTap: () {
+              Navigator.push(
+                context,
+                CupertinoPageRoute(builder: (_) => const NotificationsScreen()),
+              );
+            },
+            badge: true,
+          ),
         ],
       ),
     );
@@ -186,7 +222,8 @@ class _IconBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40, height: 40,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           shape: BoxShape.circle,
@@ -198,11 +235,15 @@ class _IconBtn extends StatelessWidget {
             Icon(icon, size: 20, color: Theme.of(context).iconTheme.color),
             if (badge)
               Positioned(
-                top: 8, right: 8,
+                top: 8,
+                right: 8,
                 child: Container(
-                  width: 8, height: 8,
+                  width: 8,
+                  height: 8,
                   decoration: const BoxDecoration(
-                    color: Color(0xFFE53935), shape: BoxShape.circle),
+                    color: Color(0xFFE53935),
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
           ],
@@ -216,8 +257,8 @@ class _IconBtn extends StatelessWidget {
 //  Home Tab
 // ════════════════════════════════════════
 class _HomeTab extends StatefulWidget {
-  final List<MentorModel> topMentors;
-  final List<MentorModel> recommended;
+  final List<UserModel> topMentors;
+  final List<UserModel> recommended;
   const _HomeTab({required this.topMentors, required this.recommended});
 
   @override
@@ -355,7 +396,7 @@ class _SectionHeader extends StatelessWidget {
 
 // ── Mentor Grid ──────────────────────────
 class _MentorGrid extends StatelessWidget {
-  final List<MentorModel> mentors;
+  final List<UserModel> mentors;
   const _MentorGrid({required this.mentors});
 
   @override
@@ -391,9 +432,11 @@ class _PromoCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            left: -30, top: -40,
+            left: -30,
+            top: -40,
             child: Container(
-              width: 110, height: 110,
+              width: 110,
+              height: 110,
               decoration: BoxDecoration(
                 color: _primary.withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -436,7 +479,8 @@ class _PromoCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Container(
-                  width: 80, height: 80,
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     color: _primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
@@ -458,19 +502,32 @@ class _PromoCard extends StatelessWidget {
 
 // ── Mentor Card ──────────────────────────
 class _MentorCard extends StatelessWidget {
-  final MentorModel mentor;
+  final UserModel mentor;
   _MentorCard({required this.mentor});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => CategoryScreen(category: CategoryModel(name: mentor.skill, icon: CupertinoIcons.person_2_fill)),
+        //   ),
+        // );
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: _border),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,7 +554,8 @@ class _MentorCard extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    bottom: 8, left: 8,
+                    bottom: 8,
+                    left: 8,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -517,18 +575,20 @@ class _MentorCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
-                            width: 6, height: 6,
+                            width: 6,
+                            height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: mentor.online ? const Color(0xFF2ECC71) : const Color(0xFFAAAAAA),
+                              color: const Color(0xFF2ECC71),
                             ),
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            mentor.online ? 'Online' : 'Offline',
-                            style: TextStyle(
-                              fontSize: 10, fontWeight: FontWeight.w600,
-                              color: mentor.online ? const Color(0xFF27AE60) : const Color(0xFF888888),
+                            "Active",
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF27AE60),
                             ),
                           ),
                         ],
@@ -546,10 +606,15 @@ class _MentorCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(mentor.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                        child: Text(
+                          mentor.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                       const Icon(
                         Icons.star_rounded,
@@ -558,7 +623,7 @@ class _MentorCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        mentor.rating.toStringAsFixed(1),
+                        "4.38",
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -568,14 +633,20 @@ class _MentorCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    mentor.skill,
+                    mentor.skills.isNotEmpty ? mentor.skills.first : "No skill",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 11, color: _mutedFg),
                   ),
                   const SizedBox(height: 4),
-                  Text(mentor.rate,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _primary)),
+                  Text(
+                    "${mentor.points} pts",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: _primary,
+                    ),
+                  ),
                 ],
               ),
             ),

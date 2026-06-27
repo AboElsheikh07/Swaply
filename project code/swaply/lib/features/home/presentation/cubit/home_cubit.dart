@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/auth/data/models/user_model.dart';
 import '../../data/repositories/home_repository.dart';
+import '../../data/models/category_model.dart';
 import 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
@@ -9,19 +11,21 @@ class HomeCubit extends Cubit<HomeState> {
 
   Future<void> loadHome() async {
     emit(HomeLoading());
+
     try {
-      // بنجيب الـ 3 calls مع بعض بدل ما نستنى واحدة ورا التانية
       final results = await Future.wait([
         _repo.getTopMentors(),
         _repo.getRecommendedMentors(),
         _repo.getCategories(),
       ]);
 
-      emit(HomeLoaded(
-        topMentors:  results[0] as dynamic,
-        recommended: results[1] as dynamic,
-        categories:  results[2] as dynamic,
-      ));
+      emit(
+        HomeLoaded(
+          topMentors: results[0] as List<UserModel>,
+          recommended: results[1] as List<UserModel>,
+          categories: results[2] as List<CategoryModel>,
+        ),
+      );
     } catch (e) {
       emit(HomeError('Something went wrong. Please try again.'));
     }
