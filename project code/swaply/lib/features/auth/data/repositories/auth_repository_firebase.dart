@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:swaply/core/constants/firestore_keys.dart';
+import 'package:swaply/features/auth/data/models/user_model.dart';
 
 class FirebaseAuthRepository {
   final _auth = FirebaseAuth.instance;
@@ -46,6 +47,14 @@ class FirebaseAuthRepository {
   }
 
   Future<void> logout() => _auth.signOut();
+
+  Future<UserModel> getCurrentUser() async {
+    final uid = _auth.currentUser!.uid;
+
+    final doc = await _db.collection(FirestoreKeys.users).doc(uid).get();
+
+    return UserModel.fromJson(doc.data()!);
+  }
 
   // Turns Firebase error codes into readable messages
   String _mapError(String code) {

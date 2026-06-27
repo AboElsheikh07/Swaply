@@ -1,9 +1,7 @@
-import '../models/mentor_model.dart';
-import '../models/category_model.dart';
+import 'package:swaply/features/auth/data/models/user_model.dart';
 
-// الـ interface - مش بتتغير سواء mock أو Firebase
 abstract class HomeRepository {
-  Future<List<MentorModel>> getTopMentors();
-  Future<List<MentorModel>> getRecommendedMentors();
-  Future<List<CategoryModel>> getCategories();
+  Future<List<UserModel>> getTopMentors();
+  Future<List<UserModel>> getRecommendedMentors();
+  Future<List<dynamic>> getCategories();
 }
