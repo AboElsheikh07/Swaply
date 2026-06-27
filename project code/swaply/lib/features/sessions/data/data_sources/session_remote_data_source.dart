@@ -20,48 +20,56 @@ class SessionRemoteDataSource {
   // ── Streams ──────────────────────────────────
 
   /// Live list of sessions where the user is the teacher (incoming requests).
-  // Stream<List<SessionItem>> watchIncomingRequests(String uid) {
-  //   return _sessions
-  //       .where('teacherId', isEqualTo: uid)
-  //       .orderBy('scheduledAt')
-  //       .snapshots()
-  //       .map((snap) => snap.docs.map(SessionItem.fromFirestore).toList());
-  // }
+  Stream<List<SessionItem>> watchIncomingRequests(String uid) {
+    return _sessions
+        .where('teacherId', isEqualTo: uid)
+        .orderBy('scheduledAt')
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((doc) => SessionItem.fromFirestore(doc, uid))
+              .toList(),
+        );
+  }
 
   /// Live list of sessions where the user is the student (my requests).
-  // Stream<List<SessionItem>> watchMyRequests(String uid) {
-  //   return _sessions
-  //       .where('studentId', isEqualTo: uid)
-  //       .orderBy('scheduledAt')
-  //       .snapshots()
-  //       .map((snap) => snap.docs.map(SessionItem.fromFirestore).toList());
-  // }
+  Stream<List<SessionItem>> watchMyRequests(String uid) {
+    return _sessions
+        .where('studentId', isEqualTo: uid)
+        .orderBy('scheduledAt')
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((doc) => SessionItem.fromFirestore(doc, uid))
+              .toList(),
+        );
+  }
 
   // ── Fetch once ───────────────────────────────
 
   /// One-time fetch of incoming requests (no real-time updates).
-  // Future<List<SessionItem>> fetchIncomingRequests(String uid) async {
-  //   final snap = await _sessions
-  //       .where('teacherId', isEqualTo: uid)
-  //       .orderBy('scheduledAt')
-  //       .get();
-  //   return snap.docs.map(SessionItem.fromFirestore).toList();
-  // }
+  Future<List<SessionItem>> fetchIncomingRequests(String uid) async {
+    final snap = await _sessions
+        .where('teacherId', isEqualTo: uid)
+        .orderBy('scheduledAt')
+        .get();
+    return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
+  }
 
   /// One-time fetch of my requests (no real-time updates).
-  // Future<List<SessionItem>> fetchMyRequests(String uid) async {
-  //   final snap = await _sessions
-  //       .where('studentId', isEqualTo: uid)
-  //       .orderBy('scheduledAt')
-  //       .get();
-  //   return snap.docs.map(SessionItem.fromFirestore).toList();
-  // }
+  Future<List<SessionItem>> fetchMyRequests(String uid) async {
+    final snap = await _sessions
+        .where('studentId', isEqualTo: uid)
+        .orderBy('scheduledAt')
+        .get();
+    return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
+  }
 
   /// Fetch a single session by ID (for deep-link / notification open).
-  // Future<SessionItem?> fetchSession(String sessionId) async {
-  //   final doc = await _sessions.doc(sessionId).get();
-  //   return doc.exists ? SessionItem.fromFirestore(doc) : null;
-  // }
+  Future<SessionItem?> fetchSession(String sessionId, String uid) async {
+    final doc = await _sessions.doc(sessionId).get();
+    return doc.exists ? SessionItem.fromFirestore(doc, uid) : null;
+  }
 
   // ── Create ───────────────────────────────────
 

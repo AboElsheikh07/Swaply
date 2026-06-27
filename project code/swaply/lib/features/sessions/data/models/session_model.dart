@@ -88,26 +88,26 @@ class SessionItem {
   }
 
   // ── Firestore ────────────────────────────────
-  // factory SessionModel.fromFirestore(DocumentSnapshot doc) {
-  //   final data = doc.data() as Map<String, dynamic>;
-  //   return SessionModel(
-  //     id: doc.id,
-  //     studentId:     data['studentId']     ?? '',
-  //     teacherId:     data['teacherId']     ?? '',
-  //     studentName:   data['studentName']   ?? '',
-  //     teacherName:   data['teacherName']   ?? '',
-  //     studentAvatar: data['studentAvatar'] ?? '',
-  //     teacherAvatar: data['teacherAvatar'] ?? '',
-  //     skill:         data['skill']         ?? '',
-  //     scheduledAt:   (data['scheduledAt'] as Timestamp).toDate(),
-  //     durationMinutes: data['durationMinutes'] ?? 60,
-  //     cost:          data['cost']          ?? 0,
-  //     status: SessionStatusX.fromString(data['status'] ?? 'pending'),
-  //     message:       data['message'],
-  //     createdAt:     (data['createdAt'] as Timestamp).toDate(),
-  //   );
-  // }
-
+ factory SessionItem.fromFirestore(DocumentSnapshot doc, String currentUid) {
+  final data = doc.data() as Map<String, dynamic>;
+  return SessionItem(
+    id: doc.id,
+    studentId:      data['studentId']      ?? '',
+    teacherId:      data['teacherId']      ?? '',
+    studentName:    data['studentName']    ?? '',
+    teacherName:    data['teacherName']    ?? '',
+    studentAvatar:  data['studentAvatar']  ?? '',
+    teacherAvatar:  data['teacherAvatar']  ?? '',
+    skill:          data['skill']          ?? '',
+    scheduledAt:    (data['scheduledAt'] as Timestamp).toDate(),
+    durationMinutes: data['durationMinutes'] ?? 60,
+    points:          data['points']          ?? 0,
+    status: SessionStatusX.fromString(data['status'] ?? 'pending'),
+    message:        data['message'],
+    createdAt:      (data['createdAt'] as Timestamp).toDate(),
+    isOutgoing:     data['studentId'] == currentUid, // ← student = sent it
+  );
+}
   Map<String, dynamic> toFirestore() => {
     'studentId': studentId,
     'teacherId': teacherId,
