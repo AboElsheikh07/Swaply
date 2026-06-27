@@ -1,9 +1,6 @@
+
 import 'package:equatable/equatable.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
-
-// ─────────────────────────────────────────
-//  States
-// ─────────────────────────────────────────
 
 abstract class SessionsState extends Equatable {
   const SessionsState();
@@ -27,7 +24,10 @@ class SessionsLoaded extends SessionsState {
   final List<SessionItem> incoming;
   final List<SessionItem> myRequests;
 
-  const SessionsLoaded({required this.incoming, required this.myRequests});
+  const SessionsLoaded({
+    required this.incoming,
+    required this.myRequests,
+  });
 
   SessionsLoaded copyWith({
     List<SessionItem>? incoming,
