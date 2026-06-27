@@ -1,7 +1,7 @@
 // main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:swaply/features/on%20boarding/onboarding_screen.dart';
+
 import 'package:swaply/root.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -102,9 +102,30 @@ class MyApp extends StatelessWidget {
               ),
               extensions: <ThemeExtension<dynamic>>[AppColors.dark],
             ),
-            home: FirebaseAuth.instance.currentUser == null
-                ? const WelcomeScreen()
-                : const RootView(),
+            home: StreamBuilder<User?>(
+              stream: FirebaseAuth.instance
+                  .authStateChanges(), // Listens to login/logout changes
+              builder: (context, snapshot) {
+                // 1. Wait for Firebase to finish checking the connection
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Scaffold(
+                    body: Center(
+                      child:
+                          CircularProgressIndicator(), // Loading spinner on boot
+                    ),
+                  );
+                }
+
+                // 2. Check if a valid user exists in the stream snapshot
+                if (snapshot.hasData && snapshot.data != null) {
+                  return const RootView(); // User is signed in
+                }
+
+                // 3. Default to welcome screen if no user data exists
+                return const WelcomeScreen(); // User is not signed in
+              },
+            ),
+
             // home: const OnboardingScreen(),
           );
         },

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 import 'home_repository.dart';
-import 'package:swaply/features/auth/data/models/user_model.dart';
 
 class FirebaseHomeRepository implements HomeRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -15,9 +15,10 @@ class FirebaseHomeRepository implements HomeRepository {
         .get();
 
     return snapshot.docs
-        .map((doc) => UserModel.fromJson(doc.data()))
+        .map((doc) => UserModel.fromFirestore(doc))
         .toList();
   }
+
 
   @override
   Future<List<UserModel>> getRecommendedMentors() async {
@@ -28,7 +29,7 @@ class FirebaseHomeRepository implements HomeRepository {
         .get();
 
     return snapshot.docs
-        .map((doc) => UserModel.fromJson(doc.data()))
+        .map((doc) => UserModel.fromFirestore(doc))
         .toList();
   }
 

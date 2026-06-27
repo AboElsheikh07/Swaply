@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
+import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
 
@@ -103,6 +104,9 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
       _errorMsg = null;
     });
 
+    // ✅ get real user info from ProfileCubit before async gap
+    final profileState = context.read<ProfileCubit>().state;
+
     final scheduledAt = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -114,8 +118,8 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
         teacherId: widget.mentor.id,
         teacherName: widget.mentor.name,
         teacherAvatar: widget.mentor.avatarUrl,
-        studentName: 'You', // replace with current user's name
-        studentAvatar: '', // replace with current user's avatar
+        studentName: profileState.name, // ✅ real name
+        studentAvatar: profileState.profileImagePath ?? '', // ✅ real avatar
         skill: _selectedSkill,
         scheduledAt: scheduledAt,
         durationMinutes: _selectedMinutes,
