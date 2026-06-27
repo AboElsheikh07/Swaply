@@ -1,6 +1,7 @@
 // main.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:swaply/features/on%20boarding/onboarding_screen.dart';
 import 'package:swaply/root.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +105,7 @@ class MyApp extends StatelessWidget {
             home: FirebaseAuth.instance.currentUser == null
                 ? const WelcomeScreen()
                 : const RootView(),
+            // home: const OnboardingScreen(),
           );
         },
       ),
