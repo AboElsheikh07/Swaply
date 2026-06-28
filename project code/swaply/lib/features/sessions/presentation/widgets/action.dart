@@ -32,12 +32,16 @@ class ActionWidget extends StatelessWidget {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OutlineBtn(label: 'Decline', icon: Icons.close, onTap: () {}),
+            OutlineBtn(
+              label: 'Decline',
+              icon: Icons.close,
+              onTap: () => context.read<SessionsCubit>().decline(session.id),
+            ),
             const SizedBox(width: 8),
             PrimaryBtn(
               icon: Icons.check_rounded,
               label: 'Accept',
-              onTap: () {},
+              onTap: () => context.read<SessionsCubit>().accept(session.id),
             ),
           ],
         );

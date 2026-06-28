@@ -8,7 +8,14 @@ import 'home_state.dart';
 class HomeCubit extends Cubit<HomeState> {
   final HomeRepository _repo;
 
-  HomeCubit(this._repo) : super(HomeInitial());
+  // TODO: inject the real UserCubit/AuthCubit here once its shape is
+  // confirmed — getRecommendedMentors needs the current user's UserModel
+  // (specifically skillsWantsToLearn) to rank matches. Left as a required
+  // constructor param for now so this won't compile silently wrong; wire
+  // it to wherever the app's current-user cubit actually lives.
+  final UserModel currentUser;
+
+  HomeCubit(this._repo, {required this.currentUser}) : super(HomeInitial());
 
   Future<void> loadHome() async {
     emit(HomeLoading());
@@ -16,7 +23,7 @@ class HomeCubit extends Cubit<HomeState> {
     try {
       final results = await Future.wait([
         _repo.getTopMentors(),
-        _repo.getRecommendedMentors(),
+        _repo.getRecommendedMentors(currentUser),
         _repo.getCategories(),
       ]);
 

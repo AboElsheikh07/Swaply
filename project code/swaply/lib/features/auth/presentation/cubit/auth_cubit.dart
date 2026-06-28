@@ -1,6 +1,8 @@
+// auth_cubit.dart
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
-import 'auth_state.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final FirebaseAuthRepository _repo;
@@ -8,12 +10,13 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit(this._repo) : super(AuthInitial());
 
   Future<void> login({required String email, required String password}) async {
+    if (isClosed) return;
     emit(AuthLoading());
     try {
       await _repo.login(email: email, password: password);
-      emit(AuthSuccess());
+      if (!isClosed) emit(AuthSuccess());
     } catch (e) {
-      emit(AuthError(e.toString()));
+      if (!isClosed) emit(AuthError(e.toString()));
     }
   }
 
@@ -22,35 +25,37 @@ class AuthCubit extends Cubit<AuthState> {
     required String email,
     required String password,
   }) async {
+    if (isClosed) return;
     emit(AuthLoading());
     try {
       await _repo.signup(name: name, email: email, password: password);
-      emit(AuthSuccess());
+      if (!isClosed) emit(AuthSuccess());
     } catch (e) {
-      emit(AuthError(e.toString()));
+      if (!isClosed) emit(AuthError(e.toString()));
     }
   }
 
   Future<void> logout() async {
     try {
       await _repo.logout();
-      emit(AuthInitial());
+      if (!isClosed) emit(AuthInitial());
     } catch (e) {
-      emit(AuthError(e.toString()));
+      if (!isClosed) emit(AuthError(e.toString()));
     }
   }
 
   Future<void> getCurrentUser() async {
+    if (isClosed) return;
     emit(AuthLoading());
-
     try {
       final user = await _repo.getCurrentUser();
-
-      emit(UserLoaded(user));
+      if (!isClosed) emit(UserLoaded(user));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      if (!isClosed) emit(AuthError(e.toString()));
     }
   }
 
-  void resetState() => emit(AuthInitial());
+  void resetState() {
+    if (!isClosed) emit(AuthInitial());
+  }
 }

@@ -7,6 +7,8 @@ class UserModel {
   final List<String> skillsCanTeach;
   final List<String> skillsWantsToLearn;
   final int balance;
+  final int heldBalance; // points reserved for accepted-but-not-yet-completed
+                          // sessions; spendable balance is balance - heldBalance
   final int pricePerHour;
   final bool onboardingComplete;
   final bool isPublic;
@@ -20,6 +22,7 @@ class UserModel {
     required this.skillsCanTeach,
     required this.skillsWantsToLearn,
     required this.balance,
+    required this.heldBalance,
     required this.pricePerHour,
     required this.onboardingComplete,
     required this.isPublic,
@@ -37,6 +40,7 @@ class UserModel {
         skillsCanTeach:     [],
         skillsWantsToLearn: [],
         balance:            50,
+        heldBalance:        0,
         pricePerHour:       0,
         onboardingComplete: false,
         isPublic:           false,
@@ -57,6 +61,7 @@ class UserModel {
         skillsCanTeach:     const [],
         skillsWantsToLearn: const [],
         balance:            50, // ✅ every new user starts with 50 pts
+        heldBalance:        0,
         pricePerHour:       0,
         onboardingComplete: false,
         isPublic:           false,
@@ -74,6 +79,7 @@ class UserModel {
       skillsCanTeach:     List<String>.from(data['skillsCanTeach']     ?? []),
       skillsWantsToLearn: List<String>.from(data['skillsWantsToLearn'] ?? []),
       balance:            data['balance']             ?? 50,
+      heldBalance:        data['heldBalance']         ?? 0,
       pricePerHour:       data['pricePerHour']        ?? 0,
       onboardingComplete: data['onboardingComplete']  ?? false,
       isPublic:           data['isPublic']             ?? false,
@@ -91,6 +97,7 @@ class UserModel {
         'skillsCanTeach':     skillsCanTeach,
         'skillsWantsToLearn': skillsWantsToLearn,
         'balance':            balance,
+        'heldBalance':        heldBalance,
         'pricePerHour':       pricePerHour,
         'onboardingComplete': onboardingComplete,
         'isPublic':           isPublic,
@@ -107,6 +114,7 @@ class UserModel {
     List<String>? skillsCanTeach,
     List<String>? skillsWantsToLearn,
     int?          balance,
+    int?          heldBalance,
     int?          pricePerHour,
     bool?         onboardingComplete,
     bool?         isPublic,
@@ -120,6 +128,7 @@ class UserModel {
         skillsCanTeach:     skillsCanTeach     ?? this.skillsCanTeach,
         skillsWantsToLearn: skillsWantsToLearn ?? this.skillsWantsToLearn,
         balance:            balance            ?? this.balance,
+        heldBalance:        heldBalance        ?? this.heldBalance,
         pricePerHour:       pricePerHour       ?? this.pricePerHour,
         onboardingComplete: onboardingComplete ?? this.onboardingComplete,
         isPublic:           isPublic           ?? this.isPublic,
@@ -141,8 +150,12 @@ class UserModel {
   bool wantsToLearn(String skill) =>
       skillsWantsToLearn.any((s) => s.toLowerCase() == skill.toLowerCase());
 
+  /// Points actually available to spend right now — total balance minus
+  /// whatever's currently held for accepted-but-not-yet-completed sessions.
+  int get spendableBalance => balance - heldBalance;
+
   /// Used in RequestSessionScreen instead of hardcoded _userPoints
-  bool canAfford(int cost) => balance >= cost;
+  bool canAfford(int cost) => spendableBalance >= cost;
 
   // ── Equality ──────────────────────────────
 

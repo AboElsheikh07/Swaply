@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
-import 'package:swaply/features/home/data/repositories/home_repository_firebase.dart';
+import 'package:swaply/features/home/data/repositories/home_repository_impl.dart';
+
 import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:swaply/features/search/presentation/screens/search_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
@@ -29,16 +29,47 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => AuthCubit(FirebaseAuthRepository())..getCurrentUser(),
-        ),
-        BlocProvider(
-          create: (_) => HomeCubit(FirebaseHomeRepository())..loadHome(),
-        ),
-      ],
-      child: const _HomeView(),
+    return const _AuthGate();
+  }
+}
+ 
+
+class _AuthGate extends StatelessWidget {
+  const _AuthGate();
+ 
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthCubit, AuthState>(
+      builder: (context, authState) {
+        if (authState is UserLoaded) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => HomeCubit(
+                  HomeRepositoryImpl(),
+                  currentUser: authState.user,
+                )..loadHome(),
+              ),
+            ],
+            child: const _HomeView(),
+          );
+        }
+ 
+        if (authState is AuthError) {
+          return Scaffold(
+            body: Center(
+              child: Text('Could not load your profile: ${authState.message}'),
+            ),
+          );
+        }
+ 
+        // AuthInitial / AuthLoading / AuthSuccess (shouldn't occur here,
+        // but handled rather than left to fall through silently) — nothing
+        // to show yet.
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      },
     );
   }
 }
@@ -61,7 +92,7 @@ class _HomeViewState extends State<_HomeView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    context.read<AuthCubit>().getCurrentUser();
+    
   }
 
   @override
@@ -503,7 +534,7 @@ class _PromoCard extends StatelessWidget {
 // ── Mentor Card ──────────────────────────
 class _MentorCard extends StatelessWidget {
   final UserModel mentor;
-  _MentorCard({required this.mentor});
+  const _MentorCard({required this.mentor});
 
   @override
   Widget build(BuildContext context) {
