@@ -4,7 +4,7 @@ import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
-import 'package:swaply/features/sessions/presentation/widgets/session_card.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/session_card.dart';
 
 class SessionsScreen extends StatefulWidget {
   const SessionsScreen({super.key});

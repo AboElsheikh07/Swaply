@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/models/session_model.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../data/models/session_model.dart';
+import '../../../../../../core/constants/app_colors.dart';
 
 
 

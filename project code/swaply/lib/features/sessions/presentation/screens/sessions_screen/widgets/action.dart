@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
-import 'package:swaply/features/sessions/presentation/widgets/rate_dialog.dart';
-import '../../data/models/session_model.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/rate_dialog.dart';
+import '../../../../data/models/session_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'buttons.dart';
-import '../../../../core/constants/app_colors.dart';
+import '../../../../../../core/constants/app_colors.dart';
 
 class ActionWidget extends StatelessWidget {
   final SessionItem session;

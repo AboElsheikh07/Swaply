@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/sessions_screen.dart';
 import 'top_up_screen.dart';
 import 'withdraw_points_screen.dart';
 

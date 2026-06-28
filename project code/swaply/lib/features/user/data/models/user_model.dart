@@ -61,7 +61,7 @@ class UserModel {
         skillsCanTeach:     const [],
         skillsWantsToLearn: const [],
         balance:            50, // ✅ every new user starts with 50 pts
-        heldBalance:        0,
+        heldBalance:        0,       
         pricePerHour:       0,
         onboardingComplete: false,
         isPublic:           false,

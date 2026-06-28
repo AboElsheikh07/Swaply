@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
-import 'package:swaply/features/sessions/presentation/widgets/action.dart';
-import 'package:swaply/features/sessions/presentation/widgets/buttons.dart';
-import 'package:swaply/features/sessions/presentation/widgets/points_label.dart';
-import 'package:swaply/features/sessions/presentation/widgets/session_status_badge.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/action.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/buttons.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/points_label.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/session_status_badge.dart';
 
 class SessionCard extends StatelessWidget {
   final SessionItem session;
