@@ -9,8 +9,8 @@ class FirebaseHomeRepository implements HomeRepository {
   Future<List<UserModel>> getTopMentors() async {
     final snapshot = await _firestore
         .collection('users')
-        .where('skills', isNotEqualTo: [])
-        .orderBy('points', descending: true)
+        .where('skillsCanTeach', isNotEqualTo: [])
+        .orderBy('balance', descending: true)
         .limit(10)
         .get();
 

@@ -47,6 +47,15 @@ class SessionItem {
   final String? message; // optional message from student
   final DateTime createdAt;
 
+  // Set by the Cloud Function the moment each side's rating doc is
+  // created — NOT by whether the rating is visible yet. A session can be
+  // fully rated (both true) while the ratings themselves are still hidden
+  // pending the double-blind reveal. These two fields only answer "did
+  // this person submit a rating", which is exactly what the UI needs to
+  // decide whether to show the Rate button at all.
+  final bool studentRated;
+  final bool teacherRated;
+
   const SessionItem({
     required this.id,
     required this.studentId,
@@ -63,6 +72,8 @@ class SessionItem {
     required this.isOutgoing,
     this.message,
     required this.createdAt,
+    required this.studentRated,
+    required this.teacherRated,
   });
 
   // ── Role helper ──────────────────────────────
@@ -74,6 +85,17 @@ class SessionItem {
 
   String personAvatarFor(String uid) =>
       uid == teacherId ? studentAvatar : teacherAvatar;
+
+  /// Has the given uid already submitted their rating for this session?
+  bool hasRated(String uid) =>
+      uid == teacherId ? teacherRated : studentRated;
+
+  /// Has the *other* participant (relative to uid) already rated?
+  bool otherPartyHasRated(String uid) =>
+      uid == teacherId ? studentRated : teacherRated;
+
+  /// True once both sides have rated, regardless of reveal state.
+  bool get isFullyRated => studentRated && teacherRated;
 
   // ── Formatted helpers ────────────────────────
   String get formattedDate => DateFormat('EEE, MMM d').format(scheduledAt);
@@ -106,6 +128,8 @@ class SessionItem {
     message:        data['message'],
     createdAt:      (data['createdAt'] as Timestamp).toDate(),
     isOutgoing:     data['studentId'] == currentUid, // ← student = sent it
+    studentRated:   data['studentRated'] ?? false,
+    teacherRated:   data['teacherRated'] ?? false,
   );
 }
   Map<String, dynamic> toFirestore() => {
@@ -122,9 +146,15 @@ class SessionItem {
     'status': status.name,
     'message': message,
     'createdAt': Timestamp.fromDate(createdAt),
+    'studentRated': studentRated,
+    'teacherRated': teacherRated,
   };
 
-  SessionItem copyWith({SessionStatus? status}) => SessionItem(
+  SessionItem copyWith({
+    SessionStatus? status,
+    bool? studentRated,
+    bool? teacherRated,
+  }) => SessionItem(
     id: id,
     studentId: studentId,
     teacherId: teacherId,
@@ -139,6 +169,8 @@ class SessionItem {
     status: status ?? this.status,
     message: message,
     createdAt: createdAt,
-    isOutgoing: isOutgoing
+    isOutgoing: isOutgoing,
+    studentRated: studentRated ?? this.studentRated,
+    teacherRated: teacherRated ?? this.teacherRated,
   );
 }

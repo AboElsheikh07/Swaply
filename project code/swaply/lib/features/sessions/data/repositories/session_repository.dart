@@ -66,6 +66,8 @@ class SessionRepository {
       status: SessionStatus.pending,
       message: message,
       createdAt: DateTime.now(),
+      studentRated: false,
+      teacherRated: false,
     );
 
     await _remote.createSession(session);

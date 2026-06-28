@@ -10,6 +10,8 @@ class UserModel {
   final int pricePerHour;
   final bool onboardingComplete;
   final bool isPublic;
+  final double ratingAvg;
+  final int ratingCount;
 
   const UserModel({
     required this.id,
@@ -21,22 +23,26 @@ class UserModel {
     required this.pricePerHour,
     required this.onboardingComplete,
     required this.isPublic,
+    required this.ratingAvg,
+    required this.ratingCount,
   });
 
   // ── Factories ─────────────────────────────
 
   /// Safe default before Firestore loads — avoids null checks everywhere
   factory UserModel.empty() => const UserModel(
-    id: '',
-    username: '',
-    avatarUrl: '',
-    skillsCanTeach: [],
-    skillsWantsToLearn: [],
-    balance: 50,
-    pricePerHour: 0,
-    onboardingComplete: false,
-    isPublic: false,
-  );
+        id:                 '',
+        username:           '',
+        avatarUrl:          '',
+        skillsCanTeach:     [],
+        skillsWantsToLearn: [],
+        balance:            50,
+        pricePerHour:       0,
+        onboardingComplete: false,
+        isPublic:           false,
+        ratingAvg:          0.0,
+        ratingCount:        0,
+      );
 
   /// Called after signup — sets initial values for a brand new user.
   /// onboardingComplete starts false; completeOnboarding() flips it to true.
@@ -45,30 +51,34 @@ class UserModel {
     required String username,
     String avatarUrl = '',
   }) => UserModel(
-    id: id,
-    username: username,
-    avatarUrl: avatarUrl,
-    skillsCanTeach: const [],
-    skillsWantsToLearn: const [],
-    balance: 50, // ✅ every new user starts with 50 pts
-    pricePerHour: 0,
-    onboardingComplete: false,
-    isPublic: false,
-  );
+        id:                 id,
+        username:           username,
+        avatarUrl:          avatarUrl,
+        skillsCanTeach:     const [],
+        skillsWantsToLearn: const [],
+        balance:            50, // ✅ every new user starts with 50 pts
+        pricePerHour:       0,
+        onboardingComplete: false,
+        isPublic:           false,
+        ratingAvg:          0.0,
+        ratingCount:        0,
+      );
 
   /// Deserialize from Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserModel(
-      id: doc.id,
-      username: data['username'] ?? '',
-      avatarUrl: data['avatarUrl'] ?? '',
-      skillsCanTeach: List<String>.from(data['skillsCanTeach'] ?? []),
+      id:                 doc.id,
+      username:           data['username']            ?? '',
+      avatarUrl:          data['avatarUrl']           ?? '',
+      skillsCanTeach:     List<String>.from(data['skillsCanTeach']     ?? []),
       skillsWantsToLearn: List<String>.from(data['skillsWantsToLearn'] ?? []),
-      balance: data['balance'] ?? 50,
-      pricePerHour: data['pricePerHour'] ?? 0,
-      onboardingComplete: data['onboardingComplete'] ?? false,
-      isPublic: data['isPublic'] ?? false,
+      balance:            data['balance']             ?? 50,
+      pricePerHour:       data['pricePerHour']        ?? 0,
+      onboardingComplete: data['onboardingComplete']  ?? false,
+      isPublic:           data['isPublic']             ?? false,
+      ratingAvg:          (data['ratingAvg'] as num?)?.toDouble() ?? 0.0,
+      ratingCount:        data['ratingCount']          ?? 0,
     );
   }
 
@@ -76,44 +86,51 @@ class UserModel {
 
   /// Used when writing to Firestore (signup or profile update)
   Map<String, dynamic> toFirestore() => {
-    'username': username,
-    'avatarUrl': avatarUrl,
-    'skillsCanTeach': skillsCanTeach,
-    'skillsWantsToLearn': skillsWantsToLearn,
-    'balance': balance,
-    'pricePerHour': pricePerHour,
-    'onboardingComplete': onboardingComplete,
-    'isPublic': isPublic,
-  };
+        'username':           username,
+        'avatarUrl':          avatarUrl,
+        'skillsCanTeach':     skillsCanTeach,
+        'skillsWantsToLearn': skillsWantsToLearn,
+        'balance':            balance,
+        'pricePerHour':       pricePerHour,
+        'onboardingComplete': onboardingComplete,
+        'isPublic':           isPublic,
+        'ratingAvg':          ratingAvg,
+        'ratingCount':        ratingCount,
+      };
 
   // ── copyWith ──────────────────────────────
 
   UserModel copyWith({
-    String? id,
-    String? username,
-    String? avatarUrl,
+    String?       id,
+    String?       username,
+    String?       avatarUrl,
     List<String>? skillsCanTeach,
     List<String>? skillsWantsToLearn,
-    int? balance,
-    int? pricePerHour,
-    bool? onboardingComplete,
-    bool? isPublic,
-  }) => UserModel(
-    id: id ?? this.id,
-    username: username ?? this.username,
-    avatarUrl: avatarUrl ?? this.avatarUrl,
-    skillsCanTeach: skillsCanTeach ?? this.skillsCanTeach,
-    skillsWantsToLearn: skillsWantsToLearn ?? this.skillsWantsToLearn,
-    balance: balance ?? this.balance,
-    pricePerHour: pricePerHour ?? this.pricePerHour,
-    onboardingComplete: onboardingComplete ?? this.onboardingComplete,
-    isPublic: isPublic ?? this.isPublic,
-  );
+    int?          balance,
+    int?          pricePerHour,
+    bool?         onboardingComplete,
+    bool?         isPublic,
+    double?       ratingAvg,
+    int?          ratingCount,
+  }) =>
+      UserModel(
+        id:                 id                 ?? this.id,
+        username:           username           ?? this.username,
+        avatarUrl:          avatarUrl          ?? this.avatarUrl,
+        skillsCanTeach:     skillsCanTeach     ?? this.skillsCanTeach,
+        skillsWantsToLearn: skillsWantsToLearn ?? this.skillsWantsToLearn,
+        balance:            balance            ?? this.balance,
+        pricePerHour:       pricePerHour       ?? this.pricePerHour,
+        onboardingComplete: onboardingComplete ?? this.onboardingComplete,
+        isPublic:           isPublic           ?? this.isPublic,
+        ratingAvg:          ratingAvg          ?? this.ratingAvg,
+        ratingCount:        ratingCount        ?? this.ratingCount,
+      );
 
   // ── Helpers ───────────────────────────────
 
   /// Check if a real user is loaded yet
-  bool get isEmpty => id.isEmpty;
+  bool get isEmpty    => id.isEmpty;
   bool get isNotEmpty => id.isNotEmpty;
 
   /// Used in Explore screen to filter teachers by skill

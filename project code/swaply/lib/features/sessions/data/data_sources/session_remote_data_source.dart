@@ -141,6 +141,11 @@ class SessionRemoteDataSource {
       tx.update(userRef, {
         'ratingCount': newCount,
         'ratingAvg': double.parse(newAvg.toStringAsFixed(1)),
+        // Lets security rules verify this cross-user write is backed by a
+        // real, completed session shared by rater and ratee — see
+        // firestore.rules' /users/{userId} update rule. Doubles as a
+        // small audit trail ("what was the most recent rating change").
+        'ratingSessionId': sessionId,
       });
     });
 
