@@ -32,6 +32,7 @@ class FirebaseAuthRepository {
       await UserRepository().createUser(
         uid: credential.user!.uid,
         username: name, // from signup form
+        
       );
       // Update Firebase display name
       await credential.user!.updateDisplayName(name);

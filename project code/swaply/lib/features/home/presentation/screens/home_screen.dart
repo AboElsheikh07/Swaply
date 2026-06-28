@@ -32,11 +32,10 @@ class HomeScreen extends StatelessWidget {
     return const _AuthGate();
   }
 }
- 
 
 class _AuthGate extends StatelessWidget {
   const _AuthGate();
- 
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
@@ -45,16 +44,15 @@ class _AuthGate extends StatelessWidget {
           return MultiBlocProvider(
             providers: [
               BlocProvider(
-                create: (_) => HomeCubit(
-                  HomeRepositoryImpl(),
-                  currentUser: authState.user,
-                )..loadHome(),
+                create: (_) =>
+                    HomeCubit(HomeRepositoryImpl(), currentUser: authState.user)
+                      ..loadHome(),
               ),
             ],
             child: const _HomeView(),
           );
         }
- 
+
         if (authState is AuthError) {
           return Scaffold(
             body: Center(
@@ -62,13 +60,11 @@ class _AuthGate extends StatelessWidget {
             ),
           );
         }
- 
+
         // AuthInitial / AuthLoading / AuthSuccess (shouldn't occur here,
         // but handled rather than left to fall through silently) — nothing
         // to show yet.
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
   }
@@ -92,7 +88,6 @@ class _HomeViewState extends State<_HomeView>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
   }
 
   @override
