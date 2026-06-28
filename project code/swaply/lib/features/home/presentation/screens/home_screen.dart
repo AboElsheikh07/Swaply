@@ -183,14 +183,35 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: _primarySoft,
-            child: const Icon(
-              CupertinoIcons.person_fill,
-              color: _primary,
-              size: 22,
-            ),
+          BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) {
+              String? imageUrl;
+
+              // 1. Extract the URL from the model if the state is successfully loaded
+              if (state is UserLoaded) {
+                imageUrl = state
+                    .user
+                    .avatarUrl; // Replace 'avatarUrl' with your model's actual property
+              }
+
+              // 2. Determine if we have a valid image to display
+              final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+
+              return CircleAvatar(
+                radius: 22,
+                backgroundColor: _primarySoft,
+                // Display the network image if available
+                backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
+                // Display the icon fallback ONLY if there is no image
+                child: hasImage
+                    ? null
+                    : const Icon(
+                        CupertinoIcons.person_fill,
+                        color: _primary,
+                        size: 22,
+                      ),
+              );
+            },
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -241,7 +262,7 @@ class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final bool badge;
-  _IconBtn({required this.icon, required this.onTap, this.badge = false});
+  const _IconBtn({required this.icon, required this.onTap, this.badge = false});
 
   @override
   Widget build(BuildContext context) {
