@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:swaply/features/home/presentation/screens/home_screen.dart';
 import 'package:swaply/features/chat/presentation/screens/messages_screen.dart';
 import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/sessions_screen.dart';
+import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/sessions_screen.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 
 class RootView extends StatefulWidget {
   const RootView({super.key});
@@ -22,18 +24,25 @@ class _RootViewState extends State<RootView> {
     controller = PageController(initialPage: currentIndex);
     screens = [
       HomeScreen(),
-      SessionsScreen(),
+      // SessionsScreen(),
+      RequestSessionScreen(
+        mentor: UserModel(
+          id: "frgrejgejgnjelrgnl",
+          username: "Teacher Reem",
+          avatarUrl: "",
+          skillsCanTeach: ["Python", "Flutter", "Music"],
+          skillsWantsToLearn: ["Flutter"],
+          pricePerHour: 10,
+          balance: 50,
+          heldBalance: 0,
+          onboardingComplete: true,
+          isPublic: true,
+          ratingAvg: 4 / 5,
+          ratingCount: 30,
+        ),
+      ),
       ConversationsScreen(),
       ProfileScreen(),
-      //  RequestSessionScreen(
-      //   mentor: MentorArg(
-      //     id: "12345",
-      //     name: "Reem",
-      //     avatarUrl: "",
-      //     skills: ["Flutter"],
-      //     pricePerHour: 10,
-      //   ),
-      // ),
     ];
     super.initState();
   }

@@ -1,5 +1,4 @@
 
-
 const durations = [
   _DurationOption('30 min', 30),
   _DurationOption('45 min', 45),
@@ -21,4 +20,14 @@ class _DurationOption {
   final String label;
   final int value;
   const _DurationOption(this.label, this.value);
+}
+
+class DayOption {
+  final DateTime date;
+  DayOption({required this.date});
+
+  String get dow {  //day on week
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return days[date.weekday - 1];
+  }
 }
