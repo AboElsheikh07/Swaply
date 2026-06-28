@@ -7,6 +7,9 @@ class UserModel {
   final List<String> skillsCanTeach;
   final List<String> skillsWantsToLearn;
   final int balance;
+  final int pricePerHour;
+  final bool onboardingComplete;
+  final bool isPublic;
 
   const UserModel({
     required this.id,
@@ -15,44 +18,57 @@ class UserModel {
     required this.skillsCanTeach,
     required this.skillsWantsToLearn,
     required this.balance,
+    required this.pricePerHour,
+    required this.onboardingComplete,
+    required this.isPublic,
   });
 
   // ── Factories ─────────────────────────────
 
   /// Safe default before Firestore loads — avoids null checks everywhere
   factory UserModel.empty() => const UserModel(
-        id:                 '',
-        username:           '',
-        avatarUrl:          '',
-        skillsCanTeach:     [],
-        skillsWantsToLearn: [],
-        balance:            50,
-      );
+    id: '',
+    username: '',
+    avatarUrl: '',
+    skillsCanTeach: [],
+    skillsWantsToLearn: [],
+    balance: 50,
+    pricePerHour: 0,
+    onboardingComplete: false,
+    isPublic: false,
+  );
 
-  /// Called after signup — sets initial values for a brand new user
+  /// Called after signup — sets initial values for a brand new user.
+  /// onboardingComplete starts false; completeOnboarding() flips it to true.
   factory UserModel.initial({
     required String id,
     required String username,
     String avatarUrl = '',
   }) => UserModel(
-        id:                 id,
-        username:           username,
-        avatarUrl:          avatarUrl,
-        skillsCanTeach:     const [],
-        skillsWantsToLearn: const [],
-        balance:            50, // ✅ every new user starts with 50 pts
-      );
+    id: id,
+    username: username,
+    avatarUrl: avatarUrl,
+    skillsCanTeach: const [],
+    skillsWantsToLearn: const [],
+    balance: 50, // ✅ every new user starts with 50 pts
+    pricePerHour: 0,
+    onboardingComplete: false,
+    isPublic: false,
+  );
 
   /// Deserialize from Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return UserModel(
-      id:                 doc.id,
-      username:           data['username']            ?? '',
-      avatarUrl:          data['avatarUrl']           ?? '',
-      skillsCanTeach:     List<String>.from(data['skillsCanTeach']     ?? []),
+      id: doc.id,
+      username: data['username'] ?? '',
+      avatarUrl: data['avatarUrl'] ?? '',
+      skillsCanTeach: List<String>.from(data['skillsCanTeach'] ?? []),
       skillsWantsToLearn: List<String>.from(data['skillsWantsToLearn'] ?? []),
-      balance:            data['balance']             ?? 50,
+      balance: data['balance'] ?? 50,
+      pricePerHour: data['pricePerHour'] ?? 0,
+      onboardingComplete: data['onboardingComplete'] ?? false,
+      isPublic: data['isPublic'] ?? false,
     );
   }
 
@@ -60,36 +76,44 @@ class UserModel {
 
   /// Used when writing to Firestore (signup or profile update)
   Map<String, dynamic> toFirestore() => {
-        'username':           username,
-        'avatarUrl':          avatarUrl,
-        'skillsCanTeach':     skillsCanTeach,
-        'skillsWantsToLearn': skillsWantsToLearn,
-        'balance':            balance,
-      };
+    'username': username,
+    'avatarUrl': avatarUrl,
+    'skillsCanTeach': skillsCanTeach,
+    'skillsWantsToLearn': skillsWantsToLearn,
+    'balance': balance,
+    'pricePerHour': pricePerHour,
+    'onboardingComplete': onboardingComplete,
+    'isPublic': isPublic,
+  };
 
   // ── copyWith ──────────────────────────────
 
   UserModel copyWith({
-    String?       id,
-    String?       username,
-    String?       avatarUrl,
+    String? id,
+    String? username,
+    String? avatarUrl,
     List<String>? skillsCanTeach,
     List<String>? skillsWantsToLearn,
-    int?          balance,
-  }) =>
-      UserModel(
-        id:                 id                 ?? this.id,
-        username:           username           ?? this.username,
-        avatarUrl:          avatarUrl          ?? this.avatarUrl,
-        skillsCanTeach:     skillsCanTeach     ?? this.skillsCanTeach,
-        skillsWantsToLearn: skillsWantsToLearn ?? this.skillsWantsToLearn,
-        balance:            balance            ?? this.balance,
-      );
+    int? balance,
+    int? pricePerHour,
+    bool? onboardingComplete,
+    bool? isPublic,
+  }) => UserModel(
+    id: id ?? this.id,
+    username: username ?? this.username,
+    avatarUrl: avatarUrl ?? this.avatarUrl,
+    skillsCanTeach: skillsCanTeach ?? this.skillsCanTeach,
+    skillsWantsToLearn: skillsWantsToLearn ?? this.skillsWantsToLearn,
+    balance: balance ?? this.balance,
+    pricePerHour: pricePerHour ?? this.pricePerHour,
+    onboardingComplete: onboardingComplete ?? this.onboardingComplete,
+    isPublic: isPublic ?? this.isPublic,
+  );
 
   // ── Helpers ───────────────────────────────
 
   /// Check if a real user is loaded yet
-  bool get isEmpty    => id.isEmpty;
+  bool get isEmpty => id.isEmpty;
   bool get isNotEmpty => id.isNotEmpty;
 
   /// Used in Explore screen to filter teachers by skill
@@ -115,5 +139,6 @@ class UserModel {
 
   @override
   String toString() =>
-      'UserModel(id: $id, username: $username, balance: $balance)';
+      'UserModel(id: $id, username: $username, balance: $balance, '
+      'pricePerHour: $pricePerHour, onboardingComplete: $onboardingComplete)';
 }
