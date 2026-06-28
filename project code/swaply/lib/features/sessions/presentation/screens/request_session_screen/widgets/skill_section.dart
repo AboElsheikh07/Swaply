@@ -28,7 +28,7 @@ class SkillSection extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: mentor.skillsCanTeach.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (_, i) {
               final skill = mentor.skillsCanTeach[i];
               final selected = selectedSkill == skill;

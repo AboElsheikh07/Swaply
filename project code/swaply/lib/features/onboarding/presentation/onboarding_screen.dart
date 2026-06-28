@@ -246,17 +246,18 @@ class StepPhotoScreen extends StatefulWidget {
 
 class _StepPhotoScreenState extends State<StepPhotoScreen> {
   Future<void> _pickImage() async {
-    // Capture everything synchronously before the first await
+    // ✅ capture context-dependent things before any await
     final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final messenger = ScaffoldMessenger.of(context);
     final nav = Navigator.of(context);
-    final picker = ImagePicker();
 
+    // ✅ Step 1 — show bottom sheet
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
+      useRootNavigator: true, // ← ADD THIS — prevents context issues
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      // Use sheetCtx for pop — never touch parent context inside an async gap
       builder: (sheetCtx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -293,23 +294,34 @@ class _StepPhotoScreenState extends State<StepPhotoScreen> {
       ),
     );
 
-    // Sheet closed — verify widget is still alive before proceeding
-    if (!mounted || source == null) return;
+    // ✅ user dismissed sheet without picking
+    if (source == null) return;
 
-    XFile? picked;
+    // ✅ Step 2 — pick image
     try {
-      picked = await picker.pickImage(source: source, imageQuality: 85);
+      final picked = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 800, // ← ADD THIS — reduces memory pressure
+        maxHeight: 800, // ← ADD THIS
+      );
+
+      if (!mounted || picked == null) return;
+      widget.onImagePicked(File(picked.path));
     } on PlatformException catch (e) {
       if (!mounted) return;
       if (e.code == 'camera_access_denied' || e.code == 'photo_access_denied') {
         _showPermissionDialog(nav);
       }
-      return;
+    } catch (e) {
+      // ✅ ADD — catches any other crash silently instead of closing the app
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Could not pick image. Please try again.'),
+        ),
+      );
     }
-
-    // pickImage can take a long time — check mounted again before touching widget
-    if (!mounted || picked == null) return;
-    widget.onImagePicked(File(picked.path));
   }
 
   void _showPermissionDialog(NavigatorState nav) {

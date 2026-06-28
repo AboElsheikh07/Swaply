@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:swaply/features/onboarding/data/data_sources/helper.dart';
 
 abstract class OnboardingRemoteDataSource {
   Future<void> saveOnboarding({
@@ -32,23 +32,24 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not logged in');
 
-    final uid = user.uid;
-
-    // تحويل الصورة لـ Base64 لو موجودة
-    String? base64Image;
+    // ── Upload image to Cloudinary ────────────
+    String? avatarUrl;
     if (profileImage != null) {
-      final bytes = await profileImage.readAsBytes();
-      base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+      avatarUrl = await CloudinaryService.uploadAvatar(
+        profileImage,
+        user.uid,
+      );
     }
 
-    await _db.collection('users').doc(uid).set({
-      'teachSkills':      teachSkills,
-      'learnSkills':      learnSkills,
-      'pricePerHour':     pricePerHour,
-      'isPublic':         teachSkills.isNotEmpty,
-      'onboardingDone':   true,
-      if (base64Image != null) 'avatarBase64': base64Image,
-      'updatedAt':        FieldValue.serverTimestamp(),
+    // ── Save to Firestore ─────────────────────
+    await _db.collection('users').doc(user.uid).set({
+      'skillsCanTeach':     teachSkills,
+      'skillsWantsToLearn': learnSkills,
+      'pricePerHour':       pricePerHour,
+      'isPublic':           teachSkills.isNotEmpty,
+      'onboardingComplete': true,
+      'avatarUrl': ?avatarUrl,
+      'updatedAt':          FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 }
