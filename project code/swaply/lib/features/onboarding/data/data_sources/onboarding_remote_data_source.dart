@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 
 abstract class OnboardingRemoteDataSource {
   Future<void> saveOnboarding({
@@ -33,6 +34,7 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
     File? profileImage,
   }) async {
     final uid = _auth.currentUser!.uid;
+    final userDoc = _db.collection('users').doc(uid);
 
     // 1. Upload avatar to Firebase Storage if provided
     String? photoUrl;
@@ -41,18 +43,30 @@ class OnboardingRemoteDataSourceImpl implements OnboardingRemoteDataSource {
       await ref.putFile(profileImage);
       photoUrl = await ref.getDownloadURL();
 
-      // Keep Firebase Auth profile in sync
+      // Keep Firebase Auth's profile photo in sync too — separate source of
+      // truth (Auth) from the app's own (Firestore via UserModel) on purpose.
       await _auth.currentUser!.updatePhotoURL(photoUrl);
     }
 
-    // 2. Write directly into the existing UserModel fields in Firestore
-    await _db.collection('users').doc(uid).update({
-      'teachSkills': teachSkills,
-      'learnSkills': learnSkills,
-      'pricePerHour': pricePerHour,
-      'isPublic': teachSkills.isNotEmpty,
-      'onboardingDone': true,
-      if (photoUrl != null) 'avatarUrl': photoUrl,
-    });
+    // 2. Load the current user doc so we don't clobber fields onboarding
+    //    doesn't touch (e.g. balance). Falls back to UserModel.empty() if
+    //    the doc doesn't exist yet for some reason.
+    final snapshot = await userDoc.get();
+    final currentUser = snapshot.exists
+        ? UserModel.fromFirestore(snapshot)
+        : UserModel.empty().copyWith(id: uid);
+
+    // 3. Apply onboarding answers through copyWith — never build a raw map.
+    final updatedUser = currentUser.copyWith(
+      skillsCanTeach:     teachSkills,
+      skillsWantsToLearn: learnSkills,
+      pricePerHour:       pricePerHour,
+      avatarUrl:          photoUrl ?? currentUser.avatarUrl,
+      onboardingComplete: true,
+      isPublic:           teachSkills.isNotEmpty,
+    );
+
+    // 4. Single source of truth for the Firestore shape: toFirestore().
+    await userDoc.set(updatedUser.toFirestore(), SetOptions(merge: true));
   }
 }
