@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
+import 'package:swaply/features/auth/data/repositories/auth_repository_firebase.dart';
+import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/profile/data/datasources/profile_local_data_source.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_state.dart';
@@ -36,9 +38,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         // ── Auth ─────────────────────────────
-        // BlocProvider(
-        //   create: (_) => AuthCubit()..checkAuth(),
-        // ),
+        BlocProvider(
+          create: (_) => AuthCubit(FirebaseAuthRepository())..getCurrentUser(),
+        ),
 
         // ── Sessions ─────────────────────────
         BlocProvider(
@@ -55,17 +57,14 @@ class MyApp extends StatelessWidget {
             initialDarkMode: initialDarkMode,
           )..loadData(),
         ),
-        // BlocProvider(create: (_) => ChatCubit()),
-        // BlocProvider(create: (_) => ExploresCubit()),
       ],
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Swaply',
-            themeMode: profileState.isDarkMode
-                ? ThemeMode.dark
-                : ThemeMode.light,
+            themeMode:
+                profileState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             theme: ThemeData.light().copyWith(
               primaryColor: const Color(0xFF5B4CB8),
               canvasColor: Colors.white,
@@ -103,30 +102,21 @@ class MyApp extends StatelessWidget {
               extensions: <ThemeExtension<dynamic>>[AppColors.dark],
             ),
             home: StreamBuilder<User?>(
-              stream: FirebaseAuth.instance
-                  .authStateChanges(), // Listens to login/logout changes
+              stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
-                // 1. Wait for Firebase to finish checking the connection
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Scaffold(
-                    body: Center(
-                      child:
-                          CircularProgressIndicator(), // Loading spinner on boot
-                    ),
+                    body: Center(child: CircularProgressIndicator()),
                   );
                 }
 
-                // 2. Check if a valid user exists in the stream snapshot
                 if (snapshot.hasData && snapshot.data != null) {
-                  return const RootView(); // User is signed in
+                  return const RootView();
                 }
 
-                // 3. Default to welcome screen if no user data exists
-                return const WelcomeScreen(); // User is not signed in
+                return const WelcomeScreen();
               },
             ),
-
-            // home: const OnboardingScreen(),
           );
         },
       ),

@@ -1,54 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
-
-// ── Mentor stub (replace with your actual MentorModel) ──
-class MentorArg {
-  final String id;
-  final String name;
-  final String avatarUrl;
-  final List<String> skills;
-  final int pricePerHour;
-
-  const MentorArg({
-    required this.id,
-    required this.name,
-    required this.avatarUrl,
-    required this.skills,
-    required this.pricePerHour,
-  });
-}
+import 'package:swaply/features/sessions/presentation/screens/request_session_screen/constants.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 
 // ── Constants ─────────────────────────────────────────────
-const _durations = [
-  _DurationOption('30 min', 30),
-  _DurationOption('45 min', 45),
-  _DurationOption('1 hr', 60),
-  _DurationOption('1.5 hr', 90),
-];
 
-const _times = [
-  '9:00 AM',
-  '10:30 AM',
-  '1:00 PM',
-  '2:30 PM',
-  '4:00 PM',
-  '5:30 PM',
-  '7:00 PM',
-];
-
-class _DurationOption {
-  final String label;
-  final int value;
-  const _DurationOption(this.label, this.value);
-}
 
 // ── Screen ────────────────────────────────────────────────
+// [mentor] is now the real UserModel for the teacher being booked — a
+// mentor IS a user, so there's no separate MentorArg shape to keep in
+// sync with UserModel anymore (mentor.pricePerHour, mentor.skillsCanTeach,
+// mentor.avatarUrl, mentor.username all already exist on UserModel).
+
 class RequestSessionScreen extends StatefulWidget {
-  final MentorArg mentor;
+  final UserModel mentor;
   const RequestSessionScreen({super.key, required this.mentor});
 
   @override
@@ -63,7 +34,7 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
   // ── Local form state ──
   late String _selectedSkill;
   late DateTime _selectedDate;
-  String _selectedTime = _times[3];
+  String _selectedTime = times[3];
   int _selectedMinutes = 60;
 
   // ── UI state ──
@@ -71,25 +42,59 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
   String? _errorMsg;
   bool _confirmed = false;
 
-  // Replace with actual wallet balance from your user controller.
-  int get _userPoints => 120;
+  // Real balance, loaded from the student's own UserModel doc in Firestore
+  // (the same source SessionRemoteDataSource.acceptSession/completeSession
+  // read/write — this is NOT ProfileCubit's local `points` field, which is
+  // a separate, local-only number on a different system entirely).
+  // Null while loading; the Confirm button stays disabled until it arrives.
+  UserModel? _currentUser;
+  bool _loadingBalance = true;
+
+  int get _spendableBalance => _currentUser?.spendableBalance ?? 0;
 
   int get _cost {
     final hours = _selectedMinutes / 60;
     return (widget.mentor.pricePerHour * hours).round();
   }
 
-  bool get _canAfford => _userPoints >= _cost;
+  bool get _canAfford =>
+      _currentUser != null && _currentUser!.canAfford(_cost);
 
   @override
   void initState() {
     super.initState();
-    _selectedSkill = widget.mentor.skills.first;
+    _selectedSkill = widget.mentor.skillsCanTeach.isNotEmpty
+        ? widget.mentor.skillsCanTeach.first
+        : '';
     _days = List.generate(
       7,
       (i) => _DayOption(date: DateTime.now().add(Duration(days: i))),
     );
     _selectedDate = _days[1].date;
+    _loadBalance();
+  }
+
+  Future<void> _loadBalance() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      setState(() => _loadingBalance = false);
+      return;
+    }
+    try {
+      final doc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (!mounted) return;
+      setState(() {
+        _currentUser = doc.exists ? UserModel.fromFirestore(doc) : null;
+        _loadingBalance = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorMsg = 'Could not load your balance. Please try again.';
+        _loadingBalance = false;
+      });
+    }
   }
 
   @override
@@ -116,7 +121,7 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
     try {
       await context.read<SessionsCubit>().requestSession(
         teacherId: widget.mentor.id,
-        teacherName: widget.mentor.name,
+        teacherName: widget.mentor.username,
         teacherAvatar: widget.mentor.avatarUrl,
         studentName: profileState.name, // ✅ real name
         studentAvatar: profileState.profileImagePath ?? '', // ✅ real avatar
@@ -149,13 +154,13 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
         }
       },
       child: _confirmed
-          ? _ConfirmedView(mentorName: widget.mentor.name)
+          ? _ConfirmedView(mentorName: widget.mentor.username)
           : Scaffold(
               backgroundColor: colors.background,
               body: SafeArea(
                 child: Column(
                   children: [
-                    _Header(mentorName: widget.mentor.name),
+                    _Header(mentorName: widget.mentor.username),
                     Expanded(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
@@ -192,9 +197,10 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
                             const SizedBox(height: 24),
                             _CostSummary(
                               pricePerHour: widget.mentor.pricePerHour,
-                              userPoints: _userPoints,
+                              userPoints: _spendableBalance,
                               cost: _cost,
                               canAfford: _canAfford,
+                              isLoadingBalance: _loadingBalance,
                               selectedMinutes: _selectedMinutes,
                             ),
                             if (_errorMsg != null) ...[
@@ -222,7 +228,9 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
                     border: Border(top: BorderSide(color: colors.border)),
                   ),
                   child: GestureDetector(
-                    onTap: (_canAfford && !_isLoading) ? _confirm : null,
+                    onTap: (_canAfford && !_isLoading && !_loadingBalance)
+                        ? _confirm
+                        : null,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
                       height: 52,
@@ -233,7 +241,7 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
                         borderRadius: BorderRadius.circular(26),
                       ),
                       alignment: Alignment.center,
-                      child: _isLoading
+                      child: (_isLoading || _loadingBalance)
                           ? const SizedBox(
                               width: 20,
                               height: 20,
@@ -303,7 +311,7 @@ class _Header extends StatelessWidget {
 }
 
 class _SkillSection extends StatelessWidget {
-  final MentorArg mentor;
+  final UserModel mentor;
   final String selectedSkill;
   final ValueChanged<String> onSelect;
 
@@ -322,7 +330,7 @@ class _SkillSection extends StatelessWidget {
       Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: mentor.skills
+        children: mentor.skillsCanTeach
             .map(
               (s) => _ToggleChip(
                 label: s,
@@ -429,7 +437,7 @@ class _TimeSection extends StatelessWidget {
         childAspectRatio: 2.8,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        children: _times
+        children: times
             .map(
               (t) => _ToggleChip(
                 label: t,
@@ -460,12 +468,12 @@ class _DurationSection extends StatelessWidget {
       const _SectionLabel(text: 'Duration'),
       const SizedBox(height: 8),
       Row(
-        children: List.generate(_durations.length, (i) {
-          final d = _durations[i];
+        children: List.generate(durations.length, (i) {
+          final d = durations[i];
           return Expanded(
             child: Padding(
               padding: EdgeInsets.only(
-                right: i < _durations.length - 1 ? 8 : 0,
+                right: i < durations.length - 1 ? 8 : 0,
               ),
               child: _ToggleChip(
                 label: d.label,
@@ -520,6 +528,7 @@ class _CostSummary extends StatelessWidget {
   final int userPoints;
   final int cost;
   final bool canAfford;
+  final bool isLoadingBalance;
   final int selectedMinutes;
 
   const _CostSummary({
@@ -527,6 +536,7 @@ class _CostSummary extends StatelessWidget {
     required this.userPoints,
     required this.cost,
     required this.canAfford,
+    required this.isLoadingBalance,
     required this.selectedMinutes,
   });
 
@@ -588,15 +598,25 @@ class _CostSummary extends StatelessWidget {
                 'Your balance: ',
                 style: TextStyle(fontSize: 12, color: colors.muted),
               ),
-              Text(
-                '$userPoints pts',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: colors.text,
+              if (isLoadingBalance)
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: colors.muted,
+                  ),
+                )
+              else
+                Text(
+                  '$userPoints pts',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: colors.text,
+                  ),
                 ),
-              ),
-              if (!canAfford) ...[
+              if (!isLoadingBalance && !canAfford) ...[
                 const SizedBox(width: 8),
                 Text(
                   'Not enough points',
