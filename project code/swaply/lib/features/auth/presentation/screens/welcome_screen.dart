@@ -81,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Trade skills with people around the world —\nteach what you know, learn what you love.',
+                          'Swap Skills. Unlock Potential.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,
