@@ -17,6 +17,12 @@ class SessionRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _ratings =>
       _db.collection('ratings');
 
+  // ── ID Generation ─────────────────────────────
+
+  /// Generate a unique Firestore document ID without writing anything yet.
+  /// This ID doubles as the Zego callID — no extra field needed.
+  String generateSessionId() => _sessions.doc().id;
+
   // ── Streams ──────────────────────────────────
 
   /// Live list of sessions where the user is the teacher (incoming requests).
@@ -141,10 +147,6 @@ class SessionRemoteDataSource {
       tx.update(userRef, {
         'ratingCount': newCount,
         'ratingAvg': double.parse(newAvg.toStringAsFixed(1)),
-        // Lets security rules verify this cross-user write is backed by a
-        // real, completed session shared by rater and ratee — see
-        // firestore.rules' /users/{userId} update rule. Doubles as a
-        // small audit trail ("what was the most recent rating change").
         'ratingSessionId': sessionId,
       });
     });

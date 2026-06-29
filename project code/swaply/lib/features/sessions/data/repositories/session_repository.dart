@@ -1,11 +1,9 @@
-import 'package:uuid/uuid.dart';
 import 'package:swaply/features/sessions/data/data_sources/session_remote_data_source.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
 
 /// Business-logic layer between cubit and data source.
 class SessionRepository {
   final SessionRemoteDataSource _remote;
-  final _uuid = const Uuid();
 
   SessionRepository({SessionRemoteDataSource? remote})
     : _remote = remote ?? SessionRemoteDataSource();
@@ -50,8 +48,13 @@ class SessionRepository {
     required int points,
     String? message,
   }) async {
+    // ✅ Generate Firestore key before creating the session object
+    // This gives us a unique ID without writing to Firestore yet.
+    // The same ID is used as the callID for Zego — no extra field needed.
+    final docId = _remote.generateSessionId();
+
     final session = SessionItem(
-      id: _uuid.v4(),
+      id: docId,
       studentId: studentId,
       teacherId: teacherId,
       studentName: studentName,
@@ -89,7 +92,7 @@ class SessionRepository {
 
   /// Either party cancels before the session starts.
   Future<void> cancelSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.rejected);
+      _remote.updateStatus(sessionId, SessionStatus.cancelled);
 
   /// Session is marked as live/ongoing (triggered when host starts the call).
   Future<void> startSession(String sessionId) =>

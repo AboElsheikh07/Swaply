@@ -8,6 +8,7 @@ import 'package:swaply/features/chat/presentation/screens/chat_screen.dart';
 import 'package:swaply/features/mentor_details/data/repositories/mentor_details_repository.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_cubit.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
+import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
 const mdPrimary = Color(0xFF5B4CB8);
@@ -426,8 +427,27 @@ class MentorDetailsContent extends StatelessWidget {
                   child: SizedBox(
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Navigator.push -> RequestSessionScreen(mentorId: mentor.id)
+                      onPressed: () async {
+                        final cubit = context.read<MentorDetailsCubit>();
+                        final navigator = Navigator.of(context);
+                        final messenger = ScaffoldMessenger.of(context);
+
+                        await cubit.loadMentor(mentor.id);
+
+                        final state = cubit.state;
+
+                        if (state is MentorDetailsLoaded) {
+                          navigator.push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  RequestSessionScreen(mentor: state.user),
+                            ),
+                          );
+                        } else if (state is MentorDetailsError) {
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(state.message)),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: mdPrimary,

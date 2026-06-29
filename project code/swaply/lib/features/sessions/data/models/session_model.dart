@@ -1,7 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-enum SessionStatus { accepted, ongoing, pending, completed, rejected }
+enum SessionStatus {
+  accepted,
+  ongoing,
+  pending,
+  completed,
+  rejected,
+  cancelled,
+}
 
 enum SessionRole { teacher, student }
 
@@ -18,7 +25,8 @@ extension SessionStatusX on SessionStatus {
         return 'Completed';
       case SessionStatus.ongoing:
         return 'Ongoing';
-
+      case SessionStatus.cancelled:
+        return 'Cancelled';
     }
   }
 
@@ -42,17 +50,10 @@ class SessionItem {
   final DateTime scheduledAt;
   final int durationMinutes;
   final bool isOutgoing;
-  final int points; // in points
+  final int points;
   final SessionStatus status;
-  final String? message; // optional message from student
+  final String? message;
   final DateTime createdAt;
-
-  // Set by the Cloud Function the moment each side's rating doc is
-  // created — NOT by whether the rating is visible yet. A session can be
-  // fully rated (both true) while the ratings themselves are still hidden
-  // pending the double-blind reveal. These two fields only answer "did
-  // this person submit a rating", which is exactly what the UI needs to
-  // decide whether to show the Rate button at all.
   final bool studentRated;
   final bool teacherRated;
 
@@ -77,6 +78,7 @@ class SessionItem {
   });
 
   // ── Role helper ──────────────────────────────
+
   SessionRole roleFor(String uid) =>
       uid == teacherId ? SessionRole.teacher : SessionRole.student;
 
@@ -86,18 +88,33 @@ class SessionItem {
   String personAvatarFor(String uid) =>
       uid == teacherId ? studentAvatar : teacherAvatar;
 
-  /// Has the given uid already submitted their rating for this session?
-  bool hasRated(String uid) =>
-      uid == teacherId ? teacherRated : studentRated;
+  bool hasRated(String uid) => uid == teacherId ? teacherRated : studentRated;
 
-  /// Has the *other* participant (relative to uid) already rated?
   bool otherPartyHasRated(String uid) =>
       uid == teacherId ? studentRated : teacherRated;
 
-  /// True once both sides have rated, regardless of reveal state.
   bool get isFullyRated => studentRated && teacherRated;
 
+  // ── Join window helper ───────────────────────
+
+  /// Returns true when:
+  /// - Session is accepted or ongoing
+  /// - Current time is within 5 minutes before scheduled time
+  ///   up until the session duration has elapsed
+  ///
+  /// This is what controls whether the "Join Session" button appears.
+  bool get isTimeToJoin {
+    if (status != SessionStatus.accepted && status != SessionStatus.ongoing) {
+      return false;
+    }
+    final now = DateTime.now();
+    final windowStart = scheduledAt.subtract(const Duration(minutes: 5));
+    final windowEnd = scheduledAt.add(Duration(minutes: durationMinutes));
+    return now.isAfter(windowStart) && now.isBefore(windowEnd);
+  }
+
   // ── Formatted helpers ────────────────────────
+
   String get formattedDate => DateFormat('EEE, MMM d').format(scheduledAt);
 
   String get formattedTime => DateFormat('h:mm a').format(scheduledAt);
@@ -110,67 +127,70 @@ class SessionItem {
   }
 
   // ── Firestore ────────────────────────────────
- factory SessionItem.fromFirestore(DocumentSnapshot doc, String currentUid) {
-  final data = doc.data() as Map<String, dynamic>;
-  return SessionItem(
-    id: doc.id,
-    studentId:      data['studentId']      ?? '',
-    teacherId:      data['teacherId']      ?? '',
-    studentName:    data['studentName']    ?? '',
-    teacherName:    data['teacherName']    ?? '',
-    studentAvatar:  data['studentAvatar']  ?? '',
-    teacherAvatar:  data['teacherAvatar']  ?? '',
-    skill:          data['skill']          ?? '',
-    scheduledAt:    (data['scheduledAt'] as Timestamp).toDate(),
-    durationMinutes: data['durationMinutes'] ?? 60,
-    points:          data['points']          ?? 0,
-    status: SessionStatusX.fromString(data['status'] ?? 'pending'),
-    message:        data['message'],
-    createdAt:      (data['createdAt'] as Timestamp).toDate(),
-    isOutgoing:     data['studentId'] == currentUid, // ← student = sent it
-    studentRated:   data['studentRated'] ?? false,
-    teacherRated:   data['teacherRated'] ?? false,
-  );
-}
+
+  factory SessionItem.fromFirestore(DocumentSnapshot doc, String currentUid) {
+    final data = doc.data() as Map<String, dynamic>;
+    return SessionItem(
+      id: doc.id,
+      studentId: data['studentId'] ?? '',
+      teacherId: data['teacherId'] ?? '',
+      studentName: data['studentName'] ?? '',
+      teacherName: data['teacherName'] ?? '',
+      studentAvatar: data['studentAvatar'] ?? '',
+      teacherAvatar: data['teacherAvatar'] ?? '',
+      skill: data['skill'] ?? '',
+      scheduledAt: (data['scheduledAt'] as Timestamp).toDate(),
+      durationMinutes: data['durationMinutes'] ?? 60,
+      points: data['points'] ?? 0,
+      status: SessionStatusX.fromString(data['status'] ?? 'pending'),
+      message: data['message'],
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      isOutgoing: data['studentId'] == currentUid,
+      studentRated: data['studentRated'] ?? false,
+      teacherRated: data['teacherRated'] ?? false,
+    );
+  }
+
   Map<String, dynamic> toFirestore() => {
-    'studentId': studentId,
-    'teacherId': teacherId,
-    'studentName': studentName,
-    'teacherName': teacherName,
-    'studentAvatar': studentAvatar,
-    'teacherAvatar': teacherAvatar,
-    'skill': skill,
-    'scheduledAt': Timestamp.fromDate(scheduledAt),
-    'durationMinutes': durationMinutes,
-    'points': points,
-    'status': status.name,
-    'message': message,
-    'createdAt': Timestamp.fromDate(createdAt),
-    'studentRated': studentRated,
-    'teacherRated': teacherRated,
-  };
+        'studentId': studentId,
+        'teacherId': teacherId,
+        'studentName': studentName,
+        'teacherName': teacherName,
+        'studentAvatar': studentAvatar,
+        'teacherAvatar': teacherAvatar,
+        'skill': skill,
+        'scheduledAt': Timestamp.fromDate(scheduledAt),
+        'durationMinutes': durationMinutes,
+        'points': points,
+        'status': status.name,
+        'message': message,
+        'createdAt': Timestamp.fromDate(createdAt),
+        'studentRated': studentRated,
+        'teacherRated': teacherRated,
+      };
 
   SessionItem copyWith({
     SessionStatus? status,
     bool? studentRated,
     bool? teacherRated,
-  }) => SessionItem(
-    id: id,
-    studentId: studentId,
-    teacherId: teacherId,
-    studentName: studentName,
-    teacherName: teacherName,
-    studentAvatar: studentAvatar,
-    teacherAvatar: teacherAvatar,
-    skill: skill,
-    scheduledAt: scheduledAt,
-    durationMinutes: durationMinutes,
-    points: points,
-    status: status ?? this.status,
-    message: message,
-    createdAt: createdAt,
-    isOutgoing: isOutgoing,
-    studentRated: studentRated ?? this.studentRated,
-    teacherRated: teacherRated ?? this.teacherRated,
-  );
+  }) =>
+      SessionItem(
+        id: id,
+        studentId: studentId,
+        teacherId: teacherId,
+        studentName: studentName,
+        teacherName: teacherName,
+        studentAvatar: studentAvatar,
+        teacherAvatar: teacherAvatar,
+        skill: skill,
+        scheduledAt: scheduledAt,
+        durationMinutes: durationMinutes,
+        points: points,
+        status: status ?? this.status,
+        message: message,
+        createdAt: createdAt,
+        isOutgoing: isOutgoing,
+        studentRated: studentRated ?? this.studentRated,
+        teacherRated: teacherRated ?? this.teacherRated,
+      );
 }

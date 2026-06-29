@@ -31,3 +31,15 @@ class DayOption {
     return days[date.weekday - 1];
   }
 }
+List<int> parseTime(String time) {
+  final parts = time.split(':');
+  int hour = int.parse(parts[0]);
+  final minuteParts = parts[1].split(' ');
+  final minute = int.parse(minuteParts[0]);
+  final period = minuteParts[1]; // AM or PM
+
+  if (period == 'PM' && hour != 12) hour += 12;
+  if (period == 'AM' && hour == 12) hour = 0;
+
+  return [hour, minute];
+}

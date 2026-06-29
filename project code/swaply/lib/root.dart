@@ -5,23 +5,24 @@ import 'package:swaply/features/chat/presentation/screens/messages_screen.dart';
 import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/sessions_screen.dart';
 
-
 import 'package:swaply/l10n/app_localizations.dart';
 
 class RootView extends StatefulWidget {
-  const RootView({super.key});
+  final int? index;
+   const RootView({super.key,this.index});
 
   @override
   State<RootView> createState() => _RootViewState();
 }
 
 class _RootViewState extends State<RootView> {
-  PageController controller = PageController();
+  late PageController controller;
   late List<Widget> screens;
-  int currentIndex = 0;
+  late int currentIndex;
 
   @override
   void initState() {
+    currentIndex = widget.index ?? 0;
     controller = PageController(initialPage: currentIndex);
     screens = [
       HomeScreen(),

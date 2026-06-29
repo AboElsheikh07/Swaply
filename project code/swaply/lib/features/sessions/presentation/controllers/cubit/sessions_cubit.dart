@@ -12,8 +12,8 @@ class SessionsCubit extends Cubit<SessionsState> {
   StreamSubscription? _myRequestsSub;
 
   SessionsCubit({required this.currentUid, SessionRepository? repo})
-      : _repo = repo ?? SessionRepository(),
-        super(const SessionsInitial());
+    : _repo = repo ?? SessionRepository(),
+      super(const SessionsInitial());
 
   // ── Load ──────────────────────────────────
 
@@ -63,10 +63,12 @@ class SessionsCubit extends Cubit<SessionsState> {
     final current = state;
     if (current is! SessionsLoaded) return;
 
-    emit(SessionsActionLoading(
-      incoming:   current.incoming,
-      myRequests: current.myRequests,
-    ));
+    emit(
+      SessionsActionLoading(
+        incoming: current.incoming,
+        myRequests: current.myRequests,
+      ),
+    );
 
     try {
       await _repo.acceptSession(sessionId);
@@ -82,10 +84,12 @@ class SessionsCubit extends Cubit<SessionsState> {
     final current = state;
     if (current is! SessionsLoaded) return;
 
-    emit(SessionsActionLoading(
-      incoming:   current.incoming,
-      myRequests: current.myRequests,
-    ));
+    emit(
+      SessionsActionLoading(
+        incoming: current.incoming,
+        myRequests: current.myRequests,
+      ),
+    );
 
     try {
       await _repo.declineSession(sessionId);
@@ -108,6 +112,19 @@ class SessionsCubit extends Cubit<SessionsState> {
     }
   }
 
+  Future<void> delete(String sessionId) async {
+    final current = state;
+    if (current is! SessionsLoaded) return;
+
+    try {
+      await _repo.deleteSession(sessionId);
+      // The Firestore stream will automatically remove it from the list
+      // so no manual state update needed here.
+    } catch (e) {
+      emit(const SessionsError('Could not delete session. Try again.'));
+    }
+  }
+
   // ── Request session ───────────────────────
 
   Future<void> requestSession({
@@ -126,17 +143,17 @@ class SessionsCubit extends Cubit<SessionsState> {
     try {
       final points = _repo.computePoints(pricePerHour, durationMinutes);
       await _repo.requestSession(
-        studentId:       currentUid,
-        teacherId:       teacherId,
-        studentName:     studentName,
-        teacherName:     teacherName,
-        studentAvatar:   studentAvatar,
-        teacherAvatar:   teacherAvatar,
-        skill:           skill,
-        scheduledAt:     scheduledAt,
+        studentId: currentUid,
+        teacherId: teacherId,
+        studentName: studentName,
+        teacherName: teacherName,
+        studentAvatar: studentAvatar,
+        teacherAvatar: teacherAvatar,
+        skill: skill,
+        scheduledAt: scheduledAt,
         durationMinutes: durationMinutes,
-        points:          points,
-        message:         message,
+        points: points,
+        message: message,
       );
       emit(const SessionRequestSuccess());
     } catch (e) {
@@ -156,11 +173,11 @@ class SessionsCubit extends Cubit<SessionsState> {
     try {
       await _repo.submitRating(
         sessionId: sessionId,
-        raterId:   currentUid,
-        rateeId:   rateeId,
-        role:      role,
-        stars:     stars,
-        review:    review,
+        raterId: currentUid,
+        rateeId: rateeId,
+        role: role,
+        stars: stars,
+        review: review,
       );
       emit(const SessionRatingSuccess());
     } catch (e) {
