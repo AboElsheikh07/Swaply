@@ -18,7 +18,7 @@ class SearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       // ✅ بدّل MockSearchRepository بـ FirebaseSearchRepository لما Firebase يتجهز
-      create: (_) => SearchCubit(MockSearchRepository())..loadPopularSkills(),
+      create: (_) => SearchCubit(FirebaseSearchRepository())..loadPopularSkills(),
       child: const SearchView(),
     );
   }
