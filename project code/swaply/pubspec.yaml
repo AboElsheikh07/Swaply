@@ -17,7 +17,8 @@ dependencies:
   firebase_core: ^4.11.0
   firebase_auth: ^6.5.4
   cloud_firestore: ^6.3.0
-  uuid: ^4.5.3
+  flutter_local_notifications: ^22.0.1
+  cloud_functions: ^6.3.3
   flutter_native_splash: ^2.4.7
   intl: ^0.20.2
   onesignal_flutter: ^5.6.2
@@ -29,6 +30,7 @@ dependencies:
   zego_uikit_prebuilt_call: ^4.24.2
   flutter_localizations:
     sdk: flutter
+  timezone: ^0.11.1
 
 dev_dependencies:
   flutter_test:
