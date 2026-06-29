@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
-import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/action.dart';
-import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/buttons.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/points_label.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/session_status_badge.dart';
 
@@ -16,9 +13,7 @@ class SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorTheme>()!;
-    final cubit  = context.read<SessionsCubit>(); // ✅ captured before any async
 
-    // Show the other party's name depending on direction
     final otherName = session.isOutgoing
         ? session.teacherName
         : session.studentName;
@@ -44,7 +39,6 @@ class SessionCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Avatar
                 Container(
                   width:  52,
                   height: 52,
@@ -59,8 +53,6 @@ class SessionCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-
-                // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,14 +79,14 @@ class SessionCard extends StatelessWidget {
                           Icon(CupertinoIcons.calendar,
                               size: 13, color: colors.muted),
                           Text(
-                            session.formattedDate, // ✅ uses model helper
+                            session.formattedDate,
                             style: TextStyle(fontSize: 12, color: colors.muted),
                           ),
                           const SizedBox(width: 6),
                           Icon(CupertinoIcons.clock,
                               size: 13, color: colors.muted),
                           Text(
-                            session.formattedDuration, // ✅ uses model helper
+                            session.formattedDuration,
                             style: TextStyle(fontSize: 12, color: colors.muted),
                           ),
                         ],
@@ -102,7 +94,6 @@ class SessionCard extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 StatusBadge(status: session.status),
               ],
             ),
@@ -114,41 +105,13 @@ class SessionCard extends StatelessWidget {
           // ── Bottom section ────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-            child: session.status == SessionStatus.pending && !session.isOutgoing
-                // ✅ Only incoming pending sessions show Accept/Decline
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      PointsLabel(session: session),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlineBtn(
-                              label: 'Decline',
-                              icon:  Icons.close,
-                              onTap: () => cubit.decline(session.id),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: PrimaryBtn(
-                              icon:  Icons.check_rounded,
-                              label: 'Accept',
-                              onTap: () => cubit.accept(session.id),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      PointsLabel(session: session),
-                      ActionWidget(session: session),
-                    ],
-                  ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PointsLabel(session: session),
+                ActionWidget(session: session),
+              ],
+            ),
           ),
         ],
       ),

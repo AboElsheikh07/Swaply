@@ -26,23 +26,23 @@ class _RootViewState extends State<RootView> {
     controller = PageController(initialPage: currentIndex);
     screens = [
       HomeScreen(),
-      // SessionsScreen(),
-      RequestSessionScreen(
-        mentor: UserModel(
-          id: "frgrejgejgnjelrgnl",
-          username: "Teacher Reem",
-          avatarUrl: "",
-          skillsCanTeach: ["Python", "Flutter", "Music"],
-          skillsWantsToLearn: ["Flutter"],
-          pricePerHour: 10,
-          balance: 50,
-          heldBalance: 0,
-          onboardingComplete: true,
-          isPublic: true,
-          ratingAvg: 4 / 5,
-          ratingCount: 30,
-        ),
-      ),
+      SessionsScreen(),
+      // RequestSessionScreen(
+      //   mentor: UserModel(
+      //     id: "frgrejgejgnjelrgnl",
+      //     username: "Teacher Reem",
+      //     avatarUrl: "",
+      //     skillsCanTeach: ["Python", "Flutter", "Music"],
+      //     skillsWantsToLearn: ["Flutter"],
+      //     pricePerHour: 10,
+      //     balance: 50,
+      //     heldBalance: 0,
+      //     onboardingComplete: true,
+      //     isPublic: true,
+      //     ratingAvg: 4 / 5,
+      //     ratingCount: 30,
+      //   ),
+      // ),
       ConversationsScreen(),
       ProfileScreen(),
     ];
