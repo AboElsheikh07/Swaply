@@ -582,6 +582,7 @@ class _MentorCard extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
+                  
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(20),
@@ -590,10 +591,9 @@ class _MentorCard extends StatelessWidget {
                       width: double.infinity,
                       color: _primarySoft,
                       // ✅ لما يكون عندك imageUrl:
-                      // child: mentor.imageUrl != null
-                      //     ? Image.network(mentor.imageUrl!, fit: BoxFit.cover)
-                      //     : Icon(...)
-                      child: const Icon(
+                      child: mentor.avatarUrl != ""
+                          ? Image.network(mentor.avatarUrl, fit: BoxFit.cover)
+                          :  Icon(
                         CupertinoIcons.person_fill,
                         color: _primary,
                         size: 48,
