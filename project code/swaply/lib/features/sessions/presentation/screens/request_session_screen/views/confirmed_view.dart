@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/shared_atoms/big_button.dart';
+import 'package:swaply/root.dart';
 
 class ConfirmedView extends StatelessWidget {
   final String mentorName;
@@ -45,15 +46,16 @@ class ConfirmedView extends StatelessWidget {
               BigBtn(
                 label: 'View Sessions',
                 filled: true,
-                onTap: () => Navigator.of(context).pushNamed('/sessions'),
+                onTap: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => RootView(index: 1)),
+                ),
               ),
               const SizedBox(height: 10),
               BigBtn(
                 label: 'Back to Home',
                 filled: false,
-                onTap: () => Navigator.of(
-                  context,
-                ).pushNamedAndRemoveUntil('/home', (_) => false),
+                onTap: () =>
+                    Navigator.of(context).popUntil((route) => route.isFirst),
               ),
             ],
           ),

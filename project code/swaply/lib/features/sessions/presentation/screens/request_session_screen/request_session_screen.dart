@@ -75,12 +75,15 @@ class _RequestSessionScreenState extends State<RequestSessionScreen> {
 
     final user = context.read<UserCubit>().currentUser;
 
+    // ✅ Parse the selected time string and combine with selected date
+    final timeParts = parseTime(_selectedTime);
     final scheduledAt = DateTime(
       _selectedDate.year,
       _selectedDate.month,
       _selectedDate.day,
+      timeParts[0], // hour
+      timeParts[1], // minute
     );
-
     try {
       await context.read<SessionsCubit>().requestSession(
         teacherId: widget.mentor.id,

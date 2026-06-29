@@ -85,8 +85,8 @@ class _SessionsScreenState extends State<SessionsScreen>
                     indicatorWeight: 2,
                     dividerColor: colors.border,
                     tabs: const [
-                      Tab(text: 'Incoming Requests'),
                       Tab(text: 'My Requests'),
+                      Tab(text: 'Incoming Requests'),
                     ],
                   ),
                 ],
@@ -108,7 +108,11 @@ class _SessionsScreenState extends State<SessionsScreen>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline, size: 48, color: colors.rose),
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: colors.rose,
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             state.message,
@@ -132,20 +136,20 @@ class _SessionsScreenState extends State<SessionsScreen>
                   final incoming = state is SessionsLoaded
                       ? state.incoming
                       : state is SessionsActionLoading
-                          ? state.incoming
-                          : <SessionItem>[];
+                      ? state.incoming
+                      : <SessionItem>[];
 
                   final myRequests = state is SessionsLoaded
                       ? state.myRequests
                       : state is SessionsActionLoading
-                          ? state.myRequests
-                          : <SessionItem>[];
+                      ? state.myRequests
+                      : <SessionItem>[];
 
                   return TabBarView(
                     controller: _tab,
                     children: [
-                      _SessionList(sessions: incoming),
                       _SessionList(sessions: myRequests),
+                      _SessionList(sessions: incoming),
                     ],
                   );
                 },
