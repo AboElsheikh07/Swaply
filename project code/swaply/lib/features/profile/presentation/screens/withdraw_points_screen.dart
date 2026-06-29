@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:swaply/features/user/cubit/user_cubit.dart';
 
 class WithdrawPointsScreen extends StatefulWidget {
   const WithdrawPointsScreen({super.key});
@@ -35,7 +35,7 @@ class _WithdrawPointsScreenState extends State<WithdrawPointsScreen> {
         return;
       }
 
-      final currentPoints = context.read<ProfileCubit>().state.points;
+      final currentPoints = context.read<UserCubit>().currentUser.balance;
 
       if (amount > currentPoints) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,7 +58,7 @@ class _WithdrawPointsScreenState extends State<WithdrawPointsScreen> {
         if (!mounted) return;
         Navigator.of(context).pop(); // dismiss loading
 
-        context.read<ProfileCubit>().withdrawPoints(amount);
+        context.read<UserCubit>().deductBalance(amount);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -76,7 +76,7 @@ class _WithdrawPointsScreenState extends State<WithdrawPointsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final currentPoints = context.watch<ProfileCubit>().state.points;
+    final currentPoints = context.watch<UserCubit>().currentUser.balance;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,

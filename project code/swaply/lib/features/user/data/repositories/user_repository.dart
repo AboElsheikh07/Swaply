@@ -42,6 +42,9 @@ class UserRepository {
 
   // ── Update ────────────────────────────────
 
+  Future<void> updateUser(String uid, Map<String, dynamic> fields) =>
+      _remote.updateUser(uid, fields);
+
   Future<void> updateAvatar(String uid, String avatarUrl) =>
       _remote.updateAvatar(uid, avatarUrl);
 

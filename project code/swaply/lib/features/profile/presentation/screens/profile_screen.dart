@@ -11,6 +11,11 @@ import 'withdraw_points_screen.dart';
 
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
+import 'package:swaply/l10n/app_localizations.dart';
+import 'package:swaply/features/user/cubit/user_cubit.dart';
+import 'package:swaply/features/user/cubit/user_state.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,7 +31,11 @@ class _ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileCubit, ProfileState>(
+    final l10n = AppLocalizations.of(context)!;
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (context, userState) {
+        final user = context.watch<UserCubit>().currentUser;
+        return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Scaffold(
           backgroundColor: _ProfileColors.pageBackground,
@@ -38,7 +47,7 @@ class _ProfileView extends StatelessWidget {
             elevation: 0,
             titleSpacing: 16,
             title: Text(
-              'My Profile',
+              l10n.myProfile,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
@@ -51,25 +60,28 @@ class _ProfileView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _AvatarSection(state: state),
+                _AvatarSection(state: state, user: user),
                 const SizedBox(height: 18),
                 _PointsCard(
-                  points: state.points,
+                  l10n: l10n,
+                  points: user.balance,
                   onTopUp: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TopUpScreen())),
                   onWithdraw: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WithdrawPointsScreen())),
                 ),
                 const SizedBox(height: 14),
-                _StatsRow(state: state),
+                _StatsRow(l10n: l10n, state: state, user: user),
                 const SizedBox(height: 16),
                 _SkillsSection(
-                  skills: state.offeredSkills,
+                  l10n: l10n,
+                  skills: user.skillsCanTeach,
                   onAddSkill: () => _showAddSkillDialog(context),
                 ),
                 const SizedBox(height: 14),
                 _SettingsSection(
+                  l10n: l10n,
                   state: state,
-                  onEditProfile: () => _showEditProfileDialog(context, state),
-                  onManageSkills: () => _showManageSkillsSheet(context, state),
+                  onEditProfile: () => _showEditProfileDialog(context, user),
+                  onManageSkills: () => _showManageSkillsSheet(context, user),
                   onSessionHistory: () => Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const SessionsScreen()),
                   ),
@@ -86,29 +98,37 @@ class _ProfileView extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 _LogoutButton(
+                  l10n: l10n,
                   onTap: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                    );
+                    final navigator = Navigator.of(context);
+                    FirebaseAuth.instance.signOut().then((_) {
+                      navigator.pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                        (route) => false,
+                      );
+                    });
                   },
                 ),
               ],
             ),
           ),
         );
+          },
+        );
       },
     );
   }
 
-  void _showEditProfileDialog(BuildContext context, ProfileState state) {
-    final nameController = TextEditingController(text: state.name);
-    final emailController = TextEditingController(text: state.email);
+  void _showEditProfileDialog(BuildContext context, UserModel user) {
+    final l10n = AppLocalizations.of(context)!;
+    final nameController = TextEditingController(text: user.username);
+    final emailController = TextEditingController(text: FirebaseAuth.instance.currentUser?.email ?? '');
 
     showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Profile'),
+          title: Text(l10n.editProfile),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -127,20 +147,21 @@ class _ProfileView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () {
                 final name = nameController.text.trim();
                 final email = emailController.text.trim();
                 if (name.isEmpty || email.isEmpty) return;
-                context.read<ProfileCubit>().updateProfile(
-                  name: name,
-                  email: email,
+                final userCubit = context.read<UserCubit>();
+                userCubit.updateProfile(
+                  username: name,
+                  
                 );
                 Navigator.of(context).pop();
               },
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
           ],
         );
@@ -149,33 +170,35 @@ class _ProfileView extends StatelessWidget {
   }
 
   void _showAddSkillDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final skillController = TextEditingController();
+    final userCubit = context.read<UserCubit>();
 
     showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Skill'),
+          title: Text(l10n.addSkill),
           content: TextField(
             controller: skillController,
-            decoration: const InputDecoration(
-              labelText: 'Skill name',
+            decoration: InputDecoration(
+              labelText: l10n.newSkill,
               hintText: 'e.g. Illustration',
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             ElevatedButton(
               onPressed: () {
                 final skill = skillController.text.trim();
                 if (skill.isEmpty) return;
-                context.read<ProfileCubit>().addSkill(skill);
+                userCubit.addTeachSkill(skill);
                 Navigator.of(context).pop();
               },
-              child: const Text('Add'),
+              child: Text(l10n.add),
             ),
           ],
         );
@@ -183,9 +206,11 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  void _showManageSkillsSheet(BuildContext context, ProfileState state) {
+  void _showManageSkillsSheet(BuildContext context, UserModel user) {
+    final l10n = AppLocalizations.of(context)!;
     final newSkillController = TextEditingController();
-    final skills = List<String>.from(state.offeredSkills);
+    final skills = List<String>.from(user.skillsCanTeach);
+    final userCubit = context.read<UserCubit>();
 
     showModalBottomSheet<void>(
       context: context,
@@ -215,16 +240,16 @@ class _ProfileView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Manage Skills',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.manageSkills,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 14),
                   if (skills.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
-                        'No skills added yet.',
+                        l10n.noSkillsAddedYet,
                         style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
                       ),
                     )
@@ -236,7 +261,7 @@ class _ProfileView extends StatelessWidget {
                           trailing: IconButton(
                             icon: const Icon(Icons.delete_outline_rounded),
                             onPressed: () {
-                              context.read<ProfileCubit>().removeSkill(skill);
+                              userCubit.removeTeachSkill(skill);
                               setState(() => skills.remove(skill));
                             },
                           ),
@@ -254,7 +279,7 @@ class _ProfileView extends StatelessWidget {
                     onSubmitted: (_) {
                       final skill = newSkillController.text.trim();
                       if (skill.isEmpty) return;
-                      context.read<ProfileCubit>().addSkill(skill);
+                      userCubit.addTeachSkill(skill);
                       Navigator.of(context).pop();
                     },
                   ),
@@ -264,7 +289,7 @@ class _ProfileView extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text('Close'),
+                          child: Text(l10n.close),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -273,10 +298,10 @@ class _ProfileView extends StatelessWidget {
                           onPressed: () {
                             final skill = newSkillController.text.trim();
                             if (skill.isEmpty) return;
-                            context.read<ProfileCubit>().addSkill(skill);
+                            userCubit.addTeachSkill(skill);
                             Navigator.of(context).pop();
                           },
-                          child: const Text('Add Skill'),
+                          child: Text(l10n.addSkill),
                         ),
                       ),
                     ],
@@ -292,13 +317,14 @@ class _ProfileView extends StatelessWidget {
   }
 
   void _showLanguageDialog(BuildContext context) {
-    final languages = ['English', 'Arabic', 'Spanish'];
+    final l10n = AppLocalizations.of(context)!;
+    final languages = ['English', 'Arabic'];
 
     showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Select Language'),
+          title: Text(l10n.selectLanguage),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: languages.map((language) {
@@ -314,7 +340,7 @@ class _ProfileView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
           ],
         );
@@ -323,6 +349,7 @@ class _ProfileView extends StatelessWidget {
   }
 
   void _showPointsDialog(BuildContext context, bool isTopUp) {
+    final l10n = AppLocalizations.of(context)!;
     final amounts = [20, 50, 100];
 
     showDialog<void>(
@@ -349,7 +376,7 @@ class _ProfileView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
           ],
         );
@@ -358,18 +385,19 @@ class _ProfileView extends StatelessWidget {
   }
 
   void _showPrivacyDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Privacy & Security'),
+          title: Text(l10n.privacySecurity),
           content: const Text(
             'Your privacy settings are in a safe place. You can manage app permissions,/n data sharing and security notifications here.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: Text(l10n.close),
             ),
           ],
         );
@@ -380,8 +408,9 @@ class _ProfileView extends StatelessWidget {
 
 class _AvatarSection extends StatelessWidget {
   final ProfileState state;
+  final UserModel user;
 
-  const _AvatarSection({required this.state});
+  const _AvatarSection({required this.state, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -458,7 +487,7 @@ class _AvatarSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            state.name,
+            user.username,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
@@ -467,7 +496,7 @@ class _AvatarSection extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            state.email,
+            (FirebaseAuth.instance.currentUser?.email ?? ''),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -481,11 +510,13 @@ class _AvatarSection extends StatelessWidget {
 }
 
 class _PointsCard extends StatelessWidget {
+  final AppLocalizations l10n;
   final int points;
   final VoidCallback onTopUp;
   final VoidCallback onWithdraw;
 
   const _PointsCard({
+    required this.l10n,
     required this.points,
     required this.onTopUp,
     required this.onWithdraw,
@@ -534,7 +565,7 @@ class _PointsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Points Balance',
+                  l10n.points,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -565,7 +596,7 @@ class _PointsCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _BalanceActionButton(
-                        label: 'Top up',
+                        label: l10n.topUp,
                         isPrimary: true,
                         onTap: onTopUp,
                       ),
@@ -573,7 +604,7 @@ class _PointsCard extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _BalanceActionButton(
-                        label: 'Withdraw Points',
+                        label: l10n.withdraw,
                         isPrimary: false,
                         onTap: onWithdraw,
                       ),
@@ -632,9 +663,12 @@ class _BalanceActionButton extends StatelessWidget {
 }
 
 class _StatsRow extends StatelessWidget {
+  final AppLocalizations l10n;
   final ProfileState state;
+  final UserModel user;
 
-  const _StatsRow({required this.state});
+  const _StatsRow({
+    required this.l10n,required this.state, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -644,17 +678,17 @@ class _StatsRow extends StatelessWidget {
           child: _StatCard(
             icon: Icons.star_rounded,
             iconColor: _ProfileColors.star,
-            value: state.rating.toStringAsFixed(1),
-            label: 'RATING',
+            value: user.ratingAvg.toStringAsFixed(1),
+            label: l10n.rating,
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: _StatCard(value: '${state.taught}', label: 'TAUGHT'),
+          child: _StatCard(value: user.ratingCount.toString(), label: l10n.reviews),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: _StatCard(value: '${state.learned}', label: 'LEARNED'),
+          child: _StatCard(value: '0', label: l10n.sessions),
         ),
       ],
     );
@@ -719,10 +753,11 @@ class _StatCard extends StatelessWidget {
 }
 
 class _SkillsSection extends StatelessWidget {
+  final AppLocalizations l10n;
   final List<String> skills;
   final VoidCallback onAddSkill;
 
-  _SkillsSection({required this.skills, required this.onAddSkill});
+  _SkillsSection({required this.l10n, required this.skills, required this.onAddSkill});
 
   @override
   Widget build(BuildContext context) {
@@ -730,7 +765,7 @@ class _SkillsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'SKILLS YOU OFFER',
+          l10n.skillsCanTeach.toUpperCase(),
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -784,6 +819,7 @@ class _AddSkillChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onTap,
       child: CustomPaint(
@@ -794,7 +830,7 @@ class _AddSkillChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
-            '+ Add skill',
+            '+ ${l10n.addSkill}',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -808,6 +844,7 @@ class _AddSkillChip extends StatelessWidget {
 }
 
 class _SettingsSection extends StatelessWidget {
+  final AppLocalizations l10n;
   final ProfileState state;
   final VoidCallback onEditProfile;
   final VoidCallback onManageSkills;
@@ -818,6 +855,7 @@ class _SettingsSection extends StatelessWidget {
   final ValueChanged<bool> onDarkModeChanged;
 
   const _SettingsSection({
+    required this.l10n,
     required this.state,
     required this.onEditProfile,
     required this.onManageSkills,
@@ -840,37 +878,37 @@ class _SettingsSection extends StatelessWidget {
         children: [
           _SettingsTile(
             icon: Icons.mode_edit_outline_outlined,
-            label: 'Edit Profile',
+            label: l10n.editProfile,
             onTap: onEditProfile,
           ),
           const _SettingsDivider(),
           _SettingsTile(
             icon: Icons.auto_awesome_motion_outlined,
-            label: 'Manage Skills',
+            label: l10n.manageSkills,
             onTap: onManageSkills,
           ),
           const _SettingsDivider(),
           _SettingsTile(
             icon: Icons.calendar_today_outlined,
-            label: 'Session History',
+            label: l10n.sessionHistory,
             onTap: onSessionHistory,
           ),
           const _SettingsDivider(),
           _SettingsTile(
             icon: Icons.notifications_none_rounded,
-            label: 'Notifications',
+            label: l10n.notifications,
             onTap: onNotifications,
           ),
           const _SettingsDivider(),
           _SettingsTile(
             icon: Icons.shield_outlined,
-            label: 'Privacy & Security',
+            label: l10n.privacySecurity,
             onTap: onPrivacy,
           ),
           const _SettingsDivider(),
           _SettingsTile(
             icon: Icons.language_rounded,
-            label: 'Language',
+            label: l10n.language,
             onTap: onLanguage,
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -895,7 +933,7 @@ class _SettingsSection extends StatelessWidget {
           const _SettingsDivider(),
           _SettingsTile(
             icon: CupertinoIcons.moon,
-            label: 'Dark Mode',
+            label: l10n.darkMode,
             trailing: CupertinoSwitch(
               value: state.isDarkMode,
               onChanged: onDarkModeChanged,
@@ -979,9 +1017,11 @@ class _SettingsDivider extends StatelessWidget {
 }
 
 class _LogoutButton extends StatelessWidget {
+  final AppLocalizations l10n;
   final VoidCallback? onTap;
 
-  const _LogoutButton({this.onTap});
+  const _LogoutButton({
+    required this.l10n,this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -994,17 +1034,17 @@ class _LogoutButton extends StatelessWidget {
           color: _ProfileColors.logoutBackground,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.logout_rounded,
               size: 18,
               color: _ProfileColors.logoutText,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
-              'Logout',
+              l10n.logout,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,

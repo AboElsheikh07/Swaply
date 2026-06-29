@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:swaply/features/user/cubit/user_cubit.dart';
 
 class TopUpScreen extends StatefulWidget {
   const TopUpScreen({super.key});
@@ -46,7 +46,7 @@ class _TopUpScreenState extends State<TopUpScreen> {
         if (!mounted) return;
         Navigator.of(context).pop(); // dismiss loading
 
-        context.read<ProfileCubit>().topUpPoints(_selectedAmount!);
+        context.read<UserCubit>().addBalance(_selectedAmount!);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
