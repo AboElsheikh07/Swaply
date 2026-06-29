@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/features/chat/data/models/chat_models.dart';
+import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
+import 'package:swaply/features/chat/presentation/screens/chat_screen.dart';
 import 'package:swaply/features/mentor_details/data/repositories/mentor_details_repository.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_cubit.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
@@ -55,8 +60,32 @@ class MentorDetailsView extends StatelessWidget {
 
 class MentorDetailsContent extends StatelessWidget {
   final UserModel mentor;
+  final ChatRepository _chatRepository = ChatRepository();
 
-  const MentorDetailsContent({super.key, required this.mentor});
+  MentorDetailsContent({super.key, required this.mentor});
+
+  Future<void> _openChat(BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final conversationId = await _chatRepository.getOrCreateConversation(
+      currentUserId: currentUser.uid,
+      otherUserId: mentor.id,
+      otherUserName: mentor.username,
+    );
+
+    final conversation = await _chatRepository.fetchConversation(
+      conversationId: conversationId,
+      currentUserId: currentUser.uid,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ChatScreen(conversation: conversation)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -378,7 +407,7 @@ class MentorDetailsContent extends StatelessWidget {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => _openChat(context),
                   child: Container(
                     width: 48,
                     height: 48,

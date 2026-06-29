@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+		// ── Categories ───────────────────────────────────────────────────────
+    match /categories/{docId} {
+      allow read: if request.auth != null;
+    }
+
+    // Users can read any profile (needed to show teacher/student info on
+    // session cards, Explore, etc). A user can freely write their own
+    // document. As a narrow exception, a user can also bump ratingAvg/
+    // ratingCount on SOMEONE ELSE's document — but only when that someone
+    // else is the other participant in a session both of them actually
+    // completed together, and only that one rating's worth of change.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      allow delete: if request.auth != null && request.auth.uid == userId;
+
+      allow update: if request.auth != null && (
+        // Normal case: editing your own profile. ratingAvg/ratingCount
+        // can't move here — they only move via the rating case below.
+        (request.auth.uid == userId &&
+         request.resource.data.ratingAvg   == resource.data.ratingAvg &&
+         request.resource.data.ratingCount == resource.data.ratingCount)
+        ||
+        // Rating case: I'm updating someone else's doc, touching ONLY
+        // ratingAvg/ratingCount, and I can point to a real, completed
+        // session where userId and I were the two participants.
+        (request.auth.uid != userId &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['ratingAvg', 'ratingCount', 'ratingSessionId']) &&
+         request.resource.data.ratingCount == resource.data.ratingCount + 1 &&
+         existsAfter(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)) &&
+         get(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)).data.status == 'completed' &&
+         (
+           (get(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)).data.teacherId == request.auth.uid &&
+            get(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)).data.studentId == userId)
+           ||
+           (get(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)).data.studentId == request.auth.uid &&
+            get(/databases/$(database)/documents/sessions/$(request.resource.data.ratingSessionId)).data.teacherId == userId)
+         ))
+      );
+    }
+
+    // Ratings — one doc per (sessionId, role), e.g. 'abc123_student'. role
+    // is the RATER's role in that session, so a session can have at most
+    // one rating submitted by its student and one by its teacher — the
+    // doc id convention itself enforces "once per session per person".
+    match /ratings/{ratingId} {
+      allow read: if request.auth != null &&
+                  (request.auth.uid == resource.data.raterId ||
+                   request.auth.uid == resource.data.rateeId);
+
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.raterId &&
+                    request.resource.data.raterId != request.resource.data.rateeId &&
+                    ratingId == request.resource.data.sessionId + '_' + request.resource.data.role &&
+                    (request.resource.data.role == 'teacher' || request.resource.data.role == 'student') &&
+                    request.resource.data.stars is int &&
+                    request.resource.data.stars >= 1 &&
+                    request.resource.data.stars <= 5 &&
+                    get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.status == 'completed' &&
+                    (
+                      (request.resource.data.role == 'teacher' &&
+                       get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.teacherId == request.auth.uid &&
+                       get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.studentId == request.resource.data.rateeId) ||
+                      (request.resource.data.role == 'student' &&
+                       get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.studentId == request.auth.uid &&
+                       get(/databases/$(database)/documents/sessions/$(request.resource.data.sessionId)).data.teacherId == request.resource.data.rateeId)
+                    );
+
+      // Ratings are immutable once submitted — no edits, no deletes.
+      allow update, delete: if false;
+    }
+
+    // Sessions — only session participants may read or modify their own
+    // session documents.
+    match /sessions/{sessionId} {
+      allow read: if request.auth != null &&
+                  (request.auth.uid == resource.data.teacherId ||
+                   request.auth.uid == resource.data.studentId);
+
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.studentId;
+
+      allow update, delete: if request.auth != null &&
+                            (request.auth.uid == resource.data.teacherId ||
+                             request.auth.uid == resource.data.studentId);
+    }
+
+    // Conversations and Messages rules (Chat Feature)
+    match /conversations/{conversationId} {
+      // Users can read conversations they're members of
+      allow read: if request.auth != null && request.auth.uid in resource.data.members;
+
+      // Users can create conversations only when they are part of the member list
+      allow create: if request.auth != null &&
+                    request.resource.data.members is list &&
+                    request.auth.uid in request.resource.data.members;
+
+      // Users can update/delete conversations only when they are already members
+      allow update, delete: if request.auth != null && request.auth.uid in resource.data.members;
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        // Users who are members of the conversation can read messages
+        allow read: if request.auth != null &&
+                    request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+
+        // Only the sender can create messages, and they must be a conversation member
+        allow create: if request.auth.uid == request.resource.data.senderId &&
+                      request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.members;
+
+        // Users can only update/delete their own messages
+        allow update, delete: if request.auth.uid == resource.data.senderId;
+      }
+    }
+  }
+}

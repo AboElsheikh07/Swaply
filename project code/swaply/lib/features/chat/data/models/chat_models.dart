@@ -8,6 +8,8 @@ class Conversation {
   final DateTime updatedAt;
   final int unread;
   final bool online;
+  final List<String> memberIds;
+  final String otherUserId;
 
   const Conversation({
     required this.id,
@@ -16,6 +18,8 @@ class Conversation {
     required this.updatedAt,
     this.unread = 0,
     this.online = false,
+    required this.memberIds,
+    required this.otherUserId,
   });
 
   String get formattedTime => DateFormat('h:mm a').format(updatedAt);
@@ -26,6 +30,12 @@ class Conversation {
   }) {
     final data = doc.data() ?? {};
     final unreadCounts = data['unreadCounts'] as Map<String, dynamic>?;
+    final members = List<String>.from(data['members'] ?? <String>[]);
+
+    final otherUserId = members.firstWhere(
+      (id) => id != currentUserId,
+      orElse: () => currentUserId,
+    );
 
     return Conversation(
       id: doc.id,
@@ -34,6 +44,8 @@ class Conversation {
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       unread: (unreadCounts?[currentUserId] as int?) ?? 0,
       online: data['online'] as bool? ?? false,
+      memberIds: members,
+      otherUserId: otherUserId,
     );
   }
 }

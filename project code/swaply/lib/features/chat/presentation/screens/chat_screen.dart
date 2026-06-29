@@ -1,49 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'messages_screen.dart';
-
-// ── Data model ────────────────────────────────────────────────────────────────
-
-class ChatMessage {
-  final String text;
-  final String time;
-  final bool isMine;
-
-  const ChatMessage({
-    required this.text,
-    required this.time,
-    required this.isMine,
-  });
-}
-
-// ── Sample messages (replace with your data source) ───────────────────────────
-
-final List<ChatMessage> sarahMessages = [
-  ChatMessage(
-    text: "Hey! Excited for our session.",
-    time: '10:21 AM',
-    isMine: false,
-  ),
-  ChatMessage(
-    text: "Me too! I prepared some questions.",
-    time: '10:22 AM',
-    isMine: true,
-  ),
-  ChatMessage(
-    text: "Great — share them whenever you're ready.",
-    time: '10:23 AM',
-    isMine: false,
-  ),
-  ChatMessage(
-    text: "Is Thursday 4pm still good for you?",
-    time: '10:24 AM',
-    isMine: true,
-  ),
-  ChatMessage(
-    text: "Sounds great, let's schedule for Thursday!",
-    time: '10:25 AM',
-    isMine: false,
-  ),
-];
+import 'package:swaply/features/chat/data/models/chat_models.dart';
+import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +17,20 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
-  final List<ChatMessage> _messages = List.from(sarahMessages);
+  final ChatRepository _chatRepository = ChatRepository();
+
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_currentUser != null) {
+      _chatRepository.markConversationRead(
+        conversationId: widget.conversation.id,
+        currentUserId: _currentUser!.uid,
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -68,25 +39,25 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    setState(() {
-      _messages.add(
-        ChatMessage(
-          text: text,
-          time: TimeOfDay.now().format(context),
-          isMine: true,
-        ),
-      );
-      _controller.clear();
-    });
+    if (text.isEmpty || _currentUser == null) return;
+
+    _controller.clear();
+    await _chatRepository.sendMessage(
+      conversationId: widget.conversation.id,
+      senderId: _currentUser!.uid,
+      text: text,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scroll.animateTo(
-        _scroll.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -185,19 +156,58 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: _messages.length,
-              itemBuilder: (context, i) => _ChatBubble(message: _messages[i]),
+      body: _currentUser == null
+          ? const Center(child: Text('Sign in to chat.'))
+          : Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder<List<ChatMessage>>(
+                    stream: _chatRepository.watchMessages(
+                      conversationId: widget.conversation.id,
+                      currentUserId: _currentUser!.uid,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Unable to load messages',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      final messages = snapshot.data ?? [];
+
+                      if (messages.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No messages yet. Start the conversation.',
+                          ),
+                        );
+                      }
+
+                      return ListView.builder(
+                        controller: _scroll,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        itemCount: messages.length,
+                        itemBuilder: (context, i) =>
+                            _ChatBubble(message: messages[i]),
+                      );
+                    },
+                  ),
+                ),
+                _InputBar(controller: _controller, onSend: _sendMessage),
+              ],
             ),
-          ),
-          _InputBar(controller: _controller, onSend: _sendMessage),
-        ],
-      ),
     );
   }
 }
@@ -252,7 +262,7 @@ class _ChatBubble extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            message.time,
+            message.formattedTime,
             style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
           ),
         ],

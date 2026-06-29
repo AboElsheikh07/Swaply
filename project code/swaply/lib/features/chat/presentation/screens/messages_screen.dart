@@ -1,63 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../data/models/chat_models.dart';
+import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
-
-// ── Data model ────────────────────────────────────────────────────────────────
-
-class Conversation {
-  final String name;
-  final String lastMessage;
-  final String time;
-  final int unread;
-  final bool online;
-
-  const Conversation({
-    required this.name,
-    required this.lastMessage,
-    required this.time,
-    this.unread = 0,
-    this.online = false,
-  });
-}
-
-final List<Conversation> conversations = [
-  Conversation(
-    name: 'Sarah Chen',
-    lastMessage: "Sounds great, let's schedule for Thursday!",
-    time: '2m',
-    unread: 2,
-    online: true,
-  ),
-  Conversation(
-    name: 'James Wilson',
-    lastMessage: 'I sent over the Flutter resources.',
-    time: '1h',
-  ),
-  Conversation(
-    name: 'Maria Lopez',
-    lastMessage: 'Perfecto! See you tomorrow.',
-    time: '3h',
-    unread: 1,
-    online: true,
-  ),
-  Conversation(
-    name: 'Derek Knight',
-    lastMessage: 'Try practicing those chords tonight.',
-    time: 'Yesterday',
-  ),
-  Conversation(
-    name: 'Priya Patel',
-    lastMessage: 'Namaste! Great session today.',
-    time: '2d',
-  ),
-];
-
-// ── Screen ────────────────────────────────────────────────────────────────────
 
 class ConversationsScreen extends StatelessWidget {
   ConversationsScreen({super.key});
 
+  final ChatRepository _chatRepository = ChatRepository();
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -77,7 +33,7 @@ class ConversationsScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
@@ -88,12 +44,19 @@ class ConversationsScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    SizedBox(width: 14),
-                    Icon(Icons.search, color: Theme.of(context).iconTheme.color, size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 14),
+                    Icon(
+                      Icons.search,
+                      color: Theme.of(context).iconTheme.color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       'Search conversations',
-                      style: TextStyle(fontSize: 15, color: Theme.of(context).iconTheme.color),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                     ),
                   ],
                 ),
@@ -101,27 +64,66 @@ class ConversationsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.zero,
-                itemCount: conversations.length,
-                separatorBuilder: (_, __) => const Divider(
-                  height: 1,
-                  indent: 82,
-                  color: Color(0xFFE5E5EA),
-                ),
-                itemBuilder: (context, index) {
-                  final c = conversations[index];
-                  return _ConversationTile(
-                    conversation: c,
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(conversation: c),
+              child: currentUser == null
+                  ? const Center(
+                      child: Text('Please sign in to view your conversations.'),
+                    )
+                  : StreamBuilder<List<Conversation>>(
+                      stream: _chatRepository.watchConversations(
+                        currentUserId: currentUser.uid,
                       ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Unable to load conversations.',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                          );
+                        }
+
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        final conversations = snapshot.data ?? [];
+
+                        if (conversations.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No chats yet. Start a conversation from the home screen.',
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          padding: EdgeInsets.zero,
+                          itemCount: conversations.length,
+                          separatorBuilder: (_, __) => const Divider(
+                            height: 1,
+                            indent: 82,
+                            color: Color(0xFFE5E5EA),
+                          ),
+                          itemBuilder: (context, index) {
+                            final c = conversations[index];
+                            return _ConversationTile(
+                              conversation: c,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatScreen(conversation: c),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
@@ -130,13 +132,11 @@ class ConversationsScreen extends StatelessWidget {
   }
 }
 
-// ── Tile ──────────────────────────────────────────────────────────────────────
-
 class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
   final VoidCallback onTap;
 
-  _ConversationTile({required this.conversation, required this.onTap});
+  const _ConversationTile({required this.conversation, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +152,9 @@ class _ConversationTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: Color(0xFFD1D1D6),
+                  backgroundColor: const Color(0xFFD1D1D6),
                   child: Text(
-                    c.name[0],
+                    c.name.isNotEmpty ? c.name[0] : '?',
                     style: TextStyle(
                       color: Theme.of(context).iconTheme.color,
                       fontSize: 20,
@@ -198,20 +198,21 @@ class _ConversationTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight:
-                          c.unread > 0 ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: c.unread > 0
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: const Color(0xFF6E6E73),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  c.time,
+                  c.formattedTime,
                   style: TextStyle(
                     fontSize: 13,
                     color: Theme.of(context).iconTheme.color,
@@ -222,7 +223,7 @@ class _ConversationTile extends StatelessWidget {
                   Container(
                     width: 22,
                     height: 22,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Color(0xFF5B4FCF),
                       shape: BoxShape.circle,
                     ),
