@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:swaply/features/home/presentation/screens/home_screen.dart';
 import 'package:swaply/features/chat/presentation/screens/messages_screen.dart';
 import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
+import 'package:swaply/features/sessions/presentation/screens/sessions_screen/sessions_screen.dart';
 
-import 'package:swaply/features/user/data/models/user_model.dart';
 
 import 'package:swaply/l10n/app_localizations.dart';
 

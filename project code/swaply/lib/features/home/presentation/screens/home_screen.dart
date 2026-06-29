@@ -5,8 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 import 'package:swaply/features/home/data/repositories/home_repository_impl.dart';
+import 'package:swaply/features/home/presentation/screens/mentor_details_screen.dart';
 
-import 'package:swaply/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:swaply/features/search/presentation/screens/search_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
@@ -241,17 +241,17 @@ class _Header extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(width: 8),
-          _IconBtn(
-            icon: CupertinoIcons.bell,
-            onTap: () {
-              Navigator.push(
-                context,
-                CupertinoPageRoute(builder: (_) => const NotificationsScreen()),
-              );
-            },
-            badge: true,
-          ),
+          // const SizedBox(width: 8),
+          // _IconBtn(
+          //   icon: CupertinoIcons.bell,
+          //   onTap: () {
+          //     Navigator.push(
+          //       context,
+          //       CupertinoPageRoute(builder: (_) => const NotificationsScreen()),
+          //     );
+          //   },
+          //   badge: true,
+          // ),
         ],
       ),
     );
@@ -317,9 +317,9 @@ class _HomeTabState extends State<_HomeTab> {
   int _slide = 0;
 
   static const _promos = [
-    ('Earn 50 pts when you teach your first skill', 'Start teaching today'),
-    ('New mentors this week', '20+ designers & devs joined'),
-    ('Invite a friend', 'Get 100 bonus points'),
+    ('New skills added daily', 'Explore fresh learning opportunities'),
+    ('Start your first exchange', 'Connect with skilled community members'),
+    ('Earn rewards while helping', 'Teach a skill and collect points'),
   ];
 
   @override
@@ -385,7 +385,7 @@ class _HomeTabState extends State<_HomeTab> {
             onSeeAll: () {},
           ),
           const SizedBox(height: 12),
-          _MentorGrid(mentors: widget.topMentors),
+          _MentorGrid(mentors: widget.topMentors.take(8).toList()),
           const SizedBox(height: 24),
 
           // ── Just For You ──
@@ -556,12 +556,12 @@ class _MentorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => CategoryScreen(category: CategoryModel(name: mentor.skill, icon: CupertinoIcons.person_2_fill)),
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MentorDetailsScreen(mentorId: mentor.id),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -582,7 +582,6 @@ class _MentorCard extends StatelessWidget {
             Expanded(
               child: Stack(
                 children: [
-                  
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(20),
@@ -590,14 +589,14 @@ class _MentorCard extends StatelessWidget {
                     child: Container(
                       width: double.infinity,
                       color: _primarySoft,
-                      // ✅ لما يكون عندك imageUrl:
+
                       child: mentor.avatarUrl != ""
                           ? Image.network(mentor.avatarUrl, fit: BoxFit.cover)
-                          :  Icon(
-                        CupertinoIcons.person_fill,
-                        color: _primary,
-                        size: 48,
-                      ),
+                          : Icon(
+                              CupertinoIcons.person_fill,
+                              color: _primary,
+                              size: 48,
+                            ),
                     ),
                   ),
                   Positioned(
