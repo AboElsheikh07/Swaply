@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../controllers/chat_cubit.dart';
-import '../../data/models/chat_models.dart';
+import 'package:swaply/features/chat/data/models/chat_models.dart';
+import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
+
+// ── Screen ────────────────────────────────────────────────────────────────────
 
 class ChatScreen extends StatefulWidget {
   final Conversation conversation;
@@ -15,14 +17,19 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
+  final ChatRepository _chatRepository = ChatRepository();
+
+  User? get _currentUser => FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-    // Load messages for this conversation
-    context.read<ChatCubit>().loadMessages(widget.conversation.id);
-    // Mark messages as read
-    context.read<ChatCubit>().markAsRead(widget.conversation.id);
+    if (_currentUser != null) {
+      _chatRepository.markConversationRead(
+        conversationId: widget.conversation.id,
+        currentUserId: _currentUser!.uid,
+      );
+    }
   }
 
   @override
@@ -34,12 +41,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _currentUser == null) return;
 
     _controller.clear();
-
-    await context.read<ChatCubit>().sendMessage(
+    await _chatRepository.sendMessage(
       conversationId: widget.conversation.id,
+      senderId: _currentUser!.uid,
       text: text,
     );
 
@@ -58,7 +65,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final c = widget.conversation;
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -149,53 +156,58 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 4),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<ChatCubit, ChatState>(
-              builder: (context, state) {
-                if (state is ChatLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (state is ChatError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${state.message}',
-                      style: const TextStyle(color: Colors.red),
+      body: _currentUser == null
+          ? const Center(child: Text('Sign in to chat.'))
+          : Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder<List<ChatMessage>>(
+                    stream: _chatRepository.watchMessages(
+                      conversationId: widget.conversation.id,
+                      currentUserId: _currentUser!.uid,
                     ),
-                  );
-                }
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Unable to load messages',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        );
+                      }
 
-                if (state is MessagesLoaded) {
-                  final messages = state.messages;
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (_scroll.hasClients &&
-                        _scroll.position.maxScrollExtent > 0) {
-                      _scroll.jumpTo(_scroll.position.maxScrollExtent);
-                    }
-                  });
+                      final messages = snapshot.data ?? [];
 
-                  return ListView.builder(
-                    controller: _scroll,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    itemCount: messages.length,
-                    itemBuilder: (context, i) =>
-                        _ChatBubble(message: messages[i]),
-                  );
-                }
+                      if (messages.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'No messages yet. Start the conversation.',
+                          ),
+                        );
+                      }
 
-                return const SizedBox();
-              },
+                      return ListView.builder(
+                        controller: _scroll,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        itemCount: messages.length,
+                        itemBuilder: (context, i) =>
+                            _ChatBubble(message: messages[i]),
+                      );
+                    },
+                  ),
+                ),
+                _InputBar(controller: _controller, onSend: _sendMessage),
+              ],
             ),
-          ),
-          _InputBar(controller: _controller, onSend: _sendMessage),
-        ],
-      ),
     );
   }
 }
@@ -270,7 +282,7 @@ class _InputBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
@@ -321,13 +333,13 @@ class _InputBar extends StatelessWidget {
             child: Container(
               width: 36,
               height: 36,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Color(0xFF5B4FCF),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.send_rounded,
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 size: 18,
               ),
             ),

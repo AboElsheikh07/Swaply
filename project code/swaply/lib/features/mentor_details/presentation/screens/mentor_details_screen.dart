@@ -1,15 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/mentor_details_model.dart';
-import '../../data/repositories/mentor_details_repository_mock.dart';
-import '../cubit/mentor_details_cubit.dart';
-import '../cubit/mentor_details_state.dart';
+import 'package:swaply/features/chat/data/models/chat_models.dart';
+import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
+import 'package:swaply/features/chat/presentation/screens/chat_screen.dart';
+import 'package:swaply/features/mentor_details/data/repositories/mentor_details_repository.dart';
+import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_cubit.dart';
+import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
 
-const mdPrimary     = Color(0xFF5B4CB8);
+const mdPrimary = Color(0xFF5B4CB8);
 const mdPrimarySoft = Color(0xFFEEECFB);
-const mdBorder      = Color(0xFFEAEAF0);
-const mdMutedFg     = Color(0xFF8A8A9A);
-const mdDark        = Color(0xFF1A1A2E);
+const mdBorder = Color(0xFFEAEAF0);
+const mdMutedFg = Color(0xFF8A8A9A);
+const mdDark = Color(0xFF1A1A2E);
 
 class MentorDetailsScreen extends StatelessWidget {
   final String mentorId;
@@ -20,8 +25,8 @@ class MentorDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       // ✅ بدّل MockMentorDetailsRepository بـ FirebaseMentorDetailsRepository لما Firebase يتجهز
-      create: (_) => MentorDetailsCubit(MockMentorDetailsRepository())
-        ..loadMentor(mentorId: mentorId),
+      create: (_) =>
+          MentorDetailsCubit(MentorDetailsRepository())..loadMentor(mentorId),
       child: const MentorDetailsView(),
     );
   }
@@ -38,12 +43,14 @@ class MentorDetailsView extends StatelessWidget {
         builder: (context, state) {
           return switch (state) {
             MentorDetailsLoading() => const Center(
-                child: CircularProgressIndicator(color: mdPrimary)),
+              child: CircularProgressIndicator(color: mdPrimary),
+            ),
             MentorDetailsError(:final message) => Center(
-                child: Text(message, style: const TextStyle(color: mdMutedFg))),
-            MentorDetailsLoaded(:final mentor, :final reviews) =>
-              MentorDetailsContent(mentor: mentor, reviews: reviews),
-            _ => const SizedBox(),
+              child: Text(message, style: const TextStyle(color: mdMutedFg)),
+            ),
+            MentorDetailsLoaded(:final user) => MentorDetailsContent(
+              mentor: user,
+            ),
           };
         },
       ),
@@ -52,14 +59,33 @@ class MentorDetailsView extends StatelessWidget {
 }
 
 class MentorDetailsContent extends StatelessWidget {
-  final MentorDetailsModel mentor;
-  final List<ReviewModel> reviews;
+  final UserModel mentor;
+  final ChatRepository _chatRepository = ChatRepository();
 
-  const MentorDetailsContent({
-    super.key,
-    required this.mentor,
-    required this.reviews,
-  });
+  MentorDetailsContent({super.key, required this.mentor});
+
+  Future<void> _openChat(BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    final conversationId = await _chatRepository.getOrCreateConversation(
+      currentUserId: currentUser.uid,
+      otherUserId: mentor.id,
+      otherUserName: mentor.username,
+    );
+
+    final conversation = await _chatRepository.fetchConversation(
+      conversationId: conversationId,
+      currentUserId: currentUser.uid,
+    );
+
+    if (!context.mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ChatScreen(conversation: conversation)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,9 +97,14 @@ class MentorDetailsContent extends StatelessWidget {
               child: Stack(
                 children: [
                   Container(
-                    height: 280, width: double.infinity,
+                    height: 280,
+                    width: double.infinity,
                     color: mdPrimarySoft,
-                    child: const Icon(Icons.person_outline_rounded, color: mdPrimary, size: 80),
+                    child: const Icon(
+                      Icons.person_outline_rounded,
+                      color: mdPrimary,
+                      size: 80,
+                    ),
                   ),
                   Container(
                     height: 280,
@@ -87,16 +118,26 @@ class MentorDetailsContent extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    top: 0, left: 0, right: 0,
+                    top: 0,
+                    left: 0,
+                    right: 0,
                     child: SafeArea(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 8,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            MdCircleBtn(icon: Icons.arrow_back_ios_new_rounded,
-                                onTap: () => Navigator.of(context).maybePop()),
-                            MdCircleBtn(icon: Icons.share_outlined, onTap: () {}),
+                            MdCircleBtn(
+                              icon: Icons.arrow_back_ios_new_rounded,
+                              onTap: () => Navigator.of(context).maybePop(),
+                            ),
+                            MdCircleBtn(
+                              icon: Icons.share_outlined,
+                              onTap: () {},
+                            ),
                           ],
                         ),
                       ),
@@ -121,27 +162,42 @@ class MentorDetailsContent extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  Text(mentor.name,
-                                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                  if (mentor.online) ...[
-                                    const SizedBox(width: 8),
-                                    MdOnlineBadge(),
-                                  ],
+                                  Text(
+                                    mentor.username,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
-                              Text(mentor.skill,
-                                  style: const TextStyle(fontSize: 13, color: mdMutedFg)),
+                              Text(
+                                mentor.skillsCanTeach.isEmpty
+                                    ? "No Skill"
+                                    : mentor.skillsCanTeach.first,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: mdMutedFg,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(mentor.rate,
-                                style: const TextStyle(
-                                    fontSize: 17, fontWeight: FontWeight.bold, color: mdDark)),
-                            const Text('session rate',
-                                style: TextStyle(fontSize: 11, color: mdMutedFg)),
+                            Text(
+                              "${mentor.pricePerHour} pts/hr",
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: mdDark,
+                              ),
+                            ),
+                            const Text(
+                              'session rate',
+                              style: TextStyle(fontSize: 11, color: mdMutedFg),
+                            ),
                           ],
                         ),
                       ],
@@ -155,24 +211,43 @@ class MentorDetailsContent extends StatelessWidget {
                           value: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 16),
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Color(0xFFFFC107),
+                                size: 16,
+                              ),
                               const SizedBox(width: 2),
-                              Text(mentor.rating.toStringAsFixed(1),
-                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(
+                                mentor.ratingAvg.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
                           label: 'Rating',
                         ),
                         const SizedBox(width: 8),
                         MdStatCard(
-                          value: Text('${mentor.reviews}',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          value: Text(
+                            '${mentor.ratingCount}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           label: 'Reviews',
                         ),
                         const SizedBox(width: 8),
                         const MdStatCard(
-                          value: Text('120+',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          value: Text(
+                            '120+',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           label: 'Sessions',
                         ),
                       ],
@@ -180,12 +255,6 @@ class MentorDetailsContent extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // About
-                    const Text('About',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    Text(mentor.bio,
-                        style: const TextStyle(fontSize: 13, color: mdMutedFg, height: 1.6)),
-                    const SizedBox(height: 20),
 
                     // Price box
                     Container(
@@ -198,49 +267,87 @@ class MentorDetailsContent extends StatelessWidget {
                       child: Row(
                         children: [
                           Container(
-                            width: 36, height: 36,
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
                               color: mdPrimary.withOpacity(0.12),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.toll_rounded, color: mdPrimary, size: 18),
+                            child: const Icon(
+                              Icons.toll_rounded,
+                              color: mdPrimary,
+                              size: 18,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Price per hour',
-                                    style: TextStyle(fontSize: 11, color: mdMutedFg)),
-                                Text('Set by ${mentor.name.split(' ').first}',
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                const Text(
+                                  'Price per hour',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: mdMutedFg,
+                                  ),
+                                ),
+                                Text(
+                                  'Set by ${mentor.username.split(' ').first}',
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          Text('${mentor.pricePerHour} pts',
-                              style: const TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.bold, color: mdPrimary)),
+                          Text(
+                            '${mentor.pricePerHour} pts',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: mdPrimary,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
 
                     // Skills
-                    const Text('Skills offered',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Skills offered',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
-                      spacing: 8, runSpacing: 8,
-                      children: mentor.skills.map((s) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: mdPrimarySoft,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(s,
-                            style: const TextStyle(
-                                fontSize: 12, fontWeight: FontWeight.w600, color: mdPrimary)),
-                      )).toList(),
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: mentor.skillsCanTeach
+                          .map(
+                            (s) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 7,
+                              ),
+                              decoration: BoxDecoration(
+                                color: mdPrimarySoft,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                s,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: mdPrimary,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                     const SizedBox(height: 20),
 
@@ -256,35 +363,24 @@ class MentorDetailsContent extends StatelessWidget {
                       child: const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Next availability',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          Text(
+                            'Next availability',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           SizedBox(height: 4),
-                          Text('Today 4:00 PM · Tomorrow 10:00 AM · Thu 2:30 PM',
-                              style: TextStyle(fontSize: 12, color: mdMutedFg)),
+                          Text(
+                            'Today 4:00 PM · Tomorrow 10:00 AM · Thu 2:30 PM',
+                            style: TextStyle(fontSize: 12, color: mdMutedFg),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
 
                     // Reviews
-                    Row(
-                      children: [
-                        const Text('Recent reviews',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () {},
-                          child: const Text('See all',
-                              style: TextStyle(
-                                  fontSize: 12, fontWeight: FontWeight.w600, color: mdPrimary)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    ...reviews.map((r) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: MdReviewCard(review: r),
-                    )),
                   ],
                 ),
               ),
@@ -294,10 +390,16 @@ class MentorDetailsContent extends StatelessWidget {
 
         // Bottom action bar
         Positioned(
-          bottom: 0, left: 0, right: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
           child: Container(
             padding: EdgeInsets.fromLTRB(
-                20, 12, 20, 12 + MediaQuery.of(context).padding.bottom),
+              20,
+              12,
+              20,
+              12 + MediaQuery.of(context).padding.bottom,
+            ),
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: mdBorder)),
@@ -305,14 +407,18 @@ class MentorDetailsContent extends StatelessWidget {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () => _openChat(context),
                   child: Container(
-                    width: 48, height: 48,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: mdBorder),
                     ),
-                    child: const Icon(Icons.chat_bubble_outline_rounded, size: 20),
+                    child: const Icon(
+                      Icons.chat_bubble_outline_rounded,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -328,10 +434,16 @@ class MentorDetailsContent extends StatelessWidget {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(32)),
+                          borderRadius: BorderRadius.circular(32),
+                        ),
                       ),
-                      child: const Text('Request Session',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                      child: const Text(
+                        'Request Session',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -354,35 +466,16 @@ class MdCircleBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40, height: 40,
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.92),
           shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
+          ],
         ),
         child: Icon(icon, size: 18),
-      ),
-    );
-  }
-}
-
-class MdOnlineBadge extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F5E9),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(radius: 3, backgroundColor: Color(0xFF2E7D32)),
-          SizedBox(width: 4),
-          Text('Online',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32))),
-        ],
       ),
     );
   }
@@ -407,48 +500,17 @@ class MdStatCard extends StatelessWidget {
           children: [
             value,
             const SizedBox(height: 2),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 10, color: mdMutedFg,
-                    letterSpacing: 0.5, fontWeight: FontWeight.w500)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                color: mdMutedFg,
+                letterSpacing: 0.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class MdReviewCard extends StatelessWidget {
-  final ReviewModel review;
-  const MdReviewCard({super.key, required this.review});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: mdBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(review.name,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-              const Spacer(),
-              const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 13),
-              const SizedBox(width: 2),
-              Text(review.rating.toStringAsFixed(1),
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(review.text,
-              style: const TextStyle(fontSize: 12, color: mdMutedFg, height: 1.5)),
-        ],
       ),
     );
   }

@@ -1,31 +1,21 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../controllers/chat_cubit.dart';
+import 'package:flutter/material.dart';
 import '../../data/models/chat_models.dart';
+import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
 
-// ── Screen ────────────────────────────────────────────────────────────────────
+class ConversationsScreen extends StatelessWidget {
+  ConversationsScreen({super.key});
 
-class ConversationsScreen extends StatefulWidget {
-  const ConversationsScreen({super.key});
-
-  @override
-  State<ConversationsScreen> createState() => _ConversationsScreenState();
-}
-
-class _ConversationsScreenState extends State<ConversationsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Load conversations when the screen initializes
-    context.read<ChatCubit>().loadConversations();
-  }
+  final ChatRepository _chatRepository = ChatRepository();
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,17 +39,24 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
               child: Container(
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(22),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    SizedBox(width: 14),
-                    Icon(Icons.search, color: Color(0xFF8E8E93), size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 14),
+                    Icon(
+                      Icons.search,
+                      color: Theme.of(context).iconTheme.color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
                     Text(
                       'Search conversations',
-                      style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
                     ),
                   ],
                 ),
@@ -67,73 +64,66 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  if (state is ChatLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (state is ChatError) {
-                    return Center(
-                      child: Text(
-                        'Error: ${state.message}',
-                        style: const TextStyle(color: Colors.red),
+              child: currentUser == null
+                  ? const Center(
+                      child: Text('Please sign in to view your conversations.'),
+                    )
+                  : StreamBuilder<List<Conversation>>(
+                      stream: _chatRepository.watchConversations(
+                        currentUserId: currentUser.uid,
                       ),
-                    );
-                  }
-
-                  if (state is ConversationsLoaded) {
-                    final conversations = state.conversations;
-
-                    if (conversations.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.chat_bubble_outline,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No conversations yet',
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Text(
+                              'Unable to load conversations.',
                               style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
+                                color: Theme.of(context).colorScheme.error,
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }
+                          );
+                        }
 
-                    return ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemCount: conversations.length,
-                      separatorBuilder: (_, __) => const Divider(
-                        height: 1,
-                        indent: 82,
-                        color: Color(0xFFE5E5EA),
-                      ),
-                      itemBuilder: (context, index) {
-                        final c = conversations[index];
-                        return _ConversationTile(
-                          conversation: c,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => ChatScreen(conversation: c),
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        final conversations = snapshot.data ?? [];
+
+                        if (conversations.isEmpty) {
+                          return const Center(
+                            child: Text(
+                              'No chats yet. Start a conversation from the home screen.',
                             ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          padding: EdgeInsets.zero,
+                          itemCount: conversations.length,
+                          separatorBuilder: (_, __) => const Divider(
+                            height: 1,
+                            indent: 82,
+                            color: Color(0xFFE5E5EA),
                           ),
+                          itemBuilder: (context, index) {
+                            final c = conversations[index];
+                            return _ConversationTile(
+                              conversation: c,
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ChatScreen(conversation: c),
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
-                    );
-                  }
-
-                  return const Center(child: Text('No data'));
-                },
-              ),
+                    ),
             ),
           ],
         ),
@@ -141,8 +131,6 @@ class _ConversationsScreenState extends State<ConversationsScreen> {
     );
   }
 }
-
-// ── Tile ──────────────────────────────────────────────────────────────────────
 
 class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
@@ -156,7 +144,7 @@ class _ConversationTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
@@ -166,9 +154,9 @@ class _ConversationTile extends StatelessWidget {
                   radius: 26,
                   backgroundColor: const Color(0xFFD1D1D6),
                   child: Text(
-                    c.name[0],
-                    style: const TextStyle(
-                      color: Color(0xFF8E8E93),
+                    c.name.isNotEmpty ? c.name[0] : '?',
+                    style: TextStyle(
+                      color: Theme.of(context).iconTheme.color,
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
@@ -225,9 +213,9 @@ class _ConversationTile extends StatelessWidget {
               children: [
                 Text(
                   c.formattedTime,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF8E8E93),
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -242,8 +230,8 @@ class _ConversationTile extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       '${c.unread}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).cardColor,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),

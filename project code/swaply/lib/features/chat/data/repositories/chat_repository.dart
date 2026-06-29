@@ -70,21 +70,93 @@ class ChatRepository {
       'createdAt': Timestamp.fromDate(now),
     });
 
-    await _conversations.doc(conversationId).update({
+    final conversationRef = _conversations.doc(conversationId);
+    final snapshot = await conversationRef.get();
+    final data = snapshot.data() ?? {};
+    final members = List<String>.from(data['members'] ?? <String>[]);
+    final unreadCounts = <String, int>{};
+
+    for (final member in members) {
+      if (member == senderId) {
+        unreadCounts[member] = 0;
+      } else {
+        final existingCount =
+            (data['unreadCounts'] as Map<String, dynamic>?)?[member] as int? ??
+            0;
+        unreadCounts[member] = existingCount + 1;
+      }
+    }
+
+    await conversationRef.update({
       'lastMessage': text,
       'updatedAt': Timestamp.fromDate(now),
-      'unreadCounts': FieldValue.increment(1),
+      'unreadCounts': unreadCounts,
     });
+  }
+
+  Future<String?> findConversationId({
+    required String currentUserId,
+    required String otherUserId,
+  }) async {
+    final snapshot = await _conversations
+        .where('members', arrayContains: currentUserId)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      final members = List<String>.from(doc.data()['members'] ?? <String>[]);
+      if (members.contains(otherUserId) && members.length == 2) {
+        return doc.id;
+      }
+    }
+
+    return null;
+  }
+
+  Future<String> getOrCreateConversation({
+    required String currentUserId,
+    required String otherUserId,
+    required String otherUserName,
+  }) async {
+    final existingId = await findConversationId(
+      currentUserId: currentUserId,
+      otherUserId: otherUserId,
+    );
+
+    if (existingId != null) {
+      return existingId;
+    }
+
+    return createConversation(
+      members: [currentUserId, otherUserId],
+      name: otherUserName,
+      initialMessage: '',
+      creatorId: currentUserId,
+    );
+  }
+
+  Future<Conversation> fetchConversation({
+    required String conversationId,
+    required String currentUserId,
+  }) async {
+    final doc = await _conversations.doc(conversationId).get();
+    return Conversation.fromFirestore(doc, currentUserId: currentUserId);
   }
 
   Future<String> createConversation({
     required List<String> members,
     required String name,
-    required String initialMessage,
+    String initialMessage = '',
     required String creatorId,
   }) async {
     final now = DateTime.now();
     final ref = _conversations.doc();
+    final unreadCounts = <String, int>{for (final id in members) id: 0};
+
+    if (initialMessage.isNotEmpty) {
+      for (final id in members) {
+        unreadCounts[id] = id == creatorId ? 0 : 1;
+      }
+    }
 
     await ref.set({
       'name': name,
@@ -92,14 +164,16 @@ class ChatRepository {
       'lastMessage': initialMessage,
       'updatedAt': Timestamp.fromDate(now),
       'online': true,
-      'unreadCounts': {for (final id in members) id: id == creatorId ? 0 : 1},
+      'unreadCounts': unreadCounts,
     });
 
-    await ref.collection('messages').add({
-      'senderId': creatorId,
-      'text': initialMessage,
-      'createdAt': Timestamp.fromDate(now),
-    });
+    if (initialMessage.isNotEmpty) {
+      await ref.collection('messages').add({
+        'senderId': creatorId,
+        'text': initialMessage,
+        'createdAt': Timestamp.fromDate(now),
+      });
+    }
 
     return ref.id;
   }
