@@ -160,6 +160,23 @@ class UserCubit extends Cubit<UserState> {
     }
   }
 
+  // ── Profile ──────────────────────────────
+
+  Future<void> updateProfile({required String username}) async {
+    final current = currentUser;
+    emit(UserActionLoading(current));
+    try {
+      await _repo.updateUser(currentUid, {'username': username});
+      emit(UserActionSuccess(
+        user: current.copyWith(username: username),
+        message: 'Profile updated.',
+      ));
+    } catch (_) {
+      emit(UserLoaded(current));
+      emit(const UserError('Could not update profile. Try again.'));
+    }
+  }
+
   // ── Balance ──────────────────────────────
 
   Future<void> deductBalance(int amount) async {

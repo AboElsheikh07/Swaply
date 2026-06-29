@@ -4,8 +4,10 @@ import 'package:swaply/features/home/presentation/screens/home_screen.dart';
 import 'package:swaply/features/chat/presentation/screens/messages_screen.dart';
 import 'package:swaply/features/profile/presentation/screens/profile_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
-import 'package:swaply/features/sessions/presentation/screens/sessions_screen/sessions_screen.dart';
+
 import 'package:swaply/features/user/data/models/user_model.dart';
+
+import 'package:swaply/l10n/app_localizations.dart';
 
 class RootView extends StatefulWidget {
   const RootView({super.key});
@@ -49,6 +51,8 @@ class _RootViewState extends State<RootView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       body: PageView(
         physics: BouncingScrollPhysics(),
@@ -84,19 +88,19 @@ class _RootViewState extends State<RootView> {
           items: [
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
-              label: 'Home',
+              label: l10n.home,
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.date_range_outlined),
-              label: 'Sessions',
+              label: l10n.sessions,
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.chat_bubble_2),
-              label: 'Messages',
+              label: l10n.messages,
             ),
             BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person),
-              label: 'Profile',
+              label: l10n.profile,
             ),
           ],
         ),

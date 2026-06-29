@@ -27,6 +27,8 @@ dependencies:
   permission_handler: ^12.0.3
   http: ^1.2.0
   zego_uikit_prebuilt_call: ^4.24.2
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -50,6 +52,7 @@ flutter_native_splash:
 
 flutter:
   uses-material-design: true
+  generate: true
   
   assets:
     - assets/images/logo.png
