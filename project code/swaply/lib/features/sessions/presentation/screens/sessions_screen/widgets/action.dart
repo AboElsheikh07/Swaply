@@ -28,6 +28,7 @@ class ActionWidget extends StatelessWidget {
         label: l10n.joinSession,
         onTap: () {
           // session.id == the Firestore doc ID == the Zego callID
+          context.read<SessionsCubit>().notifyJoined(session);
           Navigator.push(
             context,
             MaterialPageRoute(
