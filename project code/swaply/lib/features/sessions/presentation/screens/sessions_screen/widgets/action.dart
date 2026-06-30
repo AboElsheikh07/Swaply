@@ -63,7 +63,7 @@ class ActionWidget extends StatelessWidget {
                 onTap: () =>
                     context.read<SessionsCubit>().decline(session.id),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               PrimaryBtn(
                 icon: Icons.check_rounded,
                 label: l10n.btnAccept,
@@ -91,7 +91,7 @@ class ActionWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _quietLabel(context, l10n.statusCancelled),
-            const SizedBox(width: 8),
+            const SizedBox(width: 6),
             GestureDetector(
               onTap: () => _confirmDelete(context),
               child: Container(

@@ -15,29 +15,42 @@ const searchBorder      = Color(0xFFEAEAF0);
 const searchDark        = Color(0xFF1A1A2E);
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+  // ✅ لو جاية من category_screen هتلاقي اسم الـ category هنا، بيتعرض في
+  // الـ search bar وبيتبحث عليه تلقائي من أول ما الشاشة تفتح
+  final String? initialQuery;
+  const SearchScreen({super.key, this.initialQuery});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          SearchCubit(FirebaseSearchRepository())..loadPopularSkills(),
-      child: const SearchView(),
+      create: (_) {
+        final cubit = SearchCubit(FirebaseSearchRepository());
+        final q = initialQuery?.trim();
+        if (q != null && q.isNotEmpty) {
+          cubit.search(q);
+        } else {
+          cubit.loadPopularSkills();
+        }
+        return cubit;
+      },
+      child: SearchView(initialQuery: initialQuery),
     );
   }
 }
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key});
+  final String? initialQuery;
+  const SearchView({super.key, this.initialQuery});
 
   @override
   State<SearchView> createState() => SearchViewState();
 }
 
 class SearchViewState extends State<SearchView> {
-  final searchCtrl = TextEditingController();
+  late final searchCtrl =
+      TextEditingController(text: widget.initialQuery ?? '');
   String sortTab   = 'All';
-  bool isSearching = false;
+  late bool isSearching = (widget.initialQuery ?? '').trim().isNotEmpty;
 
   final sortTabs = ['All', 'Latest', 'Most Popular', 'Cheapest'];
 
@@ -346,7 +359,6 @@ class SearchResultsView extends StatelessWidget {
     required this.sortTabs,
   });
 
-  
   String _getLocalizedTab(BuildContext context, String tab) {
     final l10n = AppLocalizations.of(context)!;
     switch (tab) {
@@ -360,7 +372,6 @@ class SearchResultsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         // Sort tabs
@@ -384,7 +395,7 @@ class SearchResultsView extends StatelessWidget {
                     border: Border.all(
                         color: active ? searchPrimary : searchBorder),
                   ),
-                  child: Text(sortTabs[i],
+                  child: Text(_getLocalizedTab(context, sortTabs[i]),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -521,7 +532,6 @@ class SkillTagBadge extends StatelessWidget {
   final SkillTag tag;
   const SkillTagBadge({super.key, required this.tag});
 
-  
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
