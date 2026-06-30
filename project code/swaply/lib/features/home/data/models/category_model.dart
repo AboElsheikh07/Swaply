@@ -9,7 +9,7 @@ class CategoryModel {
     required this.count,
   });
 
-  // لما تربط Firebase
+  // لما تربط الFirebase
   factory CategoryModel.fromFirestore(Map<String, dynamic> data, String id) {
     return CategoryModel(
       id: id,
