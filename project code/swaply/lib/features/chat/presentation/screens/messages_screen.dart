@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
+import 'package:swaply/features/user/data/repositories/user_repository.dart';
 import '../../data/models/chat_models.dart';
 import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
@@ -10,6 +12,7 @@ class ConversationsScreen extends StatelessWidget {
   ConversationsScreen({super.key});
 
   final ChatRepository _chatRepository = ChatRepository();
+  final UserRepository _userRepository = UserRepository();
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +52,11 @@ class ConversationsScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     const SizedBox(width: 14),
-                    Icon(
-                      Icons.search,
-                      color: colors.mutedFg,
-                      size: 20,
-                    ),
+                    Icon(Icons.search, color: colors.mutedFg, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       l10n.searchConversations,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: colors.mutedFg,
-                      ),
+                      style: TextStyle(fontSize: 15, color: colors.mutedFg),
                     ),
                   ],
                 ),
@@ -123,6 +119,7 @@ class ConversationsScreen extends StatelessWidget {
                             final c = conversations[index];
                             return _ConversationTile(
                               conversation: c,
+                              userRepository: _userRepository,
                               onTap: () => Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -144,117 +141,134 @@ class ConversationsScreen extends StatelessWidget {
 
 class _ConversationTile extends StatelessWidget {
   final Conversation conversation;
+  final UserRepository userRepository;
   final VoidCallback onTap;
 
-  const _ConversationTile({required this.conversation, required this.onTap});
+  const _ConversationTile({
+    required this.conversation,
+    required this.userRepository,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final c = conversation;
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: colors.card,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Stack(
+    return StreamBuilder<UserModel?>(
+      stream: userRepository.watchUser(c.otherUserId),
+      builder: (context, snapshot) {
+        final other = snapshot.data;
+        final name = other?.username ?? c.name;
+        final avatarUrl = other?.avatarUrl ?? '';
+        final online = other?.online ?? c.online;
+
+        return InkWell(
+          onTap: onTap,
+          child: Container(
+            color: colors.card,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
               children: [
-                CircleAvatar(
-                  radius: 26,
-                  backgroundColor: colors.primarySoft,
-                  child: Text(
-                    c.name.isNotEmpty ? c.name[0] : '?',
-                    style: TextStyle(
-                      color: colors.primary,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundColor: colors.primarySoft,
+                      backgroundImage: avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl) as ImageProvider
+                          : null,
+                      child: avatarUrl.isEmpty
+                          ? Text(
+                              name.isNotEmpty ? name[0] : '?',
+                              style: TextStyle(
+                                color: colors.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : null,
                     ),
+                    if (online)
+                      Positioned(
+                        bottom: 1,
+                        right: 1,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.card, width: 2),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: colors.text,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        c.lastMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: c.unread > 0
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: colors.mutedFg,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                if (c.online)
-                  Positioned(
-                    bottom: 1,
-                    right: 1,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.card, width: 2),
-                      ),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      c.formattedTime,
+                      style: TextStyle(fontSize: 13, color: colors.mutedFg),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    c.name,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: colors.text,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    c.lastMessage,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: c.unread > 0
-                          ? FontWeight.w600
-                          : FontWeight.w400,
-                      color: colors.mutedFg,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  c.formattedTime,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: colors.mutedFg,
-                  ),
+                    const SizedBox(height: 5),
+                    if (c.unread > 0)
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: colors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${c.unread}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    else
+                      const SizedBox(height: 22),
+                  ],
                 ),
-                const SizedBox(height: 5),
-                if (c.unread > 0)
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: colors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${c.unread}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  )
-                else
-                  const SizedBox(height: 22),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

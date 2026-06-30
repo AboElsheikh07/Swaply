@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/chat/data/models/chat_models.dart';
 import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
+import 'package:swaply/features/user/data/models/user_model.dart';
+import 'package:swaply/features/user/data/repositories/user_repository.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -20,6 +22,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
   final ChatRepository _chatRepository = ChatRepository();
+  final UserRepository _userRepository = UserRepository();
 
   User? get _currentUser => FirebaseAuth.instance.currentUser;
 
@@ -75,90 +78,82 @@ class _ChatScreenState extends State<ChatScreen> {
         elevation: 0.5,
         shadowColor: colors.border,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: colors.text,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: colors.text, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
-        title: Row(
-          children: [
-            Stack(
+        title: StreamBuilder<UserModel?>(
+          stream: _userRepository.watchUser(c.otherUserId),
+          builder: (context, snapshot) {
+            final other = snapshot.data;
+            final name = other?.username ?? c.name;
+            final avatarUrl = other?.avatarUrl ?? '';
+            final online = other?.online ?? c.online;
+            return Row(
               children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: colors.primarySoft,
-                  child: Text(
-                    c.name[0],
-                    style: TextStyle(
-                      color: colors.primary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: colors.primarySoft,
+                      backgroundImage: avatarUrl.isNotEmpty
+                          ? NetworkImage(avatarUrl) as ImageProvider
+                          : null,
+                      child: avatarUrl.isEmpty
+                          ? Text(
+                              name.isNotEmpty ? name[0] : '?',
+                              style: TextStyle(
+                                color: colors.primary,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : null,
                     ),
-                  ),
+                    if (online)
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: colors.card, width: 1.5),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                if (c.online)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: colors.green,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: colors.card, width: 1.5),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: colors.text,
                       ),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  c.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: colors.text,
-                  ),
+                    if (online)
+                      Text(
+                        l10n.online,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colors.green,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
                 ),
-                if (c.online)
-                  Text(
-                    l10n.online,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.green,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
               ],
-            ),
-          ],
+            );
+          },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.phone_outlined,
-              color: colors.text,
-              size: 22,
-            ),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.videocam_outlined,
-              color: colors.primary,
-              size: 24,
-            ),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 4),
-        ],
+        actions: [],
       ),
       body: _currentUser == null
           ? Center(child: Text(l10n.signInToChat))
@@ -184,7 +179,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(
-                          child: CircularProgressIndicator(color: colors.primary),
+                          child: CircularProgressIndicator(
+                            color: colors.primary,
+                          ),
                         );
                       }
 
@@ -289,7 +286,6 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
     final colors = context.colors;
     return Container(
       color: colors.card,
@@ -308,11 +304,7 @@ class _InputBar extends StatelessWidget {
               color: colors.background,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.attach_file,
-              color: colors.mutedFg,
-              size: 18,
-            ),
+            child: Icon(Icons.attach_file, color: colors.mutedFg, size: 18),
           ),
           const SizedBox(width: 10),
           Expanded(
