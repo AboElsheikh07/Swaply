@@ -1,5 +1,7 @@
 import 'package:swaply/features/sessions/data/data_sources/session_remote_data_source.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
+import 'package:swaply/features/sessions/services/onesignal_push_service.dart';
+import 'package:swaply/features/sessions/services/sessions_notifications.dart';
 
 /// Business-logic layer between cubit and data source.
 class SessionRepository {
@@ -34,80 +36,109 @@ class SessionRepository {
 
   // ── Create ───────────────────────────────────
 
-  /// Student sends a new session request to a teacher.
+
   Future<void> requestSession({
-    required String studentId,
-    required String teacherId,
-    required String studentName,
-    required String teacherName,
-    required String studentAvatar,
-    required String teacherAvatar,
-    required String skill,
-    required DateTime scheduledAt,
-    required int durationMinutes,
-    required int points,
-    String? message,
-  }) async {
-    // ✅ Generate Firestore key before creating the session object
-    // This gives us a unique ID without writing to Firestore yet.
-    // The same ID is used as the callID for Zego — no extra field needed.
-    final docId = _remote.generateSessionId();
+  required String studentId,
+  required String teacherId,
+  required String studentName,
+  required String teacherName,
+  required String studentAvatar,
+  required String teacherAvatar,
+  required String skill,
+  required DateTime scheduledAt,
+  required int durationMinutes,
+  required int points,
+  String? message,
+}) async {
+  final docId = _remote.generateSessionId();
 
-    final session = SessionItem(
-      id: docId,
-      studentId: studentId,
-      teacherId: teacherId,
-      studentName: studentName,
-      teacherName: teacherName,
-      studentAvatar: studentAvatar,
-      teacherAvatar: teacherAvatar,
-      skill: skill,
-      scheduledAt: scheduledAt,
-      durationMinutes: durationMinutes,
-      isOutgoing: true, // always true — student is sending the request
-      points: points,
-      status: SessionStatus.pending,
-      message: message,
-      createdAt: DateTime.now(),
-      studentRated: false,
-      teacherRated: false,
-    );
+  final session = SessionItem(
+    id: docId,
+    studentId: studentId,
+    teacherId: teacherId,
+    studentName: studentName,
+    teacherName: teacherName,
+    studentAvatar: studentAvatar,
+    teacherAvatar: teacherAvatar,
+    skill: skill,
+    scheduledAt: scheduledAt,
+    durationMinutes: durationMinutes,
+    isOutgoing: true,
+    points: points,
+    status: SessionStatus.pending,
+    message: message,
+    createdAt: DateTime.now(),
+    studentRated: false,
+    teacherRated: false,
+  );
 
-    await _remote.createSession(session);
-  }
+  await _remote.createSession(session);
+
+  await OneSignalPushService.sendToUser(
+    externalUserId: teacherId,
+    title: 'New session request',
+    body: '$studentName wants to book a $skill session',
+    data: {'sessionId': docId, 'type': 'new_request'},
+  );
+}
+
 
   // ── Status updates ───────────────────────────
 
-  /// Teacher accepts an incoming request.
-  Future<void> acceptSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.accepted);
+Future<void> acceptSession(String sessionId, SessionItem session) async {
+  await _remote.acceptSessionWithHold(
+    sessionId: sessionId,
+    studentId: session.studentId,
+    points: session.points,
+  );
 
-  /// Teacher declines an incoming request.
-  Future<void> declineSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.rejected);
+  await OneSignalPushService.sendToUser(
+    externalUserId: session.studentId,
+    title: 'Session accepted',
+    body: '${session.teacherName} accepted your ${session.skill} request',
+    data: {'sessionId': sessionId, 'type': 'accepted'},
+  );
 
-  /// Either party marks the session as completed.
-  Future<void> completeSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.completed);
 
-  /// Either party cancels before the session starts.
-  Future<void> cancelSession(String sessionId) =>
-      _remote.updateStatus(sessionId, SessionStatus.cancelled);
+}
+
+Future<void> notifySessionJoined({
+  required SessionItem session,
+  required String joinerUid,
+}) async {
+  final teacherJoined = joinerUid == session.teacherId;
+  final recipientId = teacherJoined ? session.studentId : session.teacherId;
+  final joinerName = teacherJoined ? session.teacherName : session.studentName;
+
+  await OneSignalPushService.sendToUser(
+    externalUserId: recipientId,
+    title: 'Your session partner joined',
+    body: '$joinerName joined the ${session.skill} session — join now!',
+    data: {'sessionId': session.id, 'type': 'partner_joined'},
+  );
+}
+
+/// Marks a session completed and settles the held balance.
+/// Safe to call from either party's device, and safe to call more than
+/// once for the same session (the transaction's status guard no-ops it).
+Future<void> completeSession(SessionItem session) => _remote.completeSessionAndSettle(
+  sessionId: session.id,
+  studentId: session.studentId,
+  teacherId: session.teacherId,
+  points: session.points,
+);
+
+Future<void> declineSession(String sessionId) =>
+    _remote.updateStatus(sessionId, SessionStatus.rejected);
+
+Future<void> cancelSession(String sessionId) async {
+  await _remote.updateStatus(sessionId, SessionStatus.cancelled);
+
+}
 
   /// Session is marked as live/ongoing (triggered when host starts the call).
   Future<void> startSession(String sessionId) =>
       _remote.updateStatus(sessionId, SessionStatus.ongoing);
-
-  // ── Reschedule ───────────────────────────────
-
-  /// Update the scheduled date/time of a pending session.
-  Future<void> rescheduleSession({
-    required String sessionId,
-    required DateTime newScheduledAt,
-  }) => _remote.rescheduleSession(
-    sessionId: sessionId,
-    newScheduledAt: newScheduledAt,
-  );
 
   // ── Rating ───────────────────────────────────
 
@@ -129,18 +160,6 @@ class SessionRepository {
     review: review,
   );
 
-  // ── Points ───────────────────────────────────
-
-  /// Deduct points from student and credit teacher after session completes.
-  Future<void> transferPoints({
-    required String studentId,
-    required String teacherId,
-    required int points,
-  }) => _remote.transferPoints(
-    studentId: studentId,
-    teacherId: teacherId,
-    points: points,
-  );
 
   // ── Delete ───────────────────────────────────
 

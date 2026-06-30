@@ -7,6 +7,7 @@ import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions
 class SessionsCubit extends Cubit<SessionsState> {
   final SessionRepository _repo;
   final String currentUid;
+  Timer? _completionSweepTimer;
 
   StreamSubscription? _incomingSub;
   StreamSubscription? _myRequestsSub;
@@ -24,6 +25,7 @@ class SessionsCubit extends Cubit<SessionsState> {
       emit(const SessionsLoaded(incoming: [], myRequests: []));
       _listenIncoming();
       _listenMyRequests();
+      _startCompletionSweep();
     } catch (e) {
       emit(const SessionsError('Failed to load sessions. Please try again.'));
     }
@@ -57,11 +59,33 @@ class SessionsCubit extends Cubit<SessionsState> {
     );
   }
 
-  // ── Accept ────────────────────────────────
+  // ── Auto-complete sweep ───────────────────
 
+  /// Re-checks the already-loaded lists every 30s for sessions whose
+  /// end time has passed. Firestore streams won't emit on their own near
+  /// that moment (nothing writes to the doc as time passes), so this
+  /// timer is what actually notices and triggers completion+settlement.
+  void _startCompletionSweep() {
+    _completionSweepTimer?.cancel();
+    _completionSweepTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      final current = state;
+      if (current is! SessionsLoaded) return;
+      for (final s in [...current.incoming, ...current.myRequests]) {
+        if (s.isPastEnd) {
+          _repo.completeSession(
+            s,
+          ); // fire-and-forget; transaction is idempotent-safe
+        }
+      }
+    });
+  }
+
+  // ── Accept ────────────────────────────────
   Future<void> accept(String sessionId) async {
     final current = state;
     if (current is! SessionsLoaded) return;
+
+    final session = current.incoming.firstWhere((s) => s.id == sessionId);
 
     emit(
       SessionsActionLoading(
@@ -71,13 +95,13 @@ class SessionsCubit extends Cubit<SessionsState> {
     );
 
     try {
-      await _repo.acceptSession(sessionId);
+      await _repo.acceptSession(sessionId, session);
     } catch (e) {
+     
       emit(current);
       emit(const SessionsError('Could not accept session. Try again.'));
     }
   }
-
   // ── Decline ───────────────────────────────
 
   Future<void> decline(String sessionId) async {
@@ -161,6 +185,18 @@ class SessionsCubit extends Cubit<SessionsState> {
     }
   }
 
+  // ── Join notification ─────────────────────
+
+  /// Fire-and-forget: tells the other party someone joined the call.
+  /// Doesn't block or disrupt navigation if the push fails.
+  Future<void> notifyJoined(SessionItem session) async {
+    try {
+      await _repo.notifySessionJoined(session: session, joinerUid: currentUid);
+    } catch (_) {
+      // non-critical — joining the call should proceed regardless
+    }
+  }
+
   // ── Rating ────────────────────────────────
 
   Future<void> submitRating({
@@ -205,6 +241,7 @@ class SessionsCubit extends Cubit<SessionsState> {
   Future<void> close() {
     _incomingSub?.cancel();
     _myRequestsSub?.cancel();
+    _completionSweepTimer?.cancel();
     return super.close();
   }
 }
