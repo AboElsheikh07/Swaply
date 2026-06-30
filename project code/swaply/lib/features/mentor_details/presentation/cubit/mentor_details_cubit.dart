@@ -11,9 +11,15 @@ class MentorDetailsCubit extends Cubit<MentorDetailsState> {
     emit(MentorDetailsLoading());
 
     try {
-      final user = await repository.getMentor(mentorId);
+      final results = await Future.wait([
+        repository.getMentor(mentorId),
+        repository.getAvailability(mentorId), // ✅ بيانات حقيقية
+      ]);
 
-      emit(MentorDetailsLoaded(user));
+      emit(MentorDetailsLoaded(
+        results[0] as dynamic,
+        availability: results[1] as MentorAvailability,
+      ));
     } catch (e) {
       emit(MentorDetailsError(e.toString()));
     }
