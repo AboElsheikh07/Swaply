@@ -108,7 +108,7 @@ class SessionItem {
       return false;
     }
     final now = DateTime.now();
-    final windowStart = scheduledAt.subtract(const Duration(minutes: 5));
+    final windowStart = scheduledAt;
     final windowEnd = scheduledAt.add(Duration(minutes: durationMinutes));
     return now.isAfter(windowStart) && now.isBefore(windowEnd);
   }
@@ -152,45 +152,44 @@ class SessionItem {
   }
 
   Map<String, dynamic> toFirestore() => {
-        'studentId': studentId,
-        'teacherId': teacherId,
-        'studentName': studentName,
-        'teacherName': teacherName,
-        'studentAvatar': studentAvatar,
-        'teacherAvatar': teacherAvatar,
-        'skill': skill,
-        'scheduledAt': Timestamp.fromDate(scheduledAt),
-        'durationMinutes': durationMinutes,
-        'points': points,
-        'status': status.name,
-        'message': message,
-        'createdAt': Timestamp.fromDate(createdAt),
-        'studentRated': studentRated,
-        'teacherRated': teacherRated,
-      };
+    'studentId': studentId,
+    'teacherId': teacherId,
+    'studentName': studentName,
+    'teacherName': teacherName,
+    'studentAvatar': studentAvatar,
+    'teacherAvatar': teacherAvatar,
+    'skill': skill,
+    'scheduledAt': Timestamp.fromDate(scheduledAt),
+    'durationMinutes': durationMinutes,
+    'points': points,
+    'status': status.name,
+    'message': message,
+    'createdAt': Timestamp.fromDate(createdAt),
+    'studentRated': studentRated,
+    'teacherRated': teacherRated,
+  };
 
   SessionItem copyWith({
     SessionStatus? status,
     bool? studentRated,
     bool? teacherRated,
-  }) =>
-      SessionItem(
-        id: id,
-        studentId: studentId,
-        teacherId: teacherId,
-        studentName: studentName,
-        teacherName: teacherName,
-        studentAvatar: studentAvatar,
-        teacherAvatar: teacherAvatar,
-        skill: skill,
-        scheduledAt: scheduledAt,
-        durationMinutes: durationMinutes,
-        points: points,
-        status: status ?? this.status,
-        message: message,
-        createdAt: createdAt,
-        isOutgoing: isOutgoing,
-        studentRated: studentRated ?? this.studentRated,
-        teacherRated: teacherRated ?? this.teacherRated,
-      );
+  }) => SessionItem(
+    id: id,
+    studentId: studentId,
+    teacherId: teacherId,
+    studentName: studentName,
+    teacherName: teacherName,
+    studentAvatar: studentAvatar,
+    teacherAvatar: teacherAvatar,
+    skill: skill,
+    scheduledAt: scheduledAt,
+    durationMinutes: durationMinutes,
+    points: points,
+    status: status ?? this.status,
+    message: message,
+    createdAt: createdAt,
+    isOutgoing: isOutgoing,
+    studentRated: studentRated ?? this.studentRated,
+    teacherRated: teacherRated ?? this.teacherRated,
+  );
 }

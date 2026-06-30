@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/chat/data/models/chat_models.dart';
 import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
 import 'package:swaply/l10n/app_localizations.dart';
@@ -65,17 +66,18 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final c = widget.conversation;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.card,
         elevation: 0.5,
-        shadowColor: const Color(0xFFE5E5EA),
+        shadowColor: colors.border,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF1C1C1E),
+            color: colors.text,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
@@ -87,11 +89,11 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: const Color(0xFFD1D1D6),
+                  backgroundColor: colors.primarySoft,
                   child: Text(
                     c.name[0],
-                    style: const TextStyle(
-                      color: Color(0xFF8E8E93),
+                    style: TextStyle(
+                      color: colors.primary,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -105,9 +107,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF34C759),
+                        color: colors.green,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
+                        border: Border.all(color: colors.card, width: 1.5),
                       ),
                     ),
                   ),
@@ -119,10 +121,10 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Text(
                   c.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1C1C1E),
+                    color: colors.text,
                   ),
                 ),
                 if (c.online)
@@ -130,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     l10n.online,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF34C759),
+                      color: colors.green,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -140,17 +142,17 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.phone_outlined,
-              color: Color(0xFF1C1C1E),
+              color: colors.text,
               size: 22,
             ),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.videocam_outlined,
-              color: Color(0xFF5B4FCF),
+              color: colors.primary,
               size: 24,
             ),
             onPressed: () {},
@@ -181,7 +183,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Center(
+                          child: CircularProgressIndicator(color: colors.primary),
+                        );
                       }
 
                       final messages = snapshot.data ?? [];
@@ -190,6 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         return Center(
                           child: Text(
                             l10n.noMessagesYet,
+                            style: TextStyle(color: colors.mutedFg),
                           ),
                         );
                       }
@@ -222,7 +227,7 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final mine = message.isMine;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -238,7 +243,7 @@ class _ChatBubble extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: mine ? const Color(0xFF5B4FCF) : Colors.white,
+                color: mine ? colors.primary : colors.card,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(20),
                   topRight: const Radius.circular(20),
@@ -258,7 +263,7 @@ class _ChatBubble extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 15,
                   height: 1.4,
-                  color: mine ? Colors.white : const Color(0xFF1C1C1E),
+                  color: mine ? Colors.white : colors.text,
                 ),
               ),
             ),
@@ -266,7 +271,7 @@ class _ChatBubble extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             message.formattedTime,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+            style: TextStyle(fontSize: 12, color: colors.mutedFg),
           ),
         ],
       ),
@@ -284,9 +289,10 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+   
+    final colors = context.colors;
     return Container(
-      color: Theme.of(context).cardColor,
+      color: colors.card,
       padding: EdgeInsets.only(
         left: 12,
         right: 12,
@@ -298,13 +304,13 @@ class _InputBar extends StatelessWidget {
           Container(
             width: 36,
             height: 36,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF2F2F7),
+            decoration: BoxDecoration(
+              color: colors.background,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.attach_file,
-              color: Color(0xFF8E8E93),
+              color: colors.mutedFg,
               size: 18,
             ),
           ),
@@ -313,7 +319,7 @@ class _InputBar extends StatelessWidget {
             child: Container(
               height: 42,
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F7),
+                color: colors.background,
                 borderRadius: BorderRadius.circular(21),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -323,11 +329,11 @@ class _InputBar extends StatelessWidget {
                 onSubmitted: (_) => onSend(),
                 decoration: InputDecoration(
                   hintText: AppLocalizations.of(context)!.messageHint,
-                  hintStyle: TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                  hintStyle: TextStyle(color: colors.mutedFg, fontSize: 15),
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                style: const TextStyle(fontSize: 15, color: Color(0xFF1C1C1E)),
+                style: TextStyle(fontSize: 15, color: colors.text),
               ),
             ),
           ),
@@ -338,12 +344,12 @@ class _InputBar extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Color(0xFF5B4FCF),
+                color: colors.primary,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.send_rounded,
-                color: Theme.of(context).cardColor,
+                color: Colors.white,
                 size: 18,
               ),
             ),

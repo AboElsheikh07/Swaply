@@ -29,7 +29,7 @@ class SessionRemoteDataSource {
   Stream<List<SessionItem>> watchIncomingRequests(String uid) {
     return _sessions
         .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt', descending: true)
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -42,7 +42,7 @@ class SessionRemoteDataSource {
   Stream<List<SessionItem>> watchMyRequests(String uid) {
     return _sessions
         .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt', descending: true)
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -57,7 +57,7 @@ class SessionRemoteDataSource {
   Future<List<SessionItem>> fetchIncomingRequests(String uid) async {
     final snap = await _sessions
         .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt', descending: true)
         .get();
     return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
   }
@@ -66,7 +66,7 @@ class SessionRemoteDataSource {
   Future<List<SessionItem>> fetchMyRequests(String uid) async {
     final snap = await _sessions
         .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt', descending: true)
         .get();
     return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
   }

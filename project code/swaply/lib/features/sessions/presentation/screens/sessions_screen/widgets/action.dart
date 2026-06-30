@@ -60,15 +60,13 @@ class ActionWidget extends StatelessWidget {
               OutlineBtn(
                 label: l10n.btnDecline,
                 icon: Icons.close,
-                onTap: () =>
-                    context.read<SessionsCubit>().decline(session.id),
+                onTap: () => context.read<SessionsCubit>().decline(session.id),
               ),
               const SizedBox(width: 6),
               PrimaryBtn(
                 icon: Icons.check_rounded,
                 label: l10n.btnAccept,
-                onTap: () =>
-                    context.read<SessionsCubit>().accept(session.id),
+                onTap: () => context.read<SessionsCubit>().accept(session.id),
               ),
             ],
           );
@@ -83,8 +81,6 @@ class ActionWidget extends StatelessWidget {
 
       // ── Rejected ──────────────────────────────
       case SessionStatus.rejected:
-        return _quietLabel(context, l10n.actionDeclined);
-
       // ── Cancelled → show label + Delete button ─
       case SessionStatus.cancelled:
         return Row(
@@ -95,7 +91,10 @@ class ActionWidget extends StatelessWidget {
             GestureDetector(
               onTap: () => _confirmDelete(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFEDED),
                   borderRadius: BorderRadius.circular(20),
@@ -103,7 +102,11 @@ class ActionWidget extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.delete_outline, color: Colors.red.shade400, size: 15),
+                    Icon(
+                      Icons.delete_outline,
+                      color: Colors.red.shade400,
+                      size: 15,
+                    ),
                     const SizedBox(width: 5),
                     Text(
                       l10n.btnDelete,
@@ -146,10 +149,7 @@ class ActionWidget extends StatelessWidget {
               Navigator.pop(context);
               cubit.cancel(session.id);
             },
-            child: Text(
-              l10n.btnYesCancel,
-              style: TextStyle(color: Colors.red),
-            ),
+            child: Text(l10n.btnYesCancel, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -176,10 +176,7 @@ class ActionWidget extends StatelessWidget {
               Navigator.pop(context);
               cubit.delete(session.id);
             },
-            child: Text(
-              l10n.btnYesDelete,
-              style: TextStyle(color: Colors.red),
-            ),
+            child: Text(l10n.btnYesDelete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -252,12 +249,12 @@ class ActionWidget extends StatelessWidget {
         role: isTeacher ? 'student' : 'teacher',
         onSubmit: (stars, review) {
           context.read<SessionsCubit>().submitRating(
-                sessionId: session.id,
-                rateeId: rateeId,
-                role: myRole,
-                stars: stars,
-                review: review,
-              );
+            sessionId: session.id,
+            rateeId: rateeId,
+            role: myRole,
+            stars: stars,
+            review: review,
+          );
         },
       ),
       child: Container(
