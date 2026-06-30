@@ -29,5 +29,123 @@
   "home": "الرئيسية",
   "search": "بحث",
   "messages": "الرسائل",
-  "profile": "البروفايل"
+  "profile": "البروفايل",
+  "couldNotLoadProfile": "تعذر تحميل ملفك الشخصي: {error}",
+  "@couldNotLoadProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "goodMorning": "صباح الخير،",
+  "goodAfternoon": "مساء الخير،",
+  "goodEvening": "مساء الخير،",
+  "searchSkillsUsers": "ابحث عن مهارات، مستخدمين...",
+  "learn": "تعلم",
+  "teach": "درّس",
+  "categories": "التصنيفات",
+  "seeAll": "عرض الكل",
+  "recommendedMentors": "موجهون مقترحون",
+  "activeRequests": "طلبات نشطة",
+  "noActiveRequests": "لا توجد طلبات نشطة حالياً.",
+  "letsLearn": "هيا نتعلم شيئاً اليوم",
+  "topMentors": "أفضل الموجهين",
+  "justForYou": "خصيصاً لك",
+  "promo1Title": "مهارات جديدة تُضاف يومياً",
+  "promo1Desc": "اكتشف فرص تعلم جديدة",
+  "promo2Title": "ابدأ أول تبادل لك",
+  "promo2Desc": "تواصل مع أعضاء مجتمع ماهرين",
+  "promo3Title": "اربح مكافآت أثناء المساعدة",
+  "promo3Desc": "درّس مهارة واجمع النقاط",
+  "mentorsCount": "{count} موجهين",
+  "@mentorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "ابحث عن مهارات، مستخدمين...",
+  "filterAll": "الكل",
+  "filterLatest": "الأحدث",
+  "filterMostPopular": "الأكثر شعبية",
+  "filterCheapest": "الأرخص",
+  "popularSkills": "مهارات شائعة",
+  "recentSearches": "عمليات البحث الأخيرة",
+  "clearAll": "مسح الكل",
+  "noMentorsFound": "لم يتم العثور على موجهين لـ",
+  "tryDifferentKeyword": "جرب كلمة بحث أخرى أو تصنيف مختلف",
+  "noResultsFound": "لم يتم العثور على نتائج.",
+  "tagHot": "شائع",
+  "tagNew": "جديد",
+  "tagPopular": "مشهور",
+  "manageSessionsDesc": "إدارة طلبات تبادل المهارات المرسلة إليك ومنك.",
+  "myRequests": "طلباتي",
+  "incomingRequests": "الطلبات الواردة",
+  "tryAgain": "حاول مرة أخرى",
+  "noSessionsYet": "لا توجد جلسات بعد",
+  "sessionsWillAppearHere": "ستظهر الجلسات هنا بمجرد إنشائها.",
+  "statusAccepted": "مقبول",
+  "statusOngoing": "جارية",
+  "statusPending": "قيد الانتظار",
+  "statusCompleted": "مكتملة",
+  "statusRejected": "مرفوضة",
+  "statusCancelled": "ملغاة",
+  "joinSession": "انضمام للجلسة",
+  "startsAt": "تبدأ {time}",
+  "@startsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "btnDecline": "رفض",
+  "btnAccept": "قبول",
+  "actionDeclined": "تم الرفض",
+  "btnDelete": "حذف",
+  "cancelSession": "إلغاء الجلسة",
+  "cancelSessionConfirm": "هل أنت متأكد أنك تريد إلغاء طلب الجلسة هذا؟",
+  "btnNo": "لا",
+  "btnYesCancel": "نعم، إلغاء",
+  "deleteSession": "حذف الجلسة",
+  "deleteSessionConfirm": "سيتم إزالة الجلسة نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+  "btnYesDelete": "نعم، حذف",
+  "rated": "تم التقييم",
+  "rateStudent": "تقييم الطالب",
+  "rateTeacher": "تقييم الموجه",
+  "searchConversations": "البحث في المحادثات",
+  "pleaseSignInChats": "يرجى تسجيل الدخول لعرض محادثاتك.",
+  "unableToLoadChats": "تعذر تحميل المحادثات.",
+  "noChatsYet": "لا توجد محادثات بعد. ابدأ محادثة من الشاشة الرئيسية.",
+  "pricePerHour": "السعر في الساعة",
+  "setBy": "محدد بواسطة {name}",
+  "@setBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsAmount": "{pts} نقطة",
+  "@pointsAmount": {
+    "placeholders": {
+      "pts": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsOffered": "المهارات المقدمة",
+  "nextAvailability": "التوفر القادم",
+  "mockAvailability": "اليوم 4:00 م · غداً 10:00 ص · الخميس 2:30 م",
+  "requestSession": "طلب جلسة",
+  "online": "متصل",
+  "signInToChat": "سجل الدخول للمحادثة.",
+  "unableToLoadMessages": "تعذر تحميل الرسائل",
+  "noMessagesYet": "لا توجد رسائل بعد. ابدأ المحادثة.",
+  "messageHint": "رسالة...",
+  "pointsAbbr": "نقطة",
+  "earnPointsHint": "اكسب نقاط عبر تعليم مهاراتك للآخرين.",
+  "privacySecurityHint": "إعدادات الخصوصية الخاصة بك في مكان آمن. يمكنك إدارة أذونات التطبيق ومشاركة البيانات وإشعارات الأمان هنا."
 }

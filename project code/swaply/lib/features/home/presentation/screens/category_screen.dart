@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 import '../../data/models/category_model.dart';
 
 class CategoryTab extends StatelessWidget {
@@ -101,7 +102,7 @@ class _CategoryCard extends StatelessWidget {
                       Text(category.name,
                           style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold, height: 1.2)),
                       const SizedBox(height: 4),
-                      Text('${category.count} mentors',
+                      Text(AppLocalizations.of(context)!.mentorsCount(category.count),
                           style: TextStyle(color: Colors.white.withOpacity(0.65), fontSize: 12, fontWeight: FontWeight.w500)),
                     ],
                   ),

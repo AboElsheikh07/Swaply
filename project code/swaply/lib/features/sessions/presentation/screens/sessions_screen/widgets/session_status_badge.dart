@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../data/models/session_model.dart';
 import '../../../../../../core/constants/app_colors.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 class StatusBadge extends StatelessWidget {
   final SessionStatus status;
@@ -43,20 +44,21 @@ class StatusBadge extends StatelessWidget {
   }
 
   _BadgeCfg _badgeConfig(BuildContext context, SessionStatus s) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).extension<AppColorTheme>()!;
     switch (s) {
       case SessionStatus.accepted:
-        return _BadgeCfg(colors.skyBg, colors.sky, 'Accepted');
+        return _BadgeCfg(colors.skyBg, colors.sky, l10n.statusAccepted);
       case SessionStatus.ongoing:
-        return _BadgeCfg(colors.greenBg, colors.green, 'Ongoing');
+        return _BadgeCfg(colors.greenBg, colors.green, l10n.statusOngoing);
       case SessionStatus.pending:
-        return _BadgeCfg(colors.amberBg, colors.amber, 'Pending');
+        return _BadgeCfg(colors.amberBg, colors.amber, l10n.statusPending);
       case SessionStatus.completed:
-        return _BadgeCfg(const Color(0xFFF3F4F6), colors.muted, 'Completed');
+        return _BadgeCfg(const Color(0xFFF3F4F6), colors.muted, l10n.statusCompleted);
       case SessionStatus.rejected:
-        return _BadgeCfg(const Color(0xFFF3F4F6), colors.rose, 'Rejected');
+        return _BadgeCfg(const Color(0xFFF3F4F6), colors.rose, l10n.statusRejected);
       case SessionStatus.cancelled:
-        return _BadgeCfg(const Color(0xFFF3F4F6), colors.muted, 'Cancelled');
+        return _BadgeCfg(const Color(0xFFF3F4F6), colors.muted, l10n.statusCancelled);
     }
   }
 }

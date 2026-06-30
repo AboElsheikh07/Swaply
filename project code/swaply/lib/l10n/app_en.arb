@@ -29,5 +29,123 @@
   "home": "Home",
   "search": "Search",
   "messages": "Messages",
-  "profile": "Profile"
+  "profile": "Profile",
+  "couldNotLoadProfile": "Could not load your profile: {error}",
+  "@couldNotLoadProfile": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "goodMorning": "Good Morning,",
+  "goodAfternoon": "Good Afternoon,",
+  "goodEvening": "Good Evening,",
+  "searchSkillsUsers": "Search skills, users...",
+  "learn": "Learn",
+  "teach": "Teach",
+  "categories": "Categories",
+  "seeAll": "See All",
+  "recommendedMentors": "Recommended Mentors",
+  "activeRequests": "Active Requests",
+  "noActiveRequests": "No active requests right now.",
+  "letsLearn": "Let's learn something today",
+  "topMentors": "Top Mentors",
+  "justForYou": "Just for you",
+  "promo1Title": "New skills added daily",
+  "promo1Desc": "Explore fresh learning opportunities",
+  "promo2Title": "Start your first exchange",
+  "promo2Desc": "Connect with skilled community members",
+  "promo3Title": "Earn rewards while helping",
+  "promo3Desc": "Teach a skill and collect points",
+  "mentorsCount": "{count} Mentors",
+  "@mentorsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "Search skills, users...",
+  "filterAll": "All",
+  "filterLatest": "Latest",
+  "filterMostPopular": "Most Popular",
+  "filterCheapest": "Cheapest",
+  "popularSkills": "Popular Skills",
+  "recentSearches": "Recent Searches",
+  "clearAll": "Clear All",
+  "noMentorsFound": "No mentors found for",
+  "tryDifferentKeyword": "Try a different keyword or category",
+  "noResultsFound": "No results found.",
+  "tagHot": "Hot",
+  "tagNew": "New",
+  "tagPopular": "Popular",
+  "manageSessionsDesc": "Manage skill swap requests sent to and from you.",
+  "myRequests": "My Requests",
+  "incomingRequests": "Incoming Requests",
+  "tryAgain": "Try again",
+  "noSessionsYet": "No sessions yet",
+  "sessionsWillAppearHere": "Sessions will appear here once created.",
+  "statusAccepted": "Accepted",
+  "statusOngoing": "Ongoing",
+  "statusPending": "Pending",
+  "statusCompleted": "Completed",
+  "statusRejected": "Rejected",
+  "statusCancelled": "Cancelled",
+  "joinSession": "Join Session",
+  "startsAt": "Starts {time}",
+  "@startsAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "btnDecline": "Decline",
+  "btnAccept": "Accept",
+  "actionDeclined": "Declined",
+  "btnDelete": "Delete",
+  "cancelSession": "Cancel Session",
+  "cancelSessionConfirm": "Are you sure you want to cancel this session request?",
+  "btnNo": "No",
+  "btnYesCancel": "Yes, Cancel",
+  "deleteSession": "Delete Session",
+  "deleteSessionConfirm": "This will permanently remove the session. This cannot be undone.",
+  "btnYesDelete": "Yes, Delete",
+  "rated": "Rated",
+  "rateStudent": "Rate Student",
+  "rateTeacher": "Rate Teacher",
+  "searchConversations": "Search conversations",
+  "pleaseSignInChats": "Please sign in to view your conversations.",
+  "unableToLoadChats": "Unable to load conversations.",
+  "noChatsYet": "No chats yet. Start a conversation from the home screen.",
+  "pricePerHour": "Price per hour",
+  "setBy": "Set by {name}",
+  "@setBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "pointsAmount": "{pts} pts",
+  "@pointsAmount": {
+    "placeholders": {
+      "pts": {
+        "type": "String"
+      }
+    }
+  },
+  "skillsOffered": "Skills offered",
+  "nextAvailability": "Next availability",
+  "mockAvailability": "Today 4:00 PM · Tomorrow 10:00 AM · Thu 2:30 PM",
+  "requestSession": "Request Session",
+  "online": "Online",
+  "signInToChat": "Sign in to chat.",
+  "unableToLoadMessages": "Unable to load messages",
+  "noMessagesYet": "No messages yet. Start the conversation.",
+  "messageHint": "Message...",
+  "pointsAbbr": "pts",
+  "earnPointsHint": "Earn points by teaching skills.",
+  "privacySecurityHint": "Your privacy settings are in a safe place. You can manage app permissions, data sharing and security notifications here."
 }

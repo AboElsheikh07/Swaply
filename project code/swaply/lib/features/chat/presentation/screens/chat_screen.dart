@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:swaply/features/chat/data/models/chat_models.dart';
 import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final c = widget.conversation;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -124,8 +126,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   ),
                 ),
                 if (c.online)
-                  const Text(
-                    'Online',
+                  Text(
+                    l10n.online,
                     style: TextStyle(
                       fontSize: 12,
                       color: Color(0xFF34C759),
@@ -157,7 +159,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
       body: _currentUser == null
-          ? const Center(child: Text('Sign in to chat.'))
+          ? Center(child: Text(l10n.signInToChat))
           : Column(
               children: [
                 Expanded(
@@ -170,7 +172,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       if (snapshot.hasError) {
                         return Center(
                           child: Text(
-                            'Unable to load messages',
+                            l10n.unableToLoadMessages,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.error,
                             ),
@@ -185,9 +187,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       final messages = snapshot.data ?? [];
 
                       if (messages.isEmpty) {
-                        return const Center(
+                        return Center(
                           child: Text(
-                            'No messages yet. Start the conversation.',
+                            l10n.noMessagesYet,
                           ),
                         );
                       }
@@ -220,6 +222,7 @@ class _ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final mine = message.isMine;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -281,6 +284,7 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Theme.of(context).cardColor,
       padding: EdgeInsets.only(
@@ -317,8 +321,8 @@ class _InputBar extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onSubmitted: (_) => onSend(),
-                decoration: const InputDecoration(
-                  hintText: 'Message...',
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.messageHint,
                   hintStyle: TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
                   border: InputBorder.none,
                   isDense: true,

@@ -12,6 +12,7 @@ import 'withdraw_points_screen.dart';
 import '../cubit/profile_cubit.dart';
 import '../cubit/profile_state.dart';
 import 'package:swaply/l10n/app_localizations.dart';
+import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/features/user/cubit/user_cubit.dart';
 import 'package:swaply/features/user/cubit/user_state.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
@@ -38,10 +39,10 @@ class _ProfileView extends StatelessWidget {
         return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: _ProfileColors.pageBackground,
+          backgroundColor: context.pageBackground,
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            backgroundColor: _ProfileColors.pageBackground,
+            backgroundColor: context.pageBackground,
             surfaceTintColor: Colors.transparent,
             scrolledUnderElevation: 0,
             elevation: 0,
@@ -99,14 +100,8 @@ class _ProfileView extends StatelessWidget {
                 const SizedBox(height: 18),
                 _LogoutButton(
                   l10n: l10n,
-                  onTap: () {
-                    final navigator = Navigator.of(context);
-                    FirebaseAuth.instance.signOut().then((_) {
-                      navigator.pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-                        (route) => false,
-                      );
-                    });
+                  onTap: () async {
+                    await FirebaseAuth.instance.signOut();
                   },
                 ),
               ],
@@ -356,12 +351,12 @@ class _ProfileView extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(isTopUp ? 'Top up points' : 'Withdraw points'),
+          title: Text(isTopUp ? l10n.topUp : l10n.withdraw),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: amounts.map((amount) {
               return ListTile(
-                title: Text('$amount pts'),
+                title: Text('$amount ${l10n.pointsAbbr}'),
                 onTap: () {
                   if (isTopUp) {
                     context.read<ProfileCubit>().topUpPoints(amount);
@@ -391,8 +386,8 @@ class _ProfileView extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: Text(l10n.privacySecurity),
-          content: const Text(
-            'Your privacy settings are in a safe place. You can manage app permissions,/n data sharing and security notifications here.',
+          content: Text(
+            l10n.privacySecurityHint,
           ),
           actions: [
             TextButton(
@@ -526,15 +521,15 @@ class _PointsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [_ProfileColors.primary, _ProfileColors.primaryDark],
+          colors: [context.primary, context.primaryDark],
         ),
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: _ProfileColors.primary.withValues(alpha: 0.30),
+            color: context.primary.withValues(alpha: 0.30),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -574,7 +569,7 @@ class _PointsCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  '$points pts',
+                  '$points ${l10n.pointsAbbr}',
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w800,
@@ -584,7 +579,7 @@ class _PointsCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Earn points by teaching skills.',
+                  l10n.earnPointsHint,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
@@ -654,7 +649,7 @@ class _BalanceActionButton extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: isPrimary ? _ProfileColors.primary : Colors.white,
+            color: isPrimary ? context.primary : Colors.white,
           ),
         ),
       ),
@@ -677,7 +672,7 @@ class _StatsRow extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.star_rounded,
-            iconColor: _ProfileColors.star,
+            iconColor: context.star,
             value: user.ratingAvg.toStringAsFixed(1),
             label: l10n.rating,
           ),
@@ -713,9 +708,9 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _ProfileColors.border),
+        border: Border.all(color: context.border),
       ),
       child: Column(
         children: [
@@ -797,15 +792,15 @@ class _SkillChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: _ProfileColors.skillChipBackground,
+        color: context.skillChipBackground,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: _ProfileColors.primary,
+          color: context.primary,
         ),
       ),
     );
@@ -824,7 +819,7 @@ class _AddSkillChip extends StatelessWidget {
       onTap: onTap,
       child: CustomPaint(
         painter: _DashedRRectPainter(
-          color: _ProfileColors.dashedBorder,
+          color: context.dashedBorder,
           radius: 18,
         ),
         child: Container(
@@ -870,9 +865,9 @@ class _SettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _ProfileColors.border),
+        border: Border.all(color: context.border),
       ),
       child: Column(
         children: [
@@ -937,7 +932,7 @@ class _SettingsSection extends StatelessWidget {
             trailing: CupertinoSwitch(
               value: state.isDarkMode,
               onChanged: onDarkModeChanged,
-              activeTrackColor: _ProfileColors.primary,
+              activeTrackColor: context.primary,
               thumbColor: Colors.white,
             ),
           ),
@@ -971,11 +966,11 @@ class _SettingsTile extends StatelessWidget {
             Container(
               width: 28,
               height: 28,
-              decoration: const BoxDecoration(
-                color: _ProfileColors.iconBackground,
+              decoration: BoxDecoration(
+                color: context.iconBackground,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 15, color: _ProfileColors.primary),
+              child: Icon(icon, size: 15, color: context.primary),
             ),
             SizedBox(width: 12),
             Expanded(
@@ -1006,10 +1001,10 @@ class _SettingsDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 1,
       thickness: 1,
-      color: _ProfileColors.divider,
+      color: context.divider,
       indent: 14,
       endIndent: 14,
     );
@@ -1031,16 +1026,16 @@ class _LogoutButton extends StatelessWidget {
         height: 46,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: _ProfileColors.logoutBackground,
+          color: context.logoutBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.logout_rounded,
               size: 18,
-              color: _ProfileColors.logoutText,
+              color: context.logoutText,
             ),
             const SizedBox(width: 8),
             Text(
@@ -1048,7 +1043,7 @@ class _LogoutButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: _ProfileColors.logoutText,
+                color: context.logoutText,
               ),
             ),
           ],
@@ -1099,19 +1094,21 @@ class _DashedRRectPainter extends CustomPainter {
   }
 }
 
-abstract class _ProfileColors {
-  static const Color pageBackground = Color(0xFFF7F6FB);
-  static const Color title = Color(0xFF17141F);
-  static const Color subtleText = Color(0xFF8D8A98);
-  static const Color border = Color(0xFFE6E2EF);
-  static const Color divider = Color(0xFFEEEAF5);
-  static const Color avatarBackground = Color(0xFFE8E7EA);
-  static const Color iconBackground = Color(0xFFF1EDFF);
-  static const Color skillChipBackground = Color(0xFFF1EDFF);
-  static const Color dashedBorder = Color(0xFFD4D0DD);
-  static const Color primary = Color(0xFF5B47E7);
-  static const Color primaryDark = Color(0xFF6A58EE);
-  static const Color star = Color(0xFFF4B400);
-  static const Color logoutBackground = Color(0xFFFBEAEB);
-  static const Color logoutText = Color(0xFFE74A5A);
+extension ProfileColorsExt on BuildContext {
+  AppColorTheme get colors => Theme.of(this).extension<AppColorTheme>()!;
+  
+  Color get pageBackground => Theme.of(this).scaffoldBackgroundColor;
+  Color get title => Theme.of(this).textTheme.bodyLarge!.color!;
+  Color get subtleText => Theme.of(this).textTheme.bodyMedium!.color!;
+  Color get border => Theme.of(this).dividerColor;
+  Color get divider => Theme.of(this).dividerColor;
+  Color get avatarBackground => Theme.of(this).cardColor;
+  Color get iconBackground => colors.primarySoft;
+  Color get skillChipBackground => colors.primarySoft;
+  Color get dashedBorder => colors.border;
+  Color get primary => colors.primary;
+  Color get primaryDark => colors.primary;
+  Color get star => colors.amber;
+  Color get logoutBackground => colors.roseBg;
+  Color get logoutText => colors.rose;
 }

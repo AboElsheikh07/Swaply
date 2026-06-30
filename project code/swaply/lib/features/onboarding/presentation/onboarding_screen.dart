@@ -87,9 +87,7 @@ class OnboardingFlowState extends State<OnboardingFlow> {
     return BlocListener<OnboardingCubit, OnboardingState>(
       listener: (context, state) {
         if (state is OnboardingSuccess) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const RootView()),
-          );
+          Navigator.of(context).popUntil((route) => route.isFirst);
         }
         if (state is OnboardingError) {
           ScaffoldMessenger.of(context).showSnackBar(

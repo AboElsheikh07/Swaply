@@ -15,7 +15,7 @@ class AppTheme {
     iconTheme: IconThemeData(color: AppColors.light.text),
     textTheme: TextTheme(
       bodyLarge: TextStyle(color: AppColors.light.text),
-      bodyMedium: TextStyle(color: AppColors.light.text),
+      bodyMedium: TextStyle(color: AppColors.light.mutedFg),
       titleLarge: TextStyle(color: AppColors.light.text),
       titleMedium: TextStyle(color: AppColors.light.text),
     ),
@@ -33,7 +33,7 @@ class AppTheme {
     iconTheme: IconThemeData(color: AppColors.dark.text),
     textTheme: TextTheme(
       bodyLarge: TextStyle(color: AppColors.dark.text),
-      bodyMedium: TextStyle(color: AppColors.dark.muted),
+      bodyMedium: TextStyle(color: AppColors.dark.mutedFg),
       titleLarge: TextStyle(color: AppColors.dark.text),
       titleMedium: TextStyle(color: AppColors.dark.text),
     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -56,7 +57,7 @@ class _AuthGate extends StatelessWidget {
         if (authState is AuthError) {
           return Scaffold(
             body: Center(
-              child: Text('Could not load your profile: ${authState.message}'),
+              child: Text(AppLocalizations.of(context)!.couldNotLoadProfile(authState.message)),
             ),
           );
         }
@@ -110,7 +111,7 @@ class _HomeViewState extends State<_HomeView>
                       ? (context.watch<AuthCubit>().state as UserLoaded).user
                       : null,
                 ),
-                _buildTabBar(),
+                _buildTabBar(context),
                 Expanded(
                   child: switch (state) {
                     HomeLoading() => const Center(
@@ -146,7 +147,8 @@ class _HomeViewState extends State<_HomeView>
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Theme.of(context).cardColor,
       child: TabBar(
@@ -162,9 +164,9 @@ class _HomeViewState extends State<_HomeView>
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorWeight: 2,
         dividerColor: _border,
-        tabs: const [
-          Tab(text: 'Home'),
-          Tab(text: 'Category'),
+        tabs: [
+          Tab(text: l10n.home),
+          Tab(text: l10n.categories),
         ],
       ),
     );
@@ -220,10 +222,10 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   'Hi, ${user?.username.split(" ").first ?? "User"}',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "Let's learn something today",
+                  AppLocalizations.of(context)!.letsLearn,
                   style: TextStyle(
                     fontSize: 12,
                     color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -316,11 +318,7 @@ class _HomeTabState extends State<_HomeTab> {
   final _pageCtrl = PageController();
   int _slide = 0;
 
-  static const _promos = [
-    ('New skills added daily', 'Explore fresh learning opportunities'),
-    ('Start your first exchange', 'Connect with skilled community members'),
-    ('Earn rewards while helping', 'Teach a skill and collect points'),
-  ];
+
 
   @override
   void dispose() {
@@ -330,6 +328,13 @@ class _HomeTabState extends State<_HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final promos = [
+      (l10n.promo1Title, l10n.promo1Desc),
+      (l10n.promo2Title, l10n.promo2Desc),
+      (l10n.promo3Title, l10n.promo3Desc),
+    ];
+
     return RefreshIndicator(
       color: _primary,
       onRefresh: () => context.read<HomeCubit>().refresh(),
@@ -347,11 +352,11 @@ class _HomeTabState extends State<_HomeTab> {
                     height: 140,
                     child: PageView.builder(
                       controller: _pageCtrl,
-                      itemCount: _promos.length,
+                      itemCount: promos.length,
                       onPageChanged: (i) => setState(() => _slide = i),
                       itemBuilder: (_, i) => _PromoCard(
-                        title: _promos[i].$1,
-                        subtitle: _promos[i].$2,
+                        title: promos[i].$1,
+                        subtitle: promos[i].$2,
                       ),
                     ),
                   ),
@@ -360,7 +365,7 @@ class _HomeTabState extends State<_HomeTab> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
-                    _promos.length,
+                    promos.length,
                     (i) => AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -380,7 +385,7 @@ class _HomeTabState extends State<_HomeTab> {
 
           // ── Top Mentors ──
           _SectionHeader(
-            title: 'Top Mentors',
+            title: l10n.topMentors,
             icon: Icons.local_fire_department_rounded,
             onSeeAll: () {},
           ),
@@ -389,7 +394,7 @@ class _HomeTabState extends State<_HomeTab> {
           const SizedBox(height: 24),
 
           // ── Just For You ──
-          _SectionHeader(title: 'Just for you', onSeeAll: () {}),
+          _SectionHeader(title: l10n.justForYou, onSeeAll: () {}),
           const SizedBox(height: 12),
           _MentorGrid(mentors: widget.recommended),
         ],

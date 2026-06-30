@@ -6,6 +6,7 @@ import 'package:swaply/features/search/data/models/search_model.dart';
 import 'package:swaply/features/search/data/repositories/search_repository_firebase.dart';
 import 'package:swaply/features/search/presentation/cubit/search_cubit.dart';
 import 'package:swaply/features/search/presentation/cubit/search_state.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 const searchPrimary     = Color(0xFF5B4CB8);
 const searchPrimarySoft = Color(0xFFEEECFB);
@@ -232,13 +233,13 @@ class SearchIdleView extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text('Last Search',
+            Text(AppLocalizations.of(context)!.recentSearches,
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
             const Spacer(),
             if (recentSearches.isNotEmpty)
               GestureDetector(
                 onTap: onClearAll,
-                child: const Text('Clear All',
+                child: Text(AppLocalizations.of(context)!.clearAll,
                     style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -285,7 +286,7 @@ class SearchIdleView extends StatelessWidget {
           ),
         const SizedBox(height: 24),
 
-        const Text('Popular Skills',
+        Text(AppLocalizations.of(context)!.popularSkills,
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         ...popularSkills.map(
@@ -345,8 +346,21 @@ class SearchResultsView extends StatelessWidget {
     required this.sortTabs,
   });
 
+  
+  String _getLocalizedTab(BuildContext context, String tab) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (tab) {
+      case 'All': return l10n.filterAll;
+      case 'Latest': return l10n.filterLatest;
+      case 'Most Popular': return l10n.filterMostPopular;
+      case 'Cheapest': return l10n.filterCheapest;
+      default: return tab;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         // Sort tabs
@@ -385,8 +399,8 @@ class SearchResultsView extends StatelessWidget {
 
         Expanded(
           child: results.isEmpty
-              ? const Center(
-                  child: Text('No results found.',
+              ? Center(
+                  child: Text(AppLocalizations.of(context)!.noResultsFound,
                       style: TextStyle(color: searchMutedFg)))
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -507,13 +521,16 @@ class SkillTagBadge extends StatelessWidget {
   final SkillTag tag;
   const SkillTagBadge({super.key, required this.tag});
 
+  
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final map = {
-      SkillTag.hot:      ('Hot',     const Color(0xFFFFEBEE), const Color(0xFFE53935)),
-      SkillTag.newSkill: ('New',     const Color(0xFFFFF3E0), const Color(0xFFF57C00)),
-      SkillTag.popular:  ('Popular', const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
+      SkillTag.hot:      (l10n.tagHot,     const Color(0xFFFFEBEE), const Color(0xFFE53935)),
+      SkillTag.newSkill: (l10n.tagNew,     const Color(0xFFFFF3E0), const Color(0xFFF57C00)),
+      SkillTag.popular:  (l10n.tagPopular, const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
     };
+
     final (label, bg, fg) = map[tag]!;
     return Container(
       padding:

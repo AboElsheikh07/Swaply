@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/chat_models.dart';
 import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 class ConversationsScreen extends StatelessWidget {
   ConversationsScreen({super.key});
@@ -11,6 +12,7 @@ class ConversationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -20,10 +22,10 @@ class ConversationsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Messages',
+                l10n.messages,
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
@@ -51,7 +53,7 @@ class ConversationsScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Search conversations',
+                      l10n.searchConversations,
                       style: TextStyle(
                         fontSize: 15,
                         color: Theme.of(context).iconTheme.color,
@@ -64,8 +66,8 @@ class ConversationsScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Expanded(
               child: currentUser == null
-                  ? const Center(
-                      child: Text('Please sign in to view your conversations.'),
+                  ? Center(
+                      child: Text(l10n.pleaseSignInChats),
                     )
                   : StreamBuilder<List<Conversation>>(
                       stream: _chatRepository.watchConversations(
@@ -75,7 +77,7 @@ class ConversationsScreen extends StatelessWidget {
                         if (snapshot.hasError) {
                           return Center(
                             child: Text(
-                              'Unable to load conversations.',
+                              l10n.unableToLoadChats,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.error,
                               ),
@@ -93,9 +95,9 @@ class ConversationsScreen extends StatelessWidget {
                         final conversations = snapshot.data ?? [];
 
                         if (conversations.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Text(
-                              'No chats yet. Start a conversation from the home screen.',
+                              l10n.noChatsYet,
                             ),
                           );
                         }
@@ -139,6 +141,7 @@ class _ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final c = conversation;
     return InkWell(
       onTap: onTap,

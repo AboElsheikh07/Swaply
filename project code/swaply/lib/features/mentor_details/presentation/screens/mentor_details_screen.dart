@@ -8,6 +8,7 @@ import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 const mdPrimary = Color(0xFF5B4CB8);
 const mdPrimarySoft = Color(0xFFEEECFB);
@@ -22,6 +23,7 @@ class MentorDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
       // ✅ بدّل MockMentorDetailsRepository بـ FirebaseMentorDetailsRepository لما Firebase يتجهز
       create: (_) =>
@@ -36,6 +38,7 @@ class MentorDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocBuilder<MentorDetailsCubit, MentorDetailsState>(
@@ -88,6 +91,7 @@ class MentorDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Stack(
       children: [
         CustomScrollView(
@@ -225,7 +229,7 @@ class MentorDetailsContent extends StatelessWidget {
                               ),
                             ],
                           ),
-                          label: 'Rating',
+                          label: l10n.rating,
                         ),
                         const SizedBox(width: 8),
                         MdStatCard(
@@ -236,18 +240,18 @@ class MentorDetailsContent extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          label: 'Reviews',
+                          label: l10n.reviews,
                         ),
                         const SizedBox(width: 8),
-                        const MdStatCard(
-                          value: Text(
+                        MdStatCard(
+                          value: const Text(
                             '120+',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          label: 'Sessions',
+                          label: l10n.sessions,
                         ),
                       ],
                     ),
@@ -283,15 +287,15 @@ class MentorDetailsContent extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Price per hour',
+                                Text(
+                                  l10n.pricePerHour,
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: mdMutedFg,
                                   ),
                                 ),
                                 Text(
-                                  'Set by ${mentor.username.split(' ').first}',
+                                  l10n.setBy(mentor.username.split(' ').first),
                                   style: const TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -301,7 +305,7 @@ class MentorDetailsContent extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${mentor.pricePerHour} pts',
+                            l10n.pointsAmount(mentor.pricePerHour.toString()),
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
@@ -314,8 +318,8 @@ class MentorDetailsContent extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     // Skills
-                    const Text(
-                      'Skills offered',
+                    Text(
+                      l10n.skillsOffered,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -359,11 +363,11 @@ class MentorDetailsContent extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(color: mdBorder),
                       ),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Next availability',
+                            l10n.nextAvailability,
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -371,7 +375,7 @@ class MentorDetailsContent extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Today 4:00 PM · Tomorrow 10:00 AM · Thu 2:30 PM',
+                            l10n.mockAvailability,
                             style: TextStyle(fontSize: 12, color: mdMutedFg),
                           ),
                         ],
@@ -455,8 +459,8 @@ class MentorDetailsContent extends StatelessWidget {
                           borderRadius: BorderRadius.circular(32),
                         ),
                       ),
-                      child: const Text(
-                        'Request Session',
+                      child: Text(
+                        l10n.requestSession,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,

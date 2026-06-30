@@ -87,11 +87,7 @@ class LoginViewState extends State<LoginView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const RootView()),
-              (route) => false, // removes all previous routes
-            );
+            Navigator.popUntil(context, (route) => route.isFirst);
           }
           if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(

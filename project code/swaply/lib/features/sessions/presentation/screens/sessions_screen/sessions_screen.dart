@@ -5,6 +5,7 @@ import 'package:swaply/features/sessions/data/models/session_model.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/session_card.dart';
+import 'package:swaply/l10n/app_localizations.dart';
 
 class SessionsScreen extends StatefulWidget {
   const SessionsScreen({super.key});
@@ -53,7 +54,7 @@ class _SessionsScreenState extends State<SessionsScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Sessions',
+                          AppLocalizations.of(context)!.sessions,
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
@@ -62,7 +63,7 @@ class _SessionsScreenState extends State<SessionsScreen>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Manage skill swap requests sent to and from you.',
+                          AppLocalizations.of(context)!.manageSessionsDesc,
                           style: TextStyle(fontSize: 13, color: colors.muted),
                         ),
                       ],
@@ -84,9 +85,9 @@ class _SessionsScreenState extends State<SessionsScreen>
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorWeight: 2,
                     dividerColor: colors.border,
-                    tabs: const [
-                      Tab(text: 'My Requests'),
-                      Tab(text: 'Incoming Requests'),
+                    tabs: [
+                      Tab(text: AppLocalizations.of(context)!.myRequests),
+                      Tab(text: AppLocalizations.of(context)!.incomingRequests),
                     ],
                   ),
                 ],
@@ -124,7 +125,7 @@ class _SessionsScreenState extends State<SessionsScreen>
                             onPressed: () =>
                                 context.read<SessionsCubit>().loadSessions(),
                             child: Text(
-                              'Try again',
+                              AppLocalizations.of(context)!.tryAgain,
                               style: TextStyle(color: colors.primary),
                             ),
                           ),
@@ -180,7 +181,7 @@ class _SessionList extends StatelessWidget {
             Icon(Icons.calendar_today_outlined, size: 48, color: colors.muted),
             const SizedBox(height: 12),
             Text(
-              'No sessions yet',
+              AppLocalizations.of(context)!.noSessionsYet,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -189,7 +190,7 @@ class _SessionList extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Sessions will appear here once created.',
+              AppLocalizations.of(context)!.sessionsWillAppearHere,
               style: TextStyle(fontSize: 13, color: colors.muted),
             ),
           ],

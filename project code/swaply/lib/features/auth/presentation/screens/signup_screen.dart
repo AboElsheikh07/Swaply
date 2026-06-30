@@ -84,10 +84,9 @@ class SignupViewState extends State<SignupView> {
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-              (route) => false, // removes all previous routes
             );
           }
           if (state is AuthError) {

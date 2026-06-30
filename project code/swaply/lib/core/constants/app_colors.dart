@@ -130,7 +130,7 @@ abstract class AppColors {
     background: Color(0xFF121212),
     card: Color(0xFF1E1E1E),
     border: Color(0xFF2C2C2C),
-    muted: Color.fromARGB(255, 12, 22, 41),
+    muted: Color(0xFF6B7280),
     text: Color(0xFFF9FAFB),
     green: Color(0xFF10B981),
     greenBg: Color(0xFF064E3B),

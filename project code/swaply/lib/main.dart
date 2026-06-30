@@ -26,14 +26,21 @@ void main() async {
   runApp(MyApp(initialDarkMode: isDarkMode));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final bool initialDarkMode;
   const MyApp({super.key, required this.initialDarkMode});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String? _lastUid;
+
+  @override
   Widget build(BuildContext context) {
     return AppProviders(
-      initialDarkMode: initialDarkMode,
+      initialDarkMode: widget.initialDarkMode,
       child: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, profileState) {
           return MaterialApp(
@@ -58,9 +65,14 @@ class MyApp extends StatelessWidget {
               return StreamBuilder<User?>(
                 stream: FirebaseAuth.instance.authStateChanges(),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
+                  final user = snapshot.data;
+                  if (user != null) {
+                    _lastUid = user.uid;
+                  }
+                  if (_lastUid != null) {
                     return AuthenticatedProviders(
-                      uid: snapshot.data!.uid,
+                      key: ValueKey(_lastUid),
+                      uid: _lastUid!,
                       child: child!,
                     );
                   }
@@ -71,19 +83,14 @@ class MyApp extends StatelessWidget {
             home: StreamBuilder<User?>(
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
-                // ── Waiting for auth state ──
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
                   );
                 }
-
-                // ── Logged in ──
                 if (snapshot.hasData && snapshot.data != null) {
                   return const RootView();
                 }
-
-                // ── Not logged in ──
                 return const WelcomeScreen();
               },
             ),

@@ -113,7 +113,7 @@ class WelcomeScreen extends StatelessWidget {
                 _btn(
                   label: 'Create Account',
                   onTap: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const SignupScreen()),
                     );
@@ -127,7 +127,7 @@ class WelcomeScreen extends StatelessWidget {
                 _btn(
                   label: 'I already have an account',
                   onTap: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                     );
