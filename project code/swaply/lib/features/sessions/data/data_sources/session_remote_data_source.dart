@@ -94,16 +94,69 @@ class SessionRemoteDataSource {
     });
   }
 
-  // ── Reschedule ───────────────────────────────
+// ── Accept (with hold) ────────────────────────
 
-  /// Update the scheduledAt field of a session.
-  Future<void> rescheduleSession({
+  /// Accepts a session and holds the cost on the student's balance,
+  /// atomically. Guards against double-processing if called twice.
+  Future<void> acceptSessionWithHold({
     required String sessionId,
-    required DateTime newScheduledAt,
+    required String studentId,
+    required int points,
   }) async {
-    await _sessions.doc(sessionId).update({
-      'scheduledAt': Timestamp.fromDate(newScheduledAt),
-      'updatedAt': FieldValue.serverTimestamp(),
+    final sessionRef = _sessions.doc(sessionId);
+    final studentRef = _users.doc(studentId);
+
+    await _db.runTransaction((tx) async {
+      final sessionSnap = await tx.get(sessionRef);
+      final status = sessionSnap.data()?['status'];
+      if (status != SessionStatus.pending.name) return; // already handled
+
+      tx.update(sessionRef, {
+        'status': SessionStatus.accepted.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      tx.update(studentRef, {
+        'heldBalance': FieldValue.increment(points),
+      });
+    });
+  }
+
+  // ── Complete + settle ──────────────────────────
+
+  /// Marks an accepted/ongoing session completed and moves the held
+  /// points: deducted from student.balance, released from
+  /// student.heldBalance, credited to teacher.balance. One transaction,
+  /// guarded by a status check so a second concurrent call (e.g. both
+  /// users' devices sweeping at once) is a safe no-op.
+  Future<void> completeSessionAndSettle({
+    required String sessionId,
+    required String studentId,
+    required String teacherId,
+    required int points,
+  }) async {
+    final sessionRef = _sessions.doc(sessionId);
+    final studentRef = _users.doc(studentId);
+    final teacherRef = _users.doc(teacherId);
+
+    await _db.runTransaction((tx) async {
+      final sessionSnap = await tx.get(sessionRef);
+      final status = sessionSnap.data()?['status'];
+      if (status != SessionStatus.accepted.name &&
+          status != SessionStatus.ongoing.name) {
+        return; // already completed/cancelled elsewhere — skip
+      }
+
+      tx.update(sessionRef, {
+        'status': SessionStatus.completed.name,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      tx.update(studentRef, {
+        'balance': FieldValue.increment(-points),
+        'heldBalance': FieldValue.increment(-points),
+      });
+      tx.update(teacherRef, {
+        'balance': FieldValue.increment(points),
+      });
     });
   }
 
@@ -155,34 +208,6 @@ class SessionRemoteDataSource {
     await _sessions.doc(sessionId).update({
       '${role}Rated': true,
       'updatedAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  // ── Points ───────────────────────────────────
-
-  /// Deduct points from student, credit teacher — runs as a transaction
-  /// so both writes succeed or both fail (no partial updates).
-  Future<void> transferPoints({
-    required String studentId,
-    required String teacherId,
-    required int points,
-  }) async {
-    final studentRef = _users.doc(studentId);
-    final teacherRef = _users.doc(teacherId);
-
-    await _db.runTransaction((tx) async {
-      final studentSnap = await tx.get(studentRef);
-      final teacherSnap = await tx.get(teacherRef);
-
-      final studentPoints = (studentSnap.data()?['points'] as int?) ?? 0;
-      final teacherPoints = (teacherSnap.data()?['points'] as int?) ?? 0;
-
-      if (studentPoints < points) {
-        throw Exception('Insufficient points');
-      }
-
-      tx.update(studentRef, {'points': studentPoints - points});
-      tx.update(teacherRef, {'points': teacherPoints + points});
     });
   }
 

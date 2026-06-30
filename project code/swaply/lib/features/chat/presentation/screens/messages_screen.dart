@@ -114,7 +114,7 @@ class ConversationsScreen extends StatelessWidget {
                         return ListView.separated(
                           padding: EdgeInsets.zero,
                           itemCount: conversations.length,
-                          separatorBuilder: (_, __) => Divider(
+                          separatorBuilder: (_, _) => Divider(
                             height: 1,
                             indent: 82,
                             color: colors.border,

@@ -18,7 +18,7 @@ class MentorDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  
     return BlocProvider(
       // ✅ بدّل MockMentorDetailsRepository بـ FirebaseMentorDetailsRepository لما Firebase يتجهز
       create: (_) =>
@@ -33,7 +33,7 @@ class MentorDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+   
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -105,7 +105,7 @@ class MentorDetailsContent extends StatelessWidget {
                           ? Image.network(
                               mentor.avatarUrl,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
+                              errorBuilder: (_, _ ,_) =>
                                   const _MentorAvatarFallback(),
                               loadingBuilder: (context, child, progress) {
                                 if (progress == null) return child;
@@ -294,7 +294,7 @@ class MentorDetailsContent extends StatelessWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: colors.primary.withOpacity(0.12),
+                              color: colors.primary.withValues(alpha:0.12),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -538,10 +538,10 @@ class MdCircleBtn extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: colors.card.withOpacity(0.92),
+          color: colors.card.withValues(alpha:0.92),
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
+            BoxShadow(color: Colors.black.withValues(alpha:0.08), blurRadius: 8),
           ],
         ),
         child: Icon(icon, size: 18, color: colors.text),
