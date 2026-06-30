@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/features/search/presentation/screens/search_screen.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 import '../../data/models/category_model.dart';
 
@@ -63,10 +64,20 @@ class _CategoryCard extends StatelessWidget {
     this.reverse = false,
   });
 
+  // ✅ يفتح SearchScreen ومعاه اسم الكاتيجوري كـ initialQuery
+  //    فبيدور تلقائياً على المينتورز اللي بيدرّسوا السكيل ده بس
+  void _openSearchWithCategory(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SearchScreen(initialQuery: category.name),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => _openSearchWithCategory(context),
       child: Container(
         height: 90,
         decoration: BoxDecoration(
