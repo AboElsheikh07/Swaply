@@ -20,14 +20,14 @@ class SessionCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color:        Theme.of(context).cardColor,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
-        border:       Border.all(color: colors.border),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color:      Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
-            offset:     const Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -40,16 +40,16 @@ class SessionCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  width:  52,
+                  width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color:        colors.primarySoft,
+                    color: colors.primarySoft,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     CupertinoIcons.person_fill,
                     color: colors.primary,
-                    size:  26,
+                    size: 26,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -60,9 +60,9 @@ class SessionCard extends StatelessWidget {
                       Text(
                         otherName,
                         style: TextStyle(
-                          fontSize:   15,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color:      colors.text,
+                          color: colors.text,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -72,19 +72,25 @@ class SessionCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing:            4,
-                        runSpacing:         4,
+                        spacing: 4,
+                        runSpacing: 4,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          Icon(CupertinoIcons.calendar,
-                              size: 13, color: colors.muted),
+                          Icon(
+                            CupertinoIcons.calendar,
+                            size: 13,
+                            color: colors.muted,
+                          ),
                           Text(
                             session.formattedDate,
                             style: TextStyle(fontSize: 12, color: colors.muted),
                           ),
                           const SizedBox(width: 6),
-                          Icon(CupertinoIcons.clock,
-                              size: 13, color: colors.muted),
+                          Icon(
+                            CupertinoIcons.clock,
+                            size: 13,
+                            color: colors.muted,
+                          ),
                           Text(
                             session.formattedDuration,
                             style: TextStyle(fontSize: 12, color: colors.muted),
@@ -106,10 +112,15 @@ class SessionCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 PointsLabel(session: session),
-                ActionWidget(session: session),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: ActionWidget(session: session),
+                  ),
+                ),
               ],
             ),
           ),

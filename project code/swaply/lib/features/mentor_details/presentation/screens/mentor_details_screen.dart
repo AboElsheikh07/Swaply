@@ -1,8 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:swaply/features/chat/data/models/chat_models.dart';
 import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
 import 'package:swaply/features/chat/presentation/screens/chat_screen.dart';
 import 'package:swaply/features/mentor_details/data/repositories/mentor_details_repository.dart';

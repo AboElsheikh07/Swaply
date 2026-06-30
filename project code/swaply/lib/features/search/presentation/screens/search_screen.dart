@@ -1,15 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/search_model.dart';
-import '../../data/repositories/search_repository_mock.dart';
-import '../cubit/search_cubit.dart';
-import '../cubit/search_state.dart';
+import 'package:swaply/features/mentor_details/presentation/screens/mentor_details_screen.dart';
+import 'package:swaply/features/search/data/models/search_model.dart';
+import 'package:swaply/features/search/data/repositories/search_repository_firebase.dart';
+import 'package:swaply/features/search/presentation/cubit/search_cubit.dart';
+import 'package:swaply/features/search/presentation/cubit/search_state.dart';
 
-const searchPrimary    = Color(0xFF5B4CB8);
+const searchPrimary     = Color(0xFF5B4CB8);
 const searchPrimarySoft = Color(0xFFEEECFB);
-const searchMutedFg    = Color(0xFF8A8A9A);
-const searchBorder     = Color(0xFFEAEAF0);
-const searchDark       = Color(0xFF1A1A2E);
+const searchMutedFg     = Color(0xFF8A8A9A);
+const searchBorder      = Color(0xFFEAEAF0);
+const searchDark        = Color(0xFF1A1A2E);
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -17,8 +19,8 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      // ✅ بدّل MockSearchRepository بـ FirebaseSearchRepository لما Firebase يتجهز
-      create: (_) => SearchCubit(FirebaseSearchRepository())..loadPopularSkills(),
+      create: (_) =>
+          SearchCubit(FirebaseSearchRepository())..loadPopularSkills(),
       child: const SearchView(),
     );
   }
@@ -64,6 +66,22 @@ class SearchViewState extends State<SearchView> {
     context.read<SearchCubit>().clearSearch();
   }
 
+  // ── Sort locally by tab ──────────────────
+  List<SearchMentorModel> _sort(List<SearchMentorModel> list) {
+    final sorted = List<SearchMentorModel>.from(list);
+    switch (sortTab) {
+      case 'Most Popular':
+        sorted.sort((a, b) => b.rating.compareTo(a.rating));
+      case 'Cheapest':
+        sorted.sort((a, b) {
+          final aP = int.tryParse(a.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final bP = int.tryParse(b.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          return aP.compareTo(bP);
+        });
+    }
+    return sorted;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,10 +103,11 @@ class SearchViewState extends State<SearchView> {
                         shape: BoxShape.circle,
                         border: Border.all(color: searchBorder),
                       ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+                      child: const Icon(
+                          Icons.arrow_back_ios_new_rounded, size: 16),
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Container(
                       height: 44,
@@ -104,7 +123,9 @@ class SearchViewState extends State<SearchView> {
                         children: [
                           const SizedBox(width: 14),
                           Icon(Icons.search_rounded, size: 18,
-                              color: isSearching ? searchPrimary : searchMutedFg),
+                              color: isSearching
+                                  ? searchPrimary
+                                  : searchMutedFg),
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
@@ -113,7 +134,8 @@ class SearchViewState extends State<SearchView> {
                               style: const TextStyle(fontSize: 14),
                               decoration: const InputDecoration(
                                 hintText: 'Search skills, mentors...',
-                                hintStyle: TextStyle(color: searchMutedFg, fontSize: 14),
+                                hintStyle: TextStyle(
+                                    color: searchMutedFg, fontSize: 14),
                                 border: InputBorder.none,
                                 isDense: true,
                               ),
@@ -126,25 +148,14 @@ class SearchViewState extends State<SearchView> {
                               onTap: clearSearch,
                               child: const Padding(
                                 padding: EdgeInsets.only(right: 12),
-                                child: Icon(Icons.close_rounded, size: 18, color: searchMutedFg),
+                                child: Icon(Icons.close_rounded,
+                                    size: 18, color: searchMutedFg),
                               ),
                             ),
                         ],
                       ),
                     ),
                   ),
-                  if (isSearching) ...[
-                    SizedBox(width: 10),
-                    Container(
-                      width: 40, height: 40,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: searchBorder),
-                      ),
-                      child: const Icon(Icons.tune_rounded, size: 18),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -155,27 +166,36 @@ class SearchViewState extends State<SearchView> {
                 builder: (context, state) {
                   return switch (state) {
                     SearchLoadingSkills() => const Center(
-                        child: CircularProgressIndicator(color: searchPrimary)),
-                    SearchIdle(:final popularSkills, :final recentSearches) => SearchIdleView(
+                        child: CircularProgressIndicator(
+                            color: searchPrimary)),
+                    SearchIdle(
+                      :final popularSkills,
+                      :final recentSearches,
+                    ) =>
+                      SearchIdleView(
                         popularSkills: popularSkills,
                         recentSearches: recentSearches,
                         onSelectQuery: (q) {
                           searchCtrl.text = q;
                           onQueryChanged(q);
                         },
-                        onRemoveRecent: (q) => context.read<SearchCubit>().removeRecentSearch(q),
-                        onClearAll: () => context.read<SearchCubit>().clearRecentSearches(),
+                        onRemoveRecent: (q) =>
+                            context.read<SearchCubit>().removeRecentSearch(q),
+                        onClearAll: () =>
+                            context.read<SearchCubit>().clearRecentSearches(),
                       ),
                     SearchLoading() => const Center(
-                        child: CircularProgressIndicator(color: searchPrimary)),
+                        child: CircularProgressIndicator(
+                            color: searchPrimary)),
                     SearchLoaded(:final results) => SearchResultsView(
-                        results: results,
+                        results: _sort(results),
                         sortTab: sortTab,
                         onTabChange: (t) => setState(() => sortTab = t),
                         sortTabs: sortTabs,
                       ),
                     SearchError(:final message) => Center(
-                        child: Text(message, style: const TextStyle(color: searchMutedFg))),
+                        child: Text(message,
+                            style: const TextStyle(color: searchMutedFg))),
                     _ => const SizedBox(),
                   };
                 },
@@ -210,7 +230,6 @@ class SearchIdleView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       children: [
-        // Recent searches
         Row(
           children: [
             const Text('Last Search',
@@ -220,76 +239,92 @@ class SearchIdleView extends StatelessWidget {
               GestureDetector(
                 onTap: onClearAll,
                 child: const Text('Clear All',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: searchPrimary)),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: searchPrimary)),
               ),
           ],
         ),
         const SizedBox(height: 12),
         if (recentSearches.isEmpty)
-          const Text('No recent searches.', style: TextStyle(fontSize: 12, color: searchMutedFg))
+          const Text('No recent searches.',
+              style: TextStyle(fontSize: 12, color: searchMutedFg))
         else
           Wrap(
             spacing: 8, runSpacing: 8,
-            children: recentSearches.map((s) => GestureDetector(
-              onTap: () => onSelectQuery(s),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: searchBorder),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(s, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () => onRemoveRecent(s),
-                      child: const Icon(Icons.close_rounded, size: 14, color: searchMutedFg),
-                    ),
-                  ],
-                ),
-              ),
-            )).toList(),
+            children: recentSearches
+                .map((s) => GestureDetector(
+                      onTap: () => onSelectQuery(s),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: searchBorder),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(s,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500)),
+                            const SizedBox(width: 6),
+                            GestureDetector(
+                              onTap: () => onRemoveRecent(s),
+                              child: const Icon(Icons.close_rounded,
+                                  size: 14, color: searchMutedFg),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ))
+                .toList(),
           ),
         const SizedBox(height: 24),
 
-        // Popular skills
         const Text('Popular Skills',
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        ...popularSkills.map((p) => GestureDetector(
-          onTap: () => onSelectQuery(p.name),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 48, height: 48,
-                  decoration: BoxDecoration(
-                    color: searchPrimarySoft,
-                    borderRadius: BorderRadius.circular(14),
+        ...popularSkills.map(
+          (p) => GestureDetector(
+            onTap: () => onSelectQuery(p.name),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48, height: 48,
+                    decoration: BoxDecoration(
+                      color: searchPrimarySoft,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(Icons.star_outline_rounded,
+                        color: searchPrimary),
                   ),
-                  child: const Icon(Icons.star_outline_rounded, color: searchPrimary),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(p.name,
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      Text(p.count,
-                          style: const TextStyle(fontSize: 11, color: searchMutedFg)),
-                    ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(p.name,
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600)),
+                        Text(p.count,
+                            style: const TextStyle(
+                                fontSize: 11, color: searchMutedFg)),
+                      ],
+                    ),
                   ),
-                ),
-                SkillTagBadge(tag: p.tag),
-              ],
+                  SkillTagBadge(tag: p.tag),
+                ],
+              ),
             ),
           ),
-        )),
+        ),
       ],
     );
   }
@@ -327,15 +362,18 @@ class SearchResultsView extends StatelessWidget {
               return GestureDetector(
                 onTap: () => onTabChange(sortTabs[i]),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: active ? searchPrimary : Colors.white,
+                    color: active ? searchPrimary : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: active ? searchPrimary : searchBorder),
+                    border: Border.all(
+                        color: active ? searchPrimary : searchBorder),
                   ),
                   child: Text(sortTabs[i],
                       style: TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                         color: active ? Colors.white : searchDark,
                       )),
                 ),
@@ -353,13 +391,15 @@ class SearchResultsView extends StatelessWidget {
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: results.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                     childAspectRatio: 0.72,
                   ),
-                  itemBuilder: (_, i) => SearchMentorCard(mentor: results[i]),
+                  itemBuilder: (_, i) =>
+                      SearchMentorCard(mentor: results[i]),
                 ),
         ),
       ],
@@ -374,45 +414,90 @@ class SearchMentorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: searchBorder),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => MentorDetailsScreen(mentorId: mentor.id),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Container(
-                width: double.infinity,
-                color: searchPrimarySoft,
-                child: const Icon(Icons.person_outline_rounded, color: searchPrimary, size: 44),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: searchBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: mentor.avatarUrl.isNotEmpty
+                      ? Image.network(
+                          mentor.avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const _AvatarPlaceholder(),
+                        )
+                      : const _AvatarPlaceholder(),
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(mentor.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                Text(mentor.skill,
-                    style: const TextStyle(fontSize: 11, color: searchMutedFg)),
-                const SizedBox(height: 4),
-                Text(mentor.rate,
-                    style: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.bold, color: searchPrimary)),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(mentor.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(mentor.skill,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 11, color: searchMutedFg)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded,
+                          color: Color(0xFFFFC107), size: 12),
+                      const SizedBox(width: 2),
+                      Text(mentor.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.w600)),
+                      const Spacer(),
+                      Text(mentor.rate,
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: searchPrimary)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _AvatarPlaceholder extends StatelessWidget {
+  const _AvatarPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: searchPrimarySoft,
+      child: const Icon(CupertinoIcons.person_fill,
+          color: searchPrimary, size: 44),
     );
   }
 }
@@ -431,10 +516,13 @@ class SkillTagBadge extends StatelessWidget {
     };
     final (label, bg, fg) = map[tag]!;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+          color: bg, borderRadius: BorderRadius.circular(20)),
       child: Text(label,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
+          style: TextStyle(
+              fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
     );
   }
 }

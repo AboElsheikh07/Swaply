@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 import 'package:swaply/features/home/data/repositories/home_repository_impl.dart';
-import 'package:swaply/features/home/presentation/screens/mentor_details_screen.dart';
+import 'package:swaply/features/mentor_details/presentation/screens/mentor_details_screen.dart';
 
 import 'package:swaply/features/search/presentation/screens/search_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
@@ -662,14 +662,14 @@ class _MentorCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const Icon(
+                      Icon(
                         Icons.star_rounded,
-                        color: Color(0xFFFFC107),
+                        color: const Color(0xFFFFC107),
                         size: 13,
                       ),
                       const SizedBox(width: 2),
                       Text(
-                        "4.38",
+                        mentor.ratingAvg.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,

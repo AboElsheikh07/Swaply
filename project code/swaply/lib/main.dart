@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:swaply/l10n/app_localizations.dart';
-
+     
 import 'package:swaply/core/app_providers.dart';
 import 'package:swaply/core/app_theme.dart';
 import 'package:swaply/core/authenticated_providers.dart';
