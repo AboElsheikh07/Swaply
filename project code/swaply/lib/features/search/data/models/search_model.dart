@@ -32,7 +32,7 @@ class SearchMentorModel {
   final String skill;
   final String rate;
   final double rating;
-  final bool online;
+  final String avatarUrl; // ← أضفنا الصورة
 
   const SearchMentorModel({
     required this.id,
@@ -40,17 +40,19 @@ class SearchMentorModel {
     required this.skill,
     required this.rate,
     required this.rating,
-    this.online = false,
+    this.avatarUrl = '',
   });
 
-  factory SearchMentorModel.fromFirestore(Map<String, dynamic> data, String id) {
+  // بيتبنى من UserModel الـ Firestore doc
+  factory SearchMentorModel.fromUserDoc(Map<String, dynamic> data, String id) {
+    final skills = List<String>.from(data['skillsCanTeach'] ?? []);
     return SearchMentorModel(
-      id: id,
-      name: data['name'] ?? '',
-      skill: data['skill'] ?? '',
-      rate: data['rate'] ?? '',
-      rating: (data['rating'] ?? 0.0).toDouble(),
-      online: data['online'] ?? false,
+      id:        id,
+      name:      data['username']     ?? '',
+      skill:     skills.isNotEmpty ? skills.first : '',
+      rate:      '${data['pricePerHour'] ?? 0} pts/hr',
+      rating:    (data['ratingAvg'] as num?)?.toDouble() ?? 0.0,
+      avatarUrl: data['avatarUrl']    ?? '',
     );
   }
 }
