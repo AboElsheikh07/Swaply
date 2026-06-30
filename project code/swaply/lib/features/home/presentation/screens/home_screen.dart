@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +15,6 @@ import 'package:swaply/features/user/data/models/user_model.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 import 'category_screen.dart';
-
-// ── Colors ──────────────────────────────
-const _primary = Color(0xFF5B4CB8);
-const _primarySoft = Color(0xFFEEECFB);
-const _mutedFg = Color(0xFF8A8A9A);
-const _border = Color(0xFFEAEAF0);
-const _dark = Color(0xFF1A1A2E);
 
 // ════════════════════════════════════════
 //  Entry point - يحقن الـ Cubit
@@ -57,7 +51,11 @@ class _AuthGate extends StatelessWidget {
         if (authState is AuthError) {
           return Scaffold(
             body: Center(
-              child: Text(AppLocalizations.of(context)!.couldNotLoadProfile(authState.message)),
+              child: Text(
+                AppLocalizations.of(
+                  context,
+                )!.couldNotLoadProfile(authState.message),
+              ),
             ),
           );
         }
@@ -99,8 +97,9 @@ class _HomeViewState extends State<_HomeView>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {
@@ -114,8 +113,8 @@ class _HomeViewState extends State<_HomeView>
                 _buildTabBar(context),
                 Expanded(
                   child: switch (state) {
-                    HomeLoading() => const Center(
-                      child: CircularProgressIndicator(color: _primary),
+                    HomeLoading() => Center(
+                      child: CircularProgressIndicator(color: colors.primary),
                     ),
                     HomeError(:final message) => _ErrorView(
                       message: message,
@@ -136,7 +135,7 @@ class _HomeViewState extends State<_HomeView>
                           CategoryTab(categories: categories),
                         ],
                       ),
-                    _ => SizedBox(),
+                    _ => const SizedBox(),
                   },
                 ),
               ],
@@ -149,21 +148,22 @@ class _HomeViewState extends State<_HomeView>
 
   Widget _buildTabBar(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return Container(
-      color: Theme.of(context).cardColor,
+      color: colors.card,
       child: TabBar(
         controller: _tabController,
-        labelColor: _primary,
-        unselectedLabelColor: _mutedFg,
+        labelColor: colors.primary,
+        unselectedLabelColor: colors.mutedFg,
         labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,
         ),
-        indicatorColor: _primary,
+        indicatorColor: colors.primary,
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorWeight: 2,
-        dividerColor: _border,
+        dividerColor: colors.border,
         tabs: [
           Tab(text: l10n.home),
           Tab(text: l10n.categories),
@@ -181,6 +181,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
       child: Row(
@@ -201,15 +202,15 @@ class _Header extends StatelessWidget {
 
               return CircleAvatar(
                 radius: 22,
-                backgroundColor: _primarySoft,
+                backgroundColor: colors.primarySoft,
                 // Display the network image if available
                 backgroundImage: hasImage ? NetworkImage(imageUrl) : null,
                 // Display the icon fallback ONLY if there is no image
                 child: hasImage
                     ? null
-                    : const Icon(
+                    : Icon(
                         CupertinoIcons.person_fill,
-                        color: _primary,
+                        color: colors.primary,
                         size: 22,
                       ),
               );
@@ -222,14 +223,15 @@ class _Header extends StatelessWidget {
               children: [
                 Text(
                   'Hi, ${user?.username.split(" ").first ?? "User"}',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: colors.text,
+                  ),
                 ),
                 Text(
                   AppLocalizations.of(context)!.letsLearn,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
+                  style: TextStyle(fontSize: 12, color: colors.mutedFg),
                 ),
               ],
             ),
@@ -268,20 +270,21 @@ class _IconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: colors.card,
           shape: BoxShape.circle,
-          border: Border.all(color: _border),
+          border: Border.all(color: colors.border),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(icon, size: 20, color: Theme.of(context).iconTheme.color),
+            Icon(icon, size: 20, color: colors.text),
             if (badge)
               Positioned(
                 top: 8,
@@ -289,8 +292,8 @@ class _IconBtn extends StatelessWidget {
                 child: Container(
                   width: 8,
                   height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE53935),
+                  decoration: BoxDecoration(
+                    color: colors.rose,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -318,8 +321,6 @@ class _HomeTabState extends State<_HomeTab> {
   final _pageCtrl = PageController();
   int _slide = 0;
 
-
-
   @override
   void dispose() {
     _pageCtrl.dispose();
@@ -329,6 +330,7 @@ class _HomeTabState extends State<_HomeTab> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final promos = [
       (l10n.promo1Title, l10n.promo1Desc),
       (l10n.promo2Title, l10n.promo2Desc),
@@ -336,7 +338,7 @@ class _HomeTabState extends State<_HomeTab> {
     ];
 
     return RefreshIndicator(
-      color: _primary,
+      color: colors.primary,
       onRefresh: () => context.read<HomeCubit>().refresh(),
       child: ListView(
         padding: const EdgeInsets.only(top: 20, bottom: 24),
@@ -372,7 +374,7 @@ class _HomeTabState extends State<_HomeTab> {
                       width: _slide == i ? 20 : 6,
                       height: 6,
                       decoration: BoxDecoration(
-                        color: _slide == i ? _dark : _border,
+                        color: _slide == i ? colors.text : colors.border,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -416,27 +418,32 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: colors.text,
+            ),
           ),
           if (icon != null) ...[
             const SizedBox(width: 6),
-            Icon(icon, color: Colors.orange, size: 18),
+            Icon(icon, color: colors.amber, size: 18),
           ],
           const Spacer(),
           GestureDetector(
             onTap: onSeeAll,
-            child: const Text(
+            child: Text(
               'See All',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _primary,
+                color: colors.primary,
               ),
             ),
           ),
@@ -479,8 +486,9 @@ class _PromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
-      color: _primarySoft,
+      color: colors.primarySoft,
       child: Stack(
         children: [
           Positioned(
@@ -490,7 +498,7 @@ class _PromoCard extends StatelessWidget {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                color: _primary.withOpacity(0.2),
+                color: colors.primary.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
             ),
@@ -506,25 +514,26 @@ class _PromoCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           height: 1.3,
+                          color: colors.text,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF444466),
+                          color: colors.text.withOpacity(0.7),
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'By Swaply',
-                        style: TextStyle(fontSize: 11, color: _mutedFg),
+                        style: TextStyle(fontSize: 11, color: colors.mutedFg),
                       ),
                     ],
                   ),
@@ -534,12 +543,12 @@ class _PromoCard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: _primary.withOpacity(0.12),
+                    color: colors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     CupertinoIcons.gift_fill,
-                    color: _primary,
+                    color: colors.primary,
                     size: 36,
                   ),
                 ),
@@ -559,6 +568,7 @@ class _MentorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -570,9 +580,9 @@ class _MentorCard extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: colors.card,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: _border),
+          border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -593,13 +603,12 @@ class _MentorCard extends StatelessWidget {
                     ),
                     child: Container(
                       width: double.infinity,
-                      color: _primarySoft,
-
+                      color: colors.primarySoft,
                       child: mentor.avatarUrl != ""
                           ? Image.network(mentor.avatarUrl, fit: BoxFit.cover)
                           : Icon(
                               CupertinoIcons.person_fill,
-                              color: _primary,
+                              color: colors.primary,
                               size: 48,
                             ),
                     ),
@@ -613,7 +622,7 @@ class _MentorCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
+                        color: colors.card.withOpacity(0.95),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
@@ -630,16 +639,16 @@ class _MentorCard extends StatelessWidget {
                             height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFF2ECC71),
+                              color: colors.green,
                             ),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             "Active",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF27AE60),
+                              color: colors.green,
                             ),
                           ),
                         ],
@@ -661,23 +670,21 @@ class _MentorCard extends StatelessWidget {
                           mentor.username,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
+                            color: colors.text,
                           ),
                         ),
                       ),
-                      Icon(
-                        Icons.star_rounded,
-                        color: const Color(0xFFFFC107),
-                        size: 13,
-                      ),
+                      Icon(Icons.star_rounded, color: colors.amber, size: 13),
                       const SizedBox(width: 2),
                       Text(
                         mentor.ratingAvg.toStringAsFixed(1),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
+                          color: colors.text,
                         ),
                       ),
                     ],
@@ -689,15 +696,15 @@ class _MentorCard extends StatelessWidget {
                         : "No skill",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, color: _mutedFg),
+                    style: TextStyle(fontSize: 11, color: colors.mutedFg),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "${mentor.balance} pts",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: _primary,
+                      color: colors.primary,
                     ),
                   ),
                 ],
@@ -718,18 +725,19 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.error_outline, color: _mutedFg, size: 48),
+          Icon(Icons.error_outline, color: colors.mutedFg, size: 48),
           const SizedBox(height: 12),
-          Text(message, style: const TextStyle(color: _mutedFg)),
+          Text(message, style: TextStyle(color: colors.mutedFg)),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _primary,
+              backgroundColor: colors.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Try Again'),

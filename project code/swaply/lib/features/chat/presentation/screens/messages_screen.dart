@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import '../../data/models/chat_models.dart';
 import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
@@ -13,10 +14,11 @@ class ConversationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +31,7 @@ class ConversationsScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1C1C1E),
+                  color: colors.text,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -40,15 +42,16 @@ class ConversationsScreen extends StatelessWidget {
               child: Container(
                 height: 44,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: colors.border),
                 ),
                 child: Row(
                   children: [
                     const SizedBox(width: 14),
                     Icon(
                       Icons.search,
-                      color: Theme.of(context).iconTheme.color,
+                      color: colors.mutedFg,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -56,7 +59,7 @@ class ConversationsScreen extends StatelessWidget {
                       l10n.searchConversations,
                       style: TextStyle(
                         fontSize: 15,
-                        color: Theme.of(context).iconTheme.color,
+                        color: colors.mutedFg,
                       ),
                     ),
                   ],
@@ -67,7 +70,10 @@ class ConversationsScreen extends StatelessWidget {
             Expanded(
               child: currentUser == null
                   ? Center(
-                      child: Text(l10n.pleaseSignInChats),
+                      child: Text(
+                        l10n.pleaseSignInChats,
+                        style: TextStyle(color: colors.mutedFg),
+                      ),
                     )
                   : StreamBuilder<List<Conversation>>(
                       stream: _chatRepository.watchConversations(
@@ -87,8 +93,10 @@ class ConversationsScreen extends StatelessWidget {
 
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: colors.primary,
+                            ),
                           );
                         }
 
@@ -98,6 +106,7 @@ class ConversationsScreen extends StatelessWidget {
                           return Center(
                             child: Text(
                               l10n.noChatsYet,
+                              style: TextStyle(color: colors.mutedFg),
                             ),
                           );
                         }
@@ -105,10 +114,10 @@ class ConversationsScreen extends StatelessWidget {
                         return ListView.separated(
                           padding: EdgeInsets.zero,
                           itemCount: conversations.length,
-                          separatorBuilder: (_, __) => const Divider(
+                          separatorBuilder: (_, __) => Divider(
                             height: 1,
                             indent: 82,
-                            color: Color(0xFFE5E5EA),
+                            color: colors.border,
                           ),
                           itemBuilder: (context, index) {
                             final c = conversations[index];
@@ -141,12 +150,12 @@ class _ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     final c = conversation;
     return InkWell(
       onTap: onTap,
       child: Container(
-        color: Theme.of(context).cardColor,
+        color: colors.card,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
@@ -154,11 +163,11 @@ class _ConversationTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: const Color(0xFFD1D1D6),
+                  backgroundColor: colors.primarySoft,
                   child: Text(
                     c.name.isNotEmpty ? c.name[0] : '?',
                     style: TextStyle(
-                      color: Theme.of(context).iconTheme.color,
+                      color: colors.primary,
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
                     ),
@@ -172,9 +181,9 @@ class _ConversationTile extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF34C759),
+                        color: colors.green,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: colors.card, width: 2),
                       ),
                     ),
                   ),
@@ -187,10 +196,10 @@ class _ConversationTile extends StatelessWidget {
                 children: [
                   Text(
                     c.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1C1C1E),
+                      color: colors.text,
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -203,7 +212,7 @@ class _ConversationTile extends StatelessWidget {
                       fontWeight: c.unread > 0
                           ? FontWeight.w600
                           : FontWeight.w400,
-                      color: const Color(0xFF6E6E73),
+                      color: colors.mutedFg,
                     ),
                   ),
                 ],
@@ -217,7 +226,7 @@ class _ConversationTile extends StatelessWidget {
                   c.formattedTime,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Theme.of(context).iconTheme.color,
+                    color: colors.mutedFg,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -225,15 +234,15 @@ class _ConversationTile extends StatelessWidget {
                   Container(
                     width: 22,
                     height: 22,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF5B4FCF),
+                    decoration: BoxDecoration(
+                      color: colors.primary,
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '${c.unread}',
-                      style: TextStyle(
-                        color: Theme.of(context).cardColor,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/chat/data/repositories/chat_repository.dart';
 import 'package:swaply/features/chat/presentation/screens/chat_screen.dart';
 import 'package:swaply/features/mentor_details/data/repositories/mentor_details_repository.dart';
@@ -9,12 +10,6 @@ import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 import 'package:swaply/l10n/app_localizations.dart';
-
-const mdPrimary = Color(0xFF5B4CB8);
-const mdPrimarySoft = Color(0xFFEEECFB);
-const mdBorder = Color(0xFFEAEAF0);
-const mdMutedFg = Color(0xFF8A8A9A);
-const mdDark = Color(0xFF1A1A2E);
 
 class MentorDetailsScreen extends StatelessWidget {
   final String mentorId;
@@ -39,16 +34,17 @@ class MentorDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       body: BlocBuilder<MentorDetailsCubit, MentorDetailsState>(
         builder: (context, state) {
           return switch (state) {
-            MentorDetailsLoading() => const Center(
-              child: CircularProgressIndicator(color: mdPrimary),
+            MentorDetailsLoading() => Center(
+              child: CircularProgressIndicator(color: colors.primary),
             ),
             MentorDetailsError(:final message) => Center(
-              child: Text(message, style: const TextStyle(color: mdMutedFg)),
+              child: Text(message, style: TextStyle(color: colors.mutedFg)),
             ),
             MentorDetailsLoaded(:final user) => MentorDetailsContent(
               mentor: user,
@@ -92,6 +88,7 @@ class MentorDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.colors;
     return Stack(
       children: [
         CustomScrollView(
@@ -113,10 +110,10 @@ class MentorDetailsContent extends StatelessWidget {
                               loadingBuilder: (context, child, progress) {
                                 if (progress == null) return child;
                                 return Container(
-                                  color: mdPrimarySoft,
-                                  child: const Center(
+                                  color: colors.primarySoft,
+                                  child: Center(
                                     child: CircularProgressIndicator(
-                                      color: mdPrimary,
+                                      color: colors.primary,
                                       strokeWidth: 2,
                                     ),
                                   ),
@@ -128,12 +125,12 @@ class MentorDetailsContent extends StatelessWidget {
                   ),
                   Container(
                     height: 280,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                        stops: [0.5, 1.0],
+                        colors: [Colors.transparent, colors.background],
+                        stops: const [0.5, 1.0],
                       ),
                     ),
                   ),
@@ -184,9 +181,10 @@ class MentorDetailsContent extends StatelessWidget {
                                 children: [
                                   Text(
                                     mentor.username,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
+                                      color: colors.text,
                                     ),
                                   ),
                                 ],
@@ -195,9 +193,9 @@ class MentorDetailsContent extends StatelessWidget {
                                 mentor.skillsCanTeach.isEmpty
                                     ? "No Skill"
                                     : mentor.skillsCanTeach.first,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
-                                  color: mdMutedFg,
+                                  color: colors.mutedFg,
                                 ),
                               ),
                             ],
@@ -208,15 +206,18 @@ class MentorDetailsContent extends StatelessWidget {
                           children: [
                             Text(
                               "${mentor.pricePerHour} pts/hr",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: mdDark,
+                                color: colors.text,
                               ),
                             ),
-                            const Text(
+                            Text(
                               'session rate',
-                              style: TextStyle(fontSize: 11, color: mdMutedFg),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.mutedFg,
+                              ),
                             ),
                           ],
                         ),
@@ -231,17 +232,18 @@ class MentorDetailsContent extends StatelessWidget {
                           value: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.star_rounded,
-                                color: Color(0xFFFFC107),
+                                color: colors.amber,
                                 size: 16,
                               ),
                               const SizedBox(width: 2),
                               Text(
                                 mentor.ratingAvg.toStringAsFixed(1),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
+                                  color: colors.text,
                                 ),
                               ),
                             ],
@@ -252,20 +254,22 @@ class MentorDetailsContent extends StatelessWidget {
                         MdStatCard(
                           value: Text(
                             '${mentor.ratingCount}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
+                              color: colors.text,
                             ),
                           ),
                           label: l10n.reviews,
                         ),
                         const SizedBox(width: 8),
                         MdStatCard(
-                          value: const Text(
+                          value: Text(
                             '120+',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
+                              color: colors.text,
                             ),
                           ),
                           label: l10n.sessions,
@@ -280,9 +284,9 @@ class MentorDetailsContent extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: mdPrimarySoft,
+                        color: colors.primarySoft,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: mdBorder),
+                        border: Border.all(color: colors.border),
                       ),
                       child: Row(
                         children: [
@@ -290,12 +294,12 @@ class MentorDetailsContent extends StatelessWidget {
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: mdPrimary.withOpacity(0.12),
+                              color: colors.primary.withOpacity(0.12),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.toll_rounded,
-                              color: mdPrimary,
+                              color: colors.primary,
                               size: 18,
                             ),
                           ),
@@ -308,14 +312,15 @@ class MentorDetailsContent extends StatelessWidget {
                                   l10n.pricePerHour,
                                   style: TextStyle(
                                     fontSize: 11,
-                                    color: mdMutedFg,
+                                    color: colors.mutedFg,
                                   ),
                                 ),
                                 Text(
                                   l10n.setBy(mentor.username.split(' ').first),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
+                                    color: colors.text,
                                   ),
                                 ),
                               ],
@@ -323,10 +328,10 @@ class MentorDetailsContent extends StatelessWidget {
                           ),
                           Text(
                             l10n.pointsAmount(mentor.pricePerHour.toString()),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
-                              color: mdPrimary,
+                              color: colors.primary,
                             ),
                           ),
                         ],
@@ -340,6 +345,7 @@ class MentorDetailsContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
+                        color: colors.text,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -354,15 +360,15 @@ class MentorDetailsContent extends StatelessWidget {
                                 vertical: 7,
                               ),
                               decoration: BoxDecoration(
-                                color: mdPrimarySoft,
+                                color: colors.primarySoft,
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
                                 s,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: mdPrimary,
+                                  color: colors.primary,
                                 ),
                               ),
                             ),
@@ -376,9 +382,9 @@ class MentorDetailsContent extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colors.card,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: mdBorder),
+                        border: Border.all(color: colors.border),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,12 +394,16 @@ class MentorDetailsContent extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
+                              color: colors.text,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             l10n.mockAvailability,
-                            style: TextStyle(fontSize: 12, color: mdMutedFg),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colors.mutedFg,
+                            ),
                           ),
                         ],
                       ),
@@ -420,9 +430,9 @@ class MentorDetailsContent extends StatelessWidget {
               20,
               12 + MediaQuery.of(context).padding.bottom,
             ),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: mdBorder)),
+            decoration: BoxDecoration(
+              color: colors.card,
+              border: Border(top: BorderSide(color: colors.border)),
             ),
             child: Row(
               children: [
@@ -433,11 +443,12 @@ class MentorDetailsContent extends StatelessWidget {
                     height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: mdBorder),
+                      border: Border.all(color: colors.border),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.chat_bubble_outline_rounded,
                       size: 20,
+                      color: colors.text,
                     ),
                   ),
                 ),
@@ -469,7 +480,7 @@ class MentorDetailsContent extends StatelessWidget {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: mdPrimary,
+                        backgroundColor: colors.primary,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -478,7 +489,7 @@ class MentorDetailsContent extends StatelessWidget {
                       ),
                       child: Text(
                         l10n.requestSession,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -501,11 +512,12 @@ class _MentorAvatarFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
-      color: mdPrimarySoft,
-      child: const Icon(
+      color: colors.primarySoft,
+      child: Icon(
         Icons.person_outline_rounded,
-        color: mdPrimary,
+        color: colors.primary,
         size: 80,
       ),
     );
@@ -519,19 +531,20 @@ class MdCircleBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.92),
+          color: colors.card.withOpacity(0.92),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8),
           ],
         ),
-        child: Icon(icon, size: 18),
+        child: Icon(icon, size: 18, color: colors.text),
       ),
     );
   }
@@ -544,13 +557,14 @@ class MdStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: mdBorder),
+          border: Border.all(color: colors.border),
         ),
         child: Column(
           children: [
@@ -558,9 +572,9 @@ class MdStatCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: mdMutedFg,
+                color: colors.mutedFg,
                 letterSpacing: 0.5,
                 fontWeight: FontWeight.w500,
               ),
