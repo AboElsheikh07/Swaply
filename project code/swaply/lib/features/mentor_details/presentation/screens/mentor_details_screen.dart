@@ -99,14 +99,31 @@ class MentorDetailsContent extends StatelessWidget {
             SliverToBoxAdapter(
               child: Stack(
                 children: [
-                  Container(
-                    height: 280,
-                    width: double.infinity,
-                    color: mdPrimarySoft,
-                    child: const Icon(
-                      Icons.person_outline_rounded,
-                      color: mdPrimary,
-                      size: 80,
+                  // ✅ صورة البروفايل الحقيقية لو موجودة عند المينتور
+                  ClipRect(
+                    child: SizedBox(
+                      height: 280,
+                      width: double.infinity,
+                      child: mentor.avatarUrl.isNotEmpty
+                          ? Image.network(
+                              mentor.avatarUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const _MentorAvatarFallback(),
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  color: mdPrimarySoft,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      color: mdPrimary,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          : const _MentorAvatarFallback(),
                     ),
                   ),
                   Container(
@@ -474,6 +491,23 @@ class MentorDetailsContent extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ✅ صورة افتراضية لما مفيش avatarUrl عند المينتور
+class _MentorAvatarFallback extends StatelessWidget {
+  const _MentorAvatarFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: mdPrimarySoft,
+      child: const Icon(
+        Icons.person_outline_rounded,
+        color: mdPrimary,
+        size: 80,
+      ),
     );
   }
 }

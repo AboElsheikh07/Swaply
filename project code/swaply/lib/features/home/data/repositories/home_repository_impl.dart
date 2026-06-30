@@ -7,7 +7,7 @@ class HomeRepositoryImpl implements HomeRepository {
   final HomeRemoteDataSource _remote;
 
   HomeRepositoryImpl({HomeRemoteDataSource? remote})
-      : _remote = remote ?? HomeRemoteDataSource();
+    : _remote = remote ?? HomeRemoteDataSource();
 
   /// Pool size for getRecommendedMentors' re-ranking. Needs to be bigger
   /// than what we'll actually show (10), since the skill-match re-sort
@@ -33,8 +33,9 @@ class HomeRepositoryImpl implements HomeRepository {
         .map((s) => s.toLowerCase())
         .toSet();
 
-    bool hasOverlap(UserModel mentor) => mentor.skillsCanTeach
-        .any((skill) => wantsToLearn.contains(skill.toLowerCase()));
+    bool hasOverlap(UserModel mentor) => mentor.skillsCanTeach.any(
+      (skill) => wantsToLearn.contains(skill.toLowerCase()),
+    );
 
     // Stable partition: matches first, each group keeping the rating order
     // fetchTopRatedMentors already gave us. This is a ranking nudge, not a
@@ -55,6 +56,8 @@ class HomeRepositoryImpl implements HomeRepository {
     // CategoryModel.fromFirestore takes (data, id) separately — the data
     // source already folded 'id' into each map, so pull it back out here
     // rather than have the data source know about CategoryModel at all.
+    print(raw);
+
     return raw
         .map((data) => CategoryModel.fromFirestore(data, data['id'] as String))
         .toList();

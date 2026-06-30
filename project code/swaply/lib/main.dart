@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:swaply/l10n/app_localizations.dart';
-     
+
 import 'package:swaply/core/app_providers.dart';
 import 'package:swaply/core/app_theme.dart';
 import 'package:swaply/core/authenticated_providers.dart';
@@ -20,6 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // await SeedCategories.seed();
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('is_dark_mode') ?? false;
 
@@ -48,8 +49,9 @@ class _MyAppState extends State<MyApp> {
             title: 'Swaply',
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
-            themeMode:
-                profileState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            themeMode: profileState.isDarkMode
+                ? ThemeMode.dark
+                : ThemeMode.light,
             locale: Locale(profileState.language == 'Arabic' ? 'ar' : 'en'),
             localizationsDelegates: const [
               AppLocalizations.delegate,
