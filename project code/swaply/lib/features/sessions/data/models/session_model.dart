@@ -113,6 +113,14 @@ class SessionItem {
     return now.isAfter(windowStart) && now.isBefore(windowEnd);
   }
 
+    bool get isPastEnd {
+    if (status != SessionStatus.accepted && status != SessionStatus.ongoing) {
+      return false;
+    }
+    final end = scheduledAt.add(Duration(minutes: durationMinutes));
+    return DateTime.now().isAfter(end);
+  }
+
   // ── Formatted helpers ────────────────────────
 
   String get formattedDate => DateFormat('EEE, MMM d').format(scheduledAt);

@@ -265,8 +265,7 @@ class _Header extends StatelessWidget {
 class _IconBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  final bool badge;
-  const _IconBtn({required this.icon, required this.onTap, this.badge = false});
+  const _IconBtn({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -285,19 +284,7 @@ class _IconBtn extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Icon(icon, size: 20, color: colors.text),
-            if (badge)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: colors.rose,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
+            // badge indicator removed as it's not used anywhere currently
           ],
         ),
       ),
@@ -498,7 +485,7 @@ class _PromoCard extends StatelessWidget {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                color: colors.primary.withOpacity(0.2),
+                color: colors.primary.withValues(alpha:0.2),
                 shape: BoxShape.circle,
               ),
             ),
@@ -527,7 +514,7 @@ class _PromoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: colors.text.withOpacity(0.7),
+                          color: colors.text.withValues(alpha:0.7),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -543,7 +530,7 @@ class _PromoCard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: colors.primary.withOpacity(0.12),
+                    color: colors.primary.withValues(alpha:0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -585,7 +572,7 @@ class _MentorCard extends StatelessWidget {
           border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha:0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -622,11 +609,11 @@ class _MentorCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: colors.card.withOpacity(0.95),
+                        color: colors.card.withValues(alpha:0.95),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
+                            color: Colors.black.withValues(alpha:0.08),
                             blurRadius: 4,
                           ),
                         ],

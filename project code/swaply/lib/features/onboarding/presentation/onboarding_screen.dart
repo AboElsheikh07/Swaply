@@ -5,7 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:swaply/core/constants/app_colors.dart';
-import 'package:swaply/root.dart';
 import 'controllers/cubit/onboarding_cubit.dart';
 import 'controllers/cubit/onboarding_state.dart';
 
