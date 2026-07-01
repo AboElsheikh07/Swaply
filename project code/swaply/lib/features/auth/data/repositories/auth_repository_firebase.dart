@@ -27,12 +27,9 @@ class FirebaseAuthRepository {
         password: password,
       );
 
-    
-
       await UserRepository().createUser(
         uid: credential.user!.uid,
         username: name, // from signup form
-        
       );
       // Update Firebase display name
       await credential.user!.updateDisplayName(name);
@@ -44,9 +41,23 @@ class FirebaseAuthRepository {
   Future<void> logout() => _auth.signOut();
 
   Future<UserModel> getCurrentUser() async {
-    final uid = _auth.currentUser!.uid;
+    final user = _auth.currentUser!;
+    final uid = user.uid;
 
     final docRef = await _db.collection(FirestoreKeys.users).doc(uid).get();
+
+    if (!docRef.exists) {
+      // Profile doc doesn't exist yet — e.g. the signup Firestore write
+      // hasn't landed before this ran, or the account was created outside
+      // the normal signup flow. Create a baseline profile so the app has
+      // something valid to load, instead of crashing on the null cast.
+      await UserRepository().ensureUserExists(
+        uid: uid,
+        username: user.displayName ?? '',
+      );
+      final freshDoc = await _db.collection(FirestoreKeys.users).doc(uid).get();
+      return UserModel.fromFirestore(freshDoc);
+    }
 
     return UserModel.fromFirestore(docRef);
   }

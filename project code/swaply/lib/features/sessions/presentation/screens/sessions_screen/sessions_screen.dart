@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
@@ -33,17 +34,17 @@ class _SessionsScreenState extends State<SessionsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final colors = context.colors;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // ── Header + Tab Bar ──────────────
             Container(
-              color: Theme.of(context).cardColor,
+              color: colors.card,
               width: double.infinity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,8 +150,8 @@ class _SessionsScreenState extends State<SessionsScreen>
                   return TabBarView(
                     controller: _tab,
                     children: [
-                      _SessionList(sessions: myRequests),
-                      _SessionList(sessions: incoming),
+                      _GroupedSessionList(sessions: myRequests),
+                      _GroupedSessionList(sessions: incoming),
                     ],
                   );
                 },
@@ -163,15 +164,46 @@ class _SessionsScreenState extends State<SessionsScreen>
   }
 }
 
-// ── Session List ──────────────────────────────────────────
+// ─────────────────────────────────────────
+//  Group enum
+// ─────────────────────────────────────────
 
-class _SessionList extends StatelessWidget {
+enum _Group { active, pending, completed, cancelled }
+
+// ─────────────────────────────────────────
+//  Grouped Session List
+// ─────────────────────────────────────────
+
+class _GroupedSessionList extends StatelessWidget {
   final List<SessionItem> sessions;
-  const _SessionList({required this.sessions});
+  const _GroupedSessionList({required this.sessions});
+
+  static const _groupOrder = [
+    _Group.active,
+    _Group.pending,
+    _Group.completed,
+    _Group.cancelled,
+    
+  ];
+
+  _Group _groupOf(SessionItem s) {
+    switch (s.status) {
+      case SessionStatus.accepted:
+      case SessionStatus.ongoing:
+        return _Group.active;
+      case SessionStatus.pending:
+        return _Group.pending;
+      case SessionStatus.completed:
+        return _Group.completed;
+      case SessionStatus.rejected:
+      case SessionStatus.cancelled:
+        return _Group.cancelled;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final colors = context.colors;
 
     if (sessions.isEmpty) {
       return Center(
@@ -198,11 +230,94 @@ class _SessionList extends StatelessWidget {
       );
     }
 
-    return ListView.separated(
+    // Build map of group → sessions
+    final Map<_Group, List<SessionItem>> grouped = {
+      for (final g in _groupOrder) g: [],
+    };
+    for (final s in sessions) {
+      grouped[_groupOf(s)]!.add(s);
+    }
+
+    // Flatten into a widget list: header + cards per non-empty group
+    final List<Widget> items = [];
+    for (final group in _groupOrder) {
+      final list = grouped[group]!;
+      if (list.isEmpty) continue;
+
+      items.add(_GroupHeader(group: group));
+      for (final session in list) {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: SessionCard(session: session),
+          ),
+        );
+      }
+      items.add(const SizedBox(height: 8));
+    }
+
+    return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      itemCount: sessions.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, i) => SessionCard(session: sessions[i]),
+      children: items,
     );
   }
+}
+
+// ─────────────────────────────────────────
+//  Group Header
+// ─────────────────────────────────────────
+
+class _GroupHeader extends StatelessWidget {
+  final _Group group;
+  const _GroupHeader({required this.group});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final cfg = _config(group, colors);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10, top: 4),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: cfg.color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            cfg.label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: cfg.color,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: Divider(color: colors.border, height: 1)),
+        ],
+      ),
+    );
+  }
+
+  _Cfg _config(_Group g, AppColorTheme colors) {
+    switch (g) {
+      case _Group.active:
+        return _Cfg(colors.green, 'ACTIVE');
+      case _Group.pending:
+        return _Cfg(colors.amber, 'PENDING');
+      case _Group.completed:
+        return _Cfg(colors.sky, 'COMPLETED');
+      case _Group.cancelled:
+        return _Cfg(colors.muted, 'CANCELLED & REJECTED');
+    }
+  }
+}
+
+class _Cfg {
+  final Color color;
+  final String label;
+  const _Cfg(this.color, this.label);
 }

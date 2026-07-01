@@ -29,7 +29,7 @@ class SessionRemoteDataSource {
   Stream<List<SessionItem>> watchIncomingRequests(String uid) {
     return _sessions
         .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt', descending: true)
+        .orderBy('scheduledAt')
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -42,7 +42,7 @@ class SessionRemoteDataSource {
   Stream<List<SessionItem>> watchMyRequests(String uid) {
     return _sessions
         .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt', descending: true)
+        .orderBy('scheduledAt')
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -57,7 +57,7 @@ class SessionRemoteDataSource {
   Future<List<SessionItem>> fetchIncomingRequests(String uid) async {
     final snap = await _sessions
         .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt', descending: true)
+        .orderBy('scheduledAt')
         .get();
     return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
   }
@@ -66,7 +66,7 @@ class SessionRemoteDataSource {
   Future<List<SessionItem>> fetchMyRequests(String uid) async {
     final snap = await _sessions
         .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt', descending: true)
+        .orderBy('scheduledAt')
         .get();
     return snap.docs.map((doc) => SessionItem.fromFirestore(doc, uid)).toList();
   }
@@ -89,12 +89,12 @@ class SessionRemoteDataSource {
   /// Update the status field of a session.
   Future<void> updateStatus(String sessionId, SessionStatus status) async {
     await _sessions.doc(sessionId).update({
-      'status': status.name,
+      'status': status.name, // ✅ saves 'accepted' not 'Accepted'
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-// ── Accept (with hold) ────────────────────────
+  // ── Accept (with hold) ────────────────────────
 
   /// Accepts a session and holds the cost on the student's balance,
   /// atomically. Guards against double-processing if called twice.
@@ -115,9 +115,7 @@ class SessionRemoteDataSource {
         'status': SessionStatus.accepted.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      tx.update(studentRef, {
-        'heldBalance': FieldValue.increment(points),
-      });
+      tx.update(studentRef, {'heldBalance': FieldValue.increment(points)});
     });
   }
 
@@ -154,9 +152,7 @@ class SessionRemoteDataSource {
         'balance': FieldValue.increment(-points),
         'heldBalance': FieldValue.increment(-points),
       });
-      tx.update(teacherRef, {
-        'balance': FieldValue.increment(points),
-      });
+      tx.update(teacherRef, {'balance': FieldValue.increment(points)});
     });
   }
 
@@ -216,5 +212,108 @@ class SessionRemoteDataSource {
   /// Permanently delete a session document (admin / cleanup only).
   Future<void> deleteSession(String sessionId) async {
     await _sessions.doc(sessionId).delete();
+  }
+
+  /// Deletes pending sessions whose scheduledAt has passed.
+  /// Called on app open — no backend needed.
+  Future<void> deleteExpiredPendingSessions(String uid) async {
+    final now = Timestamp.fromDate(DateTime.now());
+
+    // Check sessions where user is student (outgoing)
+    final asStudent = await _sessions
+        .where('studentId', isEqualTo: uid)
+        .where('status', isEqualTo: 'pending')
+        .where('scheduledAt', isLessThan: now)
+        .get();
+
+    // Check sessions where user is teacher (incoming)
+    final asTeacher = await _sessions
+        .where('teacherId', isEqualTo: uid)
+        .where('status', isEqualTo: 'pending')
+        .where('scheduledAt', isLessThan: now)
+        .get();
+
+    final batch = _db.batch();
+    for (final doc in [...asStudent.docs, ...asTeacher.docs]) {
+      batch.delete(doc.reference);
+    }
+    if (asStudent.docs.isNotEmpty || asTeacher.docs.isNotEmpty) {
+      await batch.commit();
+    }
+  }
+
+  /// Called on app open after deleteExpiredPendingSessions.
+  /// Handles accepted sessions whose time window has fully passed.
+  Future<void> handleExpiredAcceptedSessions(String uid) async {
+    final now = DateTime.now();
+
+    final asStudent = await _sessions
+        .where('studentId', isEqualTo: uid)
+        .where('status', isEqualTo: SessionStatus.accepted.name)
+        .get();
+
+    final asTeacher = await _sessions
+        .where('teacherId', isEqualTo: uid)
+        .where('status', isEqualTo: SessionStatus.accepted.name)
+        .get();
+
+    // deduplicate — same session might appear in both queries
+    final seen = <String>{};
+    final allDocs = [
+      ...asStudent.docs,
+      ...asTeacher.docs,
+    ].where((doc) => seen.add(doc.id)).toList();
+
+    for (final doc in allDocs) {
+      final data = doc.data();
+      final scheduledAt = (data['scheduledAt'] as Timestamp).toDate();
+      final duration = (data['durationMinutes'] as int?) ?? 60;
+      final sessionEnd = scheduledAt.add(Duration(minutes: duration));
+
+      if (now.isAfter(sessionEnd)) {
+        final studentId = data['studentId'] as String;
+        final teacherId = data['teacherId'] as String;
+        final points = (data['points'] as int?) ?? 0;
+
+        // Session ended with no join → refund student, cancel
+        await _refundAndCancel(
+          sessionId: doc.id,
+          studentId: studentId,
+          teacherId: teacherId,
+          points: points,
+        );
+      }
+    }
+  }
+
+  Future<void> _refundAndCancel({
+    required String sessionId,
+    required String studentId,
+    required String teacherId,
+    required int points,
+  }) async {
+    final sessionRef = _sessions.doc(sessionId);
+    final studentRef = _users.doc(studentId);
+
+    await _db.runTransaction((tx) async {
+      final snap = await tx.get(sessionRef);
+      final status = snap.data()?['status'];
+
+      // Guard — only cancel if still accepted (not completed/cancelled elsewhere)
+      if (status != SessionStatus.accepted.name) return;
+
+      // 1. Cancel the session
+      tx.update(sessionRef, {
+        'status': SessionStatus.cancelled.name,
+        'cancelledReason': 'expired_no_join',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // 2. Release held balance — student gets their points back
+      tx.update(studentRef, {
+        'heldBalance': FieldValue.increment(-points),
+        // balance stays the same — points were only held, not spent
+      });
+    });
   }
 }

@@ -1,7 +1,7 @@
 import 'package:swaply/features/sessions/data/data_sources/session_remote_data_source.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
 import 'package:swaply/features/sessions/services/onesignal_push_service.dart';
-import 'package:swaply/features/sessions/services/sessions_notifications.dart';
+
 
 /// Business-logic layer between cubit and data source.
 class SessionRepository {
@@ -166,6 +166,12 @@ Future<void> cancelSession(String sessionId) async {
   /// Permanently delete a session document (admin / cleanup only).
   Future<void> deleteSession(String sessionId) =>
       _remote.deleteSession(sessionId);
+
+  Future<void> deleteExpiredPendingSessions(String uid) =>
+    _remote.deleteExpiredPendingSessions(uid);
+
+  Future<void> handleExpiredAcceptedSessions(String uid) =>
+    _remote.handleExpiredAcceptedSessions(uid);      
 
   // ── Helpers ──────────────────────────────────
 

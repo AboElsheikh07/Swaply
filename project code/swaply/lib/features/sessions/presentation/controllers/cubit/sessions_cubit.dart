@@ -21,12 +21,16 @@ class SessionsCubit extends Cubit<SessionsState> {
   Future<void> loadSessions() async {
     emit(const SessionsLoading());
     try {
-      // ✅ emit empty lists immediately so UI shows empty state, not spinner forever
+      await _repo.deleteExpiredPendingSessions(currentUid);
+
+      await _repo.handleExpiredAcceptedSessions(currentUid);
+
       emit(const SessionsLoaded(incoming: [], myRequests: []));
       _listenIncoming();
       _listenMyRequests();
       _startCompletionSweep();
     } catch (e) {
+      print(e);
       emit(const SessionsError('Failed to load sessions. Please try again.'));
     }
   }
@@ -97,7 +101,6 @@ class SessionsCubit extends Cubit<SessionsState> {
     try {
       await _repo.acceptSession(sessionId, session);
     } catch (e) {
-     
       emit(current);
       emit(const SessionsError('Could not accept session. Try again.'));
     }

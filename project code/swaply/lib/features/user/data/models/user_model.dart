@@ -73,9 +73,12 @@ class UserModel {
     ratingCount: 0,
   );
 
-  /// Deserialize from Firestore document
+  /// Deserialize from Firestore document.
+  /// Guards against a null/missing data payload (e.g. doc doesn't exist)
+  /// instead of throwing a type-cast error — returns default field values
+  /// in that case rather than crashing the caller.
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return UserModel(
       id: doc.id,
       username: data['username'] ?? '',

@@ -13,6 +13,31 @@ enum SessionStatus {
 enum SessionRole { teacher, student }
 
 extension SessionStatusX on SessionStatus {
+  // ── To Firestore ─────────────────────
+  String get value => name; // saves as 'accepted', 'pending', etc. (lowercase)
+
+  // ── From Firestore ───────────────────
+  static SessionStatus fromString(String s) {
+    switch (s.toLowerCase().trim()) {
+      // ← toLowerCase fixes capital/lowercase mismatch
+      case 'accepted':
+        return SessionStatus.accepted;
+      case 'pending':
+        return SessionStatus.pending;
+      case 'rejected':
+        return SessionStatus.rejected;
+      case 'completed':
+        return SessionStatus.completed;
+      case 'ongoing':
+        return SessionStatus.ongoing;
+      case 'cancelled':
+        return SessionStatus.cancelled;
+      default:
+        return SessionStatus.pending;
+    }
+  }
+
+  // ── Display label ────────────────────
   String get label {
     switch (this) {
       case SessionStatus.pending:
@@ -28,13 +53,6 @@ extension SessionStatusX on SessionStatus {
       case SessionStatus.cancelled:
         return 'Cancelled';
     }
-  }
-
-  static SessionStatus fromString(String value) {
-    return SessionStatus.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => SessionStatus.pending,
-    );
   }
 }
 
@@ -113,7 +131,7 @@ class SessionItem {
     return now.isAfter(windowStart) && now.isBefore(windowEnd);
   }
 
-    bool get isPastEnd {
+  bool get isPastEnd {
     if (status != SessionStatus.accepted && status != SessionStatus.ongoing) {
       return false;
     }
