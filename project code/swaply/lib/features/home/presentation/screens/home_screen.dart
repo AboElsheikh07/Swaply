@@ -485,7 +485,7 @@ class _PromoCard extends StatelessWidget {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                color: colors.primary.withValues(alpha:0.2),
+                color: colors.primary.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
             ),
@@ -514,7 +514,7 @@ class _PromoCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: colors.text.withValues(alpha:0.7),
+                          color: colors.text.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -530,7 +530,7 @@ class _PromoCard extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: colors.primary.withValues(alpha:0.12),
+                    color: colors.primary.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -572,7 +572,7 @@ class _MentorCard extends StatelessWidget {
           border: Border.all(color: colors.border),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha:0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -589,10 +589,16 @@ class _MentorCard extends StatelessWidget {
                       top: Radius.circular(20),
                     ),
                     child: Container(
-                      width: double.infinity,
+                      width: double.infinity, // keep full width of parent
+                      height: 160, // <-- fixed height, adjust to your needs
                       color: colors.primarySoft,
                       child: mentor.avatarUrl != ""
-                          ? Image.network(mentor.avatarUrl, fit: BoxFit.cover)
+                          ? Image.network(
+                              mentor.avatarUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 160,
+                            )
                           : Icon(
                               CupertinoIcons.person_fill,
                               color: colors.primary,
@@ -609,11 +615,11 @@ class _MentorCard extends StatelessWidget {
                         vertical: 3,
                       ),
                       decoration: BoxDecoration(
-                        color: colors.card.withValues(alpha:0.95),
+                        color: colors.card.withValues(alpha: 0.95),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha:0.08),
+                            color: Colors.black.withValues(alpha: 0.08),
                             blurRadius: 4,
                           ),
                         ],
@@ -626,16 +632,20 @@ class _MentorCard extends StatelessWidget {
                             height: 6,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: colors.green,
+                              color: mentor.online
+                                  ? colors.green
+                                  : colors.muted,
                             ),
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "Active",
+                            mentor.online ? "Active" : "Offline",
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: colors.green,
+                              color: mentor.online
+                                  ? colors.green
+                                  : colors.muted,
                             ),
                           ),
                         ],
