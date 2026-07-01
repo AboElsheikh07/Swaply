@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/auth/presentation/screens/login_screen.dart';
 import 'package:swaply/features/auth/presentation/screens/signup_screen.dart';
-import 'package:swaply/core/constants/app_colors.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
       body: Column(
         children: [
@@ -21,9 +22,9 @@ class WelcomeScreen extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Theme.of(context).extension<AppColorTheme>()!.primary,
-                        Color(0xFF6556C8),
-                        Color(0xFF4338CA),
+                        colors.primary,
+                        const Color(0xFF6556C8),
+                        const Color(0xFF4338CA),
                       ],
                     ),
                   ),
@@ -70,12 +71,12 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        Text(
+                        const Text(
                           'Swaply',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).cardColor,
+                            color: Colors.white,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -97,11 +98,11 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
 
-          // ── Bottom white section ──
+          // ── Bottom section ──
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).extension<AppColorTheme>()!.background,
-              borderRadius: BorderRadius.only(
+              color: colors.background,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(28),
                 topRight: Radius.circular(28),
               ),
@@ -118,10 +119,10 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SignupScreen()),
                     );
                   },
-                  bg: Theme.of(context).extension<AppColorTheme>()!.primary,
+                  bg: colors.primary,
                   fg: Colors.white,
                   elevation: 4,
-                  shadowColor: Theme.of(context).extension<AppColorTheme>()!.primary.withValues(alpha: 0.4),
+                  shadowColor: colors.primary.withValues(alpha: 0.4),
                 ),
                 const SizedBox(height: 12),
                 _btn(
@@ -132,8 +133,8 @@ class WelcomeScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const LoginScreen()),
                     );
                   },
-                  bg: Theme.of(context).extension<AppColorTheme>()!.primarySoft,
-                  fg: Theme.of(context).extension<AppColorTheme>()!.primary,
+                  bg: colors.primarySoft,
+                  fg: colors.primary,
                 ),
               ],
             ),
