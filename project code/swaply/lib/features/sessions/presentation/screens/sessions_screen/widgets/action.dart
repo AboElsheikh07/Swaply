@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_cubit.dart';
+import 'package:swaply/features/sessions/presentation/controllers/cubit/sessions_state.dart';
 import 'package:swaply/features/sessions/presentation/screens/scheduled_session_screen/scheduled_session_screen.dart';
 import 'package:swaply/features/sessions/presentation/screens/sessions_screen/widgets/rate_dialog.dart';
 import '../../../../data/models/session_model.dart';
@@ -9,7 +10,6 @@ import 'package:flutter/cupertino.dart';
 import 'buttons.dart';
 import '../../../../../../core/constants/app_colors.dart';
 import 'package:swaply/l10n/app_localizations.dart';
-
 class ActionWidget extends StatelessWidget {
   final SessionItem session;
   const ActionWidget({super.key, required this.session});
@@ -18,26 +18,55 @@ class ActionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ watch cubit state so widget rebuilds on every emit
+    return BlocBuilder<SessionsCubit, SessionsState>(
+      builder: (context, state) {
+        // get the latest version of this session from state
+        final current = _latestSession(state) ?? session;
+        return _buildAction(context, current);
+      },
+    );
+  }
+
+  // ── Find the latest version of this session in state ──
+  SessionItem? _latestSession(SessionsState state) {
+    List<SessionItem> incoming = [];
+    List<SessionItem> myRequests = [];
+
+    if (state is SessionsLoaded) {
+      incoming = state.incoming;
+      myRequests = state.myRequests;
+    } else if (state is SessionsActionLoading) {
+      incoming = state.incoming;
+      myRequests = state.myRequests;
+    }
+
+    final all = [...incoming, ...myRequests];
+    try {
+      return all.firstWhere((s) => s.id == session.id);
+    } catch (_) {
+      return null; // session was deleted
+    }
+  }
+
+  Widget _buildAction(BuildContext context, SessionItem current) {
     final l10n = AppLocalizations.of(context)!;
-    // ── Join window takes priority over everything ──
-    // When scheduledAt arrives (±5 min buffer), always show Join regardless
-    // of which tab the user is on or what other status the session has.
-    if (session.isTimeToJoin) {
+
+    if (current.isTimeToJoin) {
       return PrimaryBtn(
         icon: CupertinoIcons.videocam_fill,
         label: l10n.joinSession,
         onTap: () {
-          // session.id == the Firestore doc ID == the Zego callID
-          context.read<SessionsCubit>().notifyJoined(session);
+          context.read<SessionsCubit>().notifyJoined(current);
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => ScheduledCallPage(
-                callID: session.id,
+                callID: current.id,
                 currentUserId: _currentUid,
-                currentUserName: session.isOutgoing
-                    ? session.studentName
-                    : session.teacherName,
+                currentUserName: current.isOutgoing
+                    ? current.studentName
+                    : current.teacherName,
               ),
             ),
           );
@@ -45,44 +74,37 @@ class ActionWidget extends StatelessWidget {
       );
     }
 
-    switch (session.status) {
-      // ── Accepted but not time yet → show countdown ─
+    switch (current.status) {
       case SessionStatus.accepted:
       case SessionStatus.ongoing:
-        return _quietLabel(context, l10n.startsAt(session.formattedTime));
+        return _quietLabel(context, l10n.startsAt(current.formattedTime));
 
-      // ── Pending ───────────────────────────────
       case SessionStatus.pending:
-        // Incoming request (I am the teacher) → Accept / Decline
-        if (!session.isOutgoing) {
+        if (!current.isOutgoing) {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               OutlineBtn(
                 label: l10n.btnDecline,
                 icon: Icons.close,
-                onTap: () => context.read<SessionsCubit>().decline(session.id),
+                onTap: () => context.read<SessionsCubit>().decline(current.id),
               ),
               const SizedBox(width: 6),
               PrimaryBtn(
                 icon: Icons.check_rounded,
                 label: l10n.btnAccept,
-                onTap: () => context.read<SessionsCubit>().accept(session.id),
+                onTap: () => context.read<SessionsCubit>().accept(current.id),
               ),
             ],
           );
         }
-
-        // Outgoing request (I am the student) → Cancel
         return OutlineBtn(
           label: l10n.cancel,
           icon: Icons.close,
-          onTap: () => _confirmCancel(context),
+          onTap: () => _confirmCancel(context, current),
         );
 
-      // ── Rejected ──────────────────────────────
       case SessionStatus.rejected:
-      // ── Cancelled → show label + Delete button ─
       case SessionStatus.cancelled:
         return Row(
           mainAxisSize: MainAxisSize.min,
@@ -90,7 +112,7 @@ class ActionWidget extends StatelessWidget {
             _quietLabel(context, l10n.statusCancelled),
             const SizedBox(width: 6),
             GestureDetector(
-              onTap: () => _confirmDelete(context),
+              onTap: () => _confirmDelete(context, current),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -103,11 +125,8 @@ class ActionWidget extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.delete_outline,
-                      color: Colors.red.shade400,
-                      size: 15,
-                    ),
+                    Icon(Icons.delete_outline,
+                        color: Colors.red.shade400, size: 15),
                     const SizedBox(width: 5),
                     Text(
                       l10n.btnDelete,
@@ -124,15 +143,12 @@ class ActionWidget extends StatelessWidget {
           ],
         );
 
-      // ── Completed ─────────────────────────────
       case SessionStatus.completed:
-        return _buildCompletedAction(context);
+        return _buildCompletedAction(context, current);
     }
   }
 
-  // ── Cancel confirmation dialog ────────────────
-
-  void _confirmCancel(BuildContext context) {
+  void _confirmCancel(BuildContext context, SessionItem current) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<SessionsCubit>();
     showDialog(
@@ -148,18 +164,17 @@ class ActionWidget extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              cubit.cancel(session.id);
+              cubit.cancel(current.id);
             },
-            child: Text(l10n.btnYesCancel, style: TextStyle(color: Colors.red)),
+            child: Text(l10n.btnYesCancel,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  // ── Delete confirmation dialog ────────────────
-
-  void _confirmDelete(BuildContext context) {
+  void _confirmDelete(BuildContext context, SessionItem current) {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<SessionsCubit>();
     showDialog(
@@ -175,16 +190,15 @@ class ActionWidget extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              cubit.delete(session.id);
+              cubit.delete(current.id);
             },
-            child: Text(l10n.btnYesDelete, style: TextStyle(color: Colors.red)),
+            child: Text(l10n.btnYesDelete,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
-
-  // ── Quiet status label ────────────────────────
 
   Widget _quietLabel(BuildContext context, String text) {
     return Container(
@@ -204,14 +218,12 @@ class ActionWidget extends StatelessWidget {
     );
   }
 
-  // ── Completed: rate action ────────────────────
-
-  Widget _buildCompletedAction(BuildContext context) {
+  Widget _buildCompletedAction(BuildContext context, SessionItem current) {
     final l10n = AppLocalizations.of(context)!;
     final colors = Theme.of(context).extension<AppColorTheme>()!;
     final uid = _currentUid;
 
-    if (session.hasRated(uid)) {
+    if (current.hasRated(uid)) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
@@ -237,20 +249,20 @@ class ActionWidget extends StatelessWidget {
     }
 
     final isTeacher = session.roleFor(uid) == SessionRole.teacher;
-    final otherName = session.personNameFor(uid);
-    final myRole = isTeacher ? 'teacher' : 'student';
-    final rateeId = isTeacher ? session.studentId : session.teacherId;
-    final label = isTeacher ? l10n.rateStudent : l10n.rateTeacher;
+    final otherName = current.personNameFor(uid);
+    final myRole    = isTeacher ? 'teacher' : 'student';
+    final rateeId   = isTeacher ? current.studentId : current.teacherId;
+    final label     = isTeacher ? l10n.rateStudent : l10n.rateTeacher;
 
     return GestureDetector(
       onTap: () => RateDialog.show(
         context,
         name: otherName,
-        skill: session.skill,
+        skill: current.skill,
         role: isTeacher ? 'student' : 'teacher',
         onSubmit: (stars, review) {
           context.read<SessionsCubit>().submitRating(
-            sessionId: session.id,
+            sessionId: current.id,
             rateeId: rateeId,
             role: myRole,
             stars: stars,

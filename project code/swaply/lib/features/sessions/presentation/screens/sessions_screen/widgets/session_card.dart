@@ -39,6 +39,7 @@ class SessionCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // ── Avatar ───────────────────────────
                 Container(
                   width: 52,
                   height: 52,
@@ -46,11 +47,30 @@ class SessionCard extends StatelessWidget {
                     color: colors.primarySoft,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(
-                    CupertinoIcons.person_fill,
-                    color: colors.primary,
-                    size: 26,
-                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: () {
+                    final avatarUrl = session.isOutgoing
+                        ? session.teacherAvatar
+                        : session.studentAvatar;
+
+                    if (avatarUrl.isNotEmpty) {
+                      return Image.network(
+                        avatarUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Icon(
+                          CupertinoIcons.person_fill,
+                          color: colors.primary,
+                          size: 26,
+                        ),
+                      );
+                    }
+
+                    return Icon(
+                      CupertinoIcons.person_fill,
+                      color: colors.primary,
+                      size: 26,
+                    );
+                  }(),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
