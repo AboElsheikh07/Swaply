@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:swaply/features/sessions/services/sessions_notifications.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
 import 'package:swaply/core/app_providers.dart';
@@ -25,7 +24,7 @@ void main() async {
    
   OneSignal.initialize("badf98d9-e2dd-4bde-8da7-9108d945ce6f");
   OneSignal.Notifications.requestPermission(true);
-  await SessionNotificationService.init();
+
   FirebaseAuth.instance.authStateChanges().listen((user) async {
     if (user != null) {
       OneSignal.login(user.uid); // tags this device with the Firebase uid
