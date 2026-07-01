@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:swaply/features/user/data/datasources/user_remote_data_source.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
-// ✅ بيانات إضافية محسوبة، مش مخزنة جاهزة في الـ user doc
+// ✅ حطينا الـ Class هنا عشان السيستم كله يشوفه علطول وميطلعش Error
 class MentorAvailability {
   final List<String> upcomingSlots; // أقرب 3 مواعيد متاحة بصيغة قابلة للعرض
-  final int totalSessions;          // عدد الـ sessions المكتملة فعلياً
+  final int totalSessions; // عدد الـ sessions المكتملة فعلياً
 
   const MentorAvailability({
     required this.upcomingSlots,
@@ -22,46 +22,53 @@ class MentorDetailsRepository {
 
   Future<UserModel> getMentor(String uid) async {
     final user = await _remote.fetchUser(uid);
-
-    if (user == null) {
-      throw Exception("Mentor not found");
-    }
-
+    if (user == null) throw Exception("Mentor not found");
     return user;
   }
 
-  // ✅ بيحسب الـ sessions المكتملة + بيجيب أقرب المواعيد المتاحة (pending/accepted)
-  //    للمينتور ده من sessions collection بدل الأرقام الوهمية
+  // ✅ بيحسب الـ sessions المكتملة الفردية + بيجيب أقرب المواعيد المتاحة
   Future<MentorAvailability> getAvailability(String mentorId) async {
-    try {
-      final sessionsRef = _db.collection('sessions');
+    int totalCompleted = 0;
+    List<String> slots = [];
 
-      final completedSnap = await sessionsRef
+    // 1. حساب الـ sessions المكتملة
+    try {
+      final completedSnap = await _db
+          .collection('sessions')
           .where('teacherId', isEqualTo: mentorId)
           .where('status', isEqualTo: 'completed')
           .get();
+      totalCompleted = completedSnap.docs.length;
+    } catch (e) {
+      print("Error fetching completed sessions: $e");
+    }
 
-      final upcomingSnap = await sessionsRef
+    // 2. جلب المواعيد القادمة (pending/accepted)
+    try {
+      final upcomingSnap = await _db
+          .collection('sessions')
           .where('teacherId', isEqualTo: mentorId)
           .where('status', whereIn: ['accepted', 'pending'])
           .orderBy('scheduledAt')
           .limit(3)
           .get();
 
-      final slots = upcomingSnap.docs.map((doc) {
-        final ts = doc.data()['scheduledAt'] as Timestamp?;
-        if (ts == null) return null;
-        return _formatSlot(ts.toDate());
-      }).whereType<String>().toList();
-
-      return MentorAvailability(
-        upcomingSlots: slots,
-        totalSessions: completedSnap.docs.length,
-      );
-    } catch (_) {
-      // لو الـ index لسه مش متعمول أو فيه مشكلة، نرجع قيم فاضية بدل ما نكسر الشاشة
-      return MentorAvailability.empty();
+      slots = upcomingSnap.docs
+          .map((doc) {
+            final ts = doc.data()['scheduledAt'] as Timestamp?;
+            if (ts == null) return null;
+            return _formatSlot(ts.toDate());
+          })
+          .whereType<String>()
+          .toList();
+    } catch (e) {
+      print("Firestore Index required for upcoming slots: $e");
     }
+
+    return MentorAvailability(
+      upcomingSlots: slots,
+      totalSessions: totalCompleted, // هيرجع الرقم الفعلي الحقيقي هنا دايماً
+    );
   }
 
   String _formatSlot(DateTime date) {

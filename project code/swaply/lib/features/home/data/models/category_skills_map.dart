@@ -14,7 +14,7 @@ const Map<String, List<String>> categorySkillsMap = {
     'UI/UX Design', 'UI Design', 'UX Design', 'Graphic Design',
     'Figma', 'Adobe XD', 'Illustrator', 'Photoshop', 'Branding',
     'Product Design', 'Motion Design', 'Web Design',
-  ],
+  ],  
   'Languages': [
     'English', 'Arabic', 'Spanish', 'French', 'German',
     'Italian', 'Chinese', 'Japanese', 'Turkish', 'Translation',

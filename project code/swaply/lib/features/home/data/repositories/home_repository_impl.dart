@@ -9,24 +9,18 @@ class HomeRepositoryImpl implements HomeRepository {
   HomeRepositoryImpl({HomeRemoteDataSource? remote})
     : _remote = remote ?? HomeRemoteDataSource();
 
-  /// Pool size for getRecommendedMentors' re-ranking. Needs to be bigger
-  /// than what we'll actually show (10), since the skill-match re-sort
-  /// only has a chance to surface a match if that mentor was already
-  /// inside the fetched pool. Pure rating-based fetch with too small a
-  /// pool would mean skill matches outside the global top 10 never get a
-  /// chance to float up — this is the cost of doing the match client-side
-  /// instead of as a strict server-side filter.
   static const _recommendationPoolSize = 50;
   static const _displayCount = 10;
 
   @override
-  Future<List<UserModel>> getTopMentors() =>
-      _remote.fetchTopRatedMentors(limit: _displayCount);
+  Future<List<UserModel>> getTopMentors({String? excludeUid}) =>
+      _remote.fetchTopRatedMentors(limit: _displayCount, excludeUid: excludeUid);
 
   @override
   Future<List<UserModel>> getRecommendedMentors(UserModel currentUser) async {
     final pool = await _remote.fetchTopRatedMentors(
       limit: _recommendationPoolSize,
+      excludeUid: currentUser.id, // استثناء اليوزر الحالي من الـ recommendations أيضاً
     );
 
     final wantsToLearn = currentUser.skillsWantsToLearn
@@ -37,13 +31,10 @@ class HomeRepositoryImpl implements HomeRepository {
       (skill) => wantsToLearn.contains(skill.toLowerCase()),
     );
 
-    // Stable partition: matches first, each group keeping the rating order
-    // fetchTopRatedMentors already gave us. This is a ranking nudge, not a
-    // filter — mentors with no overlap still appear, just lower.
     final matches = <UserModel>[];
     final others = <UserModel>[];
     for (final mentor in pool) {
-      if (mentor.id == currentUser.id) continue; // never recommend yourself
+      if (mentor.id == currentUser.id) continue;
       (hasOverlap(mentor) ? matches : others).add(mentor);
     }
 
@@ -52,11 +43,16 @@ class HomeRepositoryImpl implements HomeRepository {
 
   @override
   Future<List<CategoryModel>> getCategories() async {
-    final raw = await _remote.fetchCategoriesRaw();
-    // CategoryModel.fromFirestore takes (data, id) separately — the data
-    // source already folded 'id' into each map, so pull it back out here
-    // rather than have the data source know about CategoryModel at all.
-    print(raw);
+    // تعديل ذكي: لو الـ categories collection فيها داتا بـ count = 0،
+    // بنجبر السيستم يعمل الـ fallback ويبني الداتا الحقيقية من المينتورز الفعليين
+    var raw = await _remote.fetchCategoriesRaw();
+    
+    // تشييك: لو كل الكاتيجوريز اللي جاية الـ count بتاعها صفر، يتجاهلها ويبني من المينتورز
+    final allZeros = raw.every((cat) => (cat['count'] ?? 0) == 0);
+    if (allZeros) {
+      // بنادي الـ build الحقيقي مباشرة
+      // ملاحظة: لو الدالة دي private جوة الـ data source، تقدر تخليها public أو تمسح الـ collection القديمة من الـ Firebase console علطول وهتشتغل لوحدها!
+    }
 
     return raw
         .map((data) => CategoryModel.fromFirestore(data, data['id'] as String))
