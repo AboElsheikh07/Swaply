@@ -36,13 +36,14 @@ class SessionsCubit extends Cubit<SessionsState> {
   }
 
   // ── Streams ───────────────────────────────
-
   void _listenIncoming() {
     _incomingSub = _repo.watchIncomingRequests(currentUid).listen(
       (list) {
         final current = state;
         if (current is SessionsLoaded) {
           emit(current.copyWith(incoming: list));
+        } else if (current is SessionsActionLoading) {
+          emit(SessionsLoaded(incoming: list, myRequests: current.myRequests));
         }
       },
       onError: (_) =>
@@ -56,13 +57,14 @@ class SessionsCubit extends Cubit<SessionsState> {
         final current = state;
         if (current is SessionsLoaded) {
           emit(current.copyWith(myRequests: list));
+        } else if (current is SessionsActionLoading) {
+          emit(SessionsLoaded(incoming: current.incoming, myRequests: list));
         }
       },
       onError: (_) =>
           emit(const SessionsError('Failed to load your requests.')),
     );
   }
-
   // ── Auto-complete sweep ───────────────────
 
   /// Re-checks the already-loaded lists every 30s for sessions whose
@@ -86,67 +88,43 @@ class SessionsCubit extends Cubit<SessionsState> {
 
   // ── Accept ────────────────────────────────
   Future<void> accept(String sessionId) async {
-    final current = state;
-    if (current is! SessionsLoaded) return;
-
-    final session = current.incoming.firstWhere((s) => s.id == sessionId);
-
-    emit(
-      SessionsActionLoading(
-        incoming: current.incoming,
-        myRequests: current.myRequests,
-      ),
-    );
-
+    if (state is! SessionsLoaded) return;
     try {
+      final session = (state as SessionsLoaded).incoming.firstWhere(
+        (s) => s.id == sessionId,
+      );
       await _repo.acceptSession(sessionId, session);
+      // ✅ stream fires automatically → UI updates
     } catch (e) {
-      emit(current);
       emit(const SessionsError('Could not accept session. Try again.'));
     }
   }
-  // ── Decline ───────────────────────────────
 
   Future<void> decline(String sessionId) async {
-    final current = state;
-    if (current is! SessionsLoaded) return;
-
-    emit(
-      SessionsActionLoading(
-        incoming: current.incoming,
-        myRequests: current.myRequests,
-      ),
-    );
-
+    if (state is! SessionsLoaded) return;
     try {
       await _repo.declineSession(sessionId);
+      // ✅ stream fires automatically → UI updates
     } catch (e) {
-      emit(current);
       emit(const SessionsError('Could not decline session. Try again.'));
     }
   }
 
-  // ── Cancel ────────────────────────────────
-
   Future<void> cancel(String sessionId) async {
-    final current = state;
-    if (current is! SessionsLoaded) return;
-
+    if (state is! SessionsLoaded) return;
     try {
       await _repo.cancelSession(sessionId);
+      // ✅ stream fires automatically → UI updates
     } catch (e) {
       emit(const SessionsError('Could not cancel session. Try again.'));
     }
   }
 
   Future<void> delete(String sessionId) async {
-    final current = state;
-    if (current is! SessionsLoaded) return;
-
+    if (state is! SessionsLoaded) return;
     try {
       await _repo.deleteSession(sessionId);
-      // The Firestore stream will automatically remove it from the list
-      // so no manual state update needed here.
+      // ✅ stream fires automatically → removes from list
     } catch (e) {
       emit(const SessionsError('Could not delete session. Try again.'));
     }

@@ -29,7 +29,7 @@ class SessionRemoteDataSource {
   Stream<List<SessionItem>> watchIncomingRequests(String uid) {
     return _sessions
         .where('teacherId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt') // ✅ match index
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -38,11 +38,10 @@ class SessionRemoteDataSource {
         );
   }
 
-  /// Live list of sessions where the user is the student (my requests).
   Stream<List<SessionItem>> watchMyRequests(String uid) {
     return _sessions
         .where('studentId', isEqualTo: uid)
-        .orderBy('scheduledAt')
+        .orderBy('scheduledAt') // ✅ match index
         .snapshots()
         .map(
           (snap) => snap.docs
@@ -276,7 +275,7 @@ class SessionRemoteDataSource {
         final points = (data['points'] as int?) ?? 0;
 
         // Session ended with no join → refund student, cancel
-        await _refundAndCancel(
+        await refundAndCancel(
           sessionId: doc.id,
           studentId: studentId,
           teacherId: teacherId,
@@ -286,7 +285,7 @@ class SessionRemoteDataSource {
     }
   }
 
-  Future<void> _refundAndCancel({
+  Future<void> refundAndCancel({
     required String sessionId,
     required String studentId,
     required String teacherId,
