@@ -696,14 +696,6 @@ class _MentorCard extends StatelessWidget {
                     style: TextStyle(fontSize: 11, color: colors.mutedFg),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    "${mentor.balance} pts",
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      color: colors.primary,
-                    ),
-                  ),
                 ],
               ),
             ),
