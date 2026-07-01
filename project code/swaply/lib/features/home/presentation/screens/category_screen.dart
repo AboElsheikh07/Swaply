@@ -18,16 +18,30 @@ class CategoryTab extends StatelessWidget {
     Color(0xFF4E342E),
   ];
 
-  static const _icons = [
-    Icons.palette_outlined,
-    Icons.code_rounded,
-    Icons.language_rounded,
-    Icons.music_note_rounded,
-    Icons.self_improvement_rounded,
-    Icons.business_center_outlined,
-    Icons.camera_alt_outlined,
-    Icons.restaurant_outlined,
-  ];
+  // 1. عملنا دالة ذكية بتجيب الأيقونة الصح بناءً على الاسم من غير ما نلمس الـ Model
+  IconData _getIconForCategory(String name) {
+    final normalized = name.trim().toLowerCase();
+    switch (normalized) {
+      case 'programming':
+        return Icons.code_rounded;
+      case 'design':
+        return Icons.palette_outlined;
+      case 'languages':
+        return Icons.language_rounded;
+      case 'music':
+        return Icons.music_note_rounded;
+      case 'business':
+        return Icons.business_center_outlined;
+      case 'fitness & wellness':
+        return Icons.self_improvement_rounded;
+      case 'photography':
+        return Icons.camera_alt_outlined;
+      case 'cooking':
+        return Icons.restaurant_outlined;
+      default:
+        return Icons.category_outlined; // أيقونة احتياطية لو الاسم مش متطابق
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +50,19 @@ class CategoryTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       itemCount: categories.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (_, i) {
-        final color = _colors[i % _colors.length];
-        final icon = _icons[i % _icons.length];
+        final category = categories[i];
+        final color =
+            _colors[i % _colors.length]; // الألوان عادي تفضل عشوائية ومبهجة
+
+        // 2. هنا نادينا الدالة وباصينا اسم الكاتيجوري عشان نضمن الأيقونة الصح
+        final icon = _getIconForCategory(category.name);
+
         return _CategoryCard(
-          category: categories[i],
+          category: category,
           color: color,
-          icon: icon,
+          icon: icon, // هتروح للكارت مظبوطة 100%
           reverse: i.isOdd,
         );
       },

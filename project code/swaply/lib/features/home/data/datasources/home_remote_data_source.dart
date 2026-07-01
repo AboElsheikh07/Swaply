@@ -3,8 +3,6 @@ import 'package:swaply/features/home/data/models/category_skills_map.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
 /// Raw Firestore access for the Home feature — no business logic here.
-/// Mirrors the pattern used by SessionRemoteDataSource: this is the only
-/// layer that ever calls .collection()/.where()/.orderBy() directly.
 class HomeRemoteDataSource {
   final FirebaseFirestore _db;
 
@@ -17,13 +15,6 @@ class HomeRemoteDataSource {
   CollectionReference<Map<String, dynamic>> get _categories =>
       _db.collection('categories');
 
-  /// Public mentors, ranked by rating. [limit] controls how many come back —
-  /// callers needing a bigger pool to re-rank client-side (e.g. for skill
-  /// matching) should pass a higher limit than what they'll actually show.
-  ///
-  /// Ties on ratingAvg are broken by ratingCount: a single 5-star rating
-  /// shouldn't outrank someone with 50 ratings averaging 4.8 — without the
-  /// second orderBy, Firestore's tie order on ratingAvg alone is undefined.
   Future<List<UserModel>> fetchTopRatedMentors({
     int limit = 10,
     String? excludeUid,
@@ -40,19 +31,22 @@ class HomeRemoteDataSource {
     return mentors.where((u) => u.id != excludeUid).take(limit).toList();
   }
 
-  /// CategoryModel.fromFirestore takes the raw map + id separately (not a
-  /// DocumentSnapshot like UserModel does) — matching that exact signature
-  /// here rather than assuming all models share one convention.
-  /// ✅ لو فيه categories collection حقيقية مليانة بنستخدمها، لو فاضية
-  ///    (زي الوضع الحالي) بنبني الكاتيجوريز من categorySkillsMap والـ
-  ///    count بيبقى عدد المينتورز الحقيقي اللي عندهم أي skill تابع
-  ///    للـ category ده.
+  /// ✅ التعديل هنا: بنخليه يحسب الأرقام الفعلية من اليوزرز علطول
+  /// وبيتخطى الـ collection الفاضية أو اللي أرقامها أصفار عشان تضمن داتا حقيقية
   Future<List<Map<String, dynamic>>> fetchCategoriesRaw() async {
-    final snap = await _categories.get();
-    if (snap.docs.isNotEmpty) {
-      return snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+    // 1. بنجيب الكاتيجوريز المحسوبة ديناميكياً وفورياً من المينتورز المتاحين
+    final dynamicCategories = await _buildCategoriesFromUsers();
+
+    // 2. لو مفيش يوزرز خالص في الأبلكيشن لسه، كخطة احتياطية بنرجع الكاتيجوريز من الـ Collection (لو موجودة)
+    if (dynamicCategories.isEmpty) {
+      final snap = await _categories.get();
+      if (snap.docs.isNotEmpty) {
+        return snap.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+      }
     }
-    return _buildCategoriesFromUsers();
+
+    // دايماً بنفضل الأرقام الديناميكية الحقيقية
+    return dynamicCategories;
   }
 
   Future<List<Map<String, dynamic>>> _buildCategoriesFromUsers() async {
@@ -64,18 +58,25 @@ class HomeRemoteDataSource {
     for (final categoryName in categorySkillsMap.keys) {
       final skillsLower = skillsInCategory(categoryName);
 
-      final mentorsInCategory = allUsers.where((user) {
-        return user.skillsCanTeach
-            .any((s) => skillsLower.contains(s.toLowerCase()));
-      }).length;
+      // بنجيب لستة بأسماء المينتورز المقبولين في الكاتيجوري ده عشان نطبعهم ونشوفهم
+      final matchedMentorsNames = allUsers
+          .where(
+            (user) => user.skillsCanTeach.any(
+              (s) => skillsLower.contains(s.toLowerCase()),
+            ),
+          )
+          .map((user) => user.username) // أو user.id
+          .toList();
 
-      if (mentorsInCategory > 0) {
-        result.add({
-          'id': categoryName,
-          'name': categoryName,
-          'count': mentorsInCategory,
-        });
-      }
+      print(
+        "Category: $categoryName | Mentors Found: $matchedMentorsNames | Count: ${matchedMentorsNames.length}",
+      );
+
+      result.add({
+        'id': categoryName,
+        'name': categoryName,
+        'count': matchedMentorsNames.length,
+      });
     }
 
     result.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
