@@ -21,7 +21,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
    
   OneSignal.initialize("badf98d9-e2dd-4bde-8da7-9108d945ce6f");
   OneSignal.Notifications.requestPermission(true);

@@ -8,21 +8,24 @@
             "name": "swaply",
             "cwd": "swaply",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": ["--dart-define-from-file=env/dev.json"]
         },
         {
             "name": "swaply (profile mode)",
             "cwd": "swaply",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": ["--dart-define-from-file=env/dev.json"]
         },
         {
             "name": "swaply (release mode)",
             "cwd": "swaply",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": ["--dart-define-from-file=env/dev.json"]
         }
     ]
 }
