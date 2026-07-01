@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:swaply/core/constants/app_colors.dart';
+import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/mentor_details/presentation/screens/mentor_details_screen.dart';
 import 'package:swaply/features/search/data/models/search_model.dart';
 import 'package:swaply/features/search/data/repositories/search_repository_firebase.dart';
@@ -8,15 +10,7 @@ import 'package:swaply/features/search/presentation/cubit/search_cubit.dart';
 import 'package:swaply/features/search/presentation/cubit/search_state.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
-const searchPrimary     = Color(0xFF5B4CB8);
-const searchPrimarySoft = Color(0xFFEEECFB);
-const searchMutedFg     = Color(0xFF8A8A9A);
-const searchBorder      = Color(0xFFEAEAF0);
-const searchDark        = Color(0xFF1A1A2E);
-
 class SearchScreen extends StatelessWidget {
-  // ✅ لو جاية من category_screen هتلاقي اسم الـ category هنا، بيتعرض في
-  // الـ search bar وبيتبحث عليه تلقائي من أول ما الشاشة تفتح
   final String? initialQuery;
   const SearchScreen({super.key, this.initialQuery});
 
@@ -47,9 +41,10 @@ class SearchView extends StatefulWidget {
 }
 
 class SearchViewState extends State<SearchView> {
-  late final searchCtrl =
-      TextEditingController(text: widget.initialQuery ?? '');
-  String sortTab   = 'All';
+  late final searchCtrl = TextEditingController(
+    text: widget.initialQuery ?? '',
+  );
+  String sortTab = 'All';
   late bool isSearching = (widget.initialQuery ?? '').trim().isNotEmpty;
 
   final sortTabs = ['All', 'Latest', 'Most Popular', 'Cheapest'];
@@ -80,7 +75,6 @@ class SearchViewState extends State<SearchView> {
     context.read<SearchCubit>().clearSearch();
   }
 
-  // ── Sort locally by tab ──────────────────
   List<SearchMentorModel> _sort(List<SearchMentorModel> list) {
     final sorted = List<SearchMentorModel>.from(list);
     switch (sortTab) {
@@ -88,8 +82,10 @@ class SearchViewState extends State<SearchView> {
         sorted.sort((a, b) => b.rating.compareTo(a.rating));
       case 'Cheapest':
         sorted.sort((a, b) {
-          final aP = int.tryParse(a.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-          final bP = int.tryParse(b.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final aP =
+              int.tryParse(a.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+          final bP =
+              int.tryParse(b.rate.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
           return aP.compareTo(bP);
         });
     }
@@ -98,8 +94,9 @@ class SearchViewState extends State<SearchView> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -111,14 +108,18 @@ class SearchViewState extends State<SearchView> {
                   GestureDetector(
                     onTap: () => Navigator.of(context).maybePop(),
                     child: Container(
-                      width: 40, height: 40,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
+                        color: colors.card,
                         shape: BoxShape.circle,
-                        border: Border.all(color: searchBorder),
+                        border: Border.all(color: colors.border),
                       ),
-                      child: const Icon(
-                          Icons.arrow_back_ios_new_rounded, size: 16),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 16,
+                        color: colors.text,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -126,30 +127,44 @@ class SearchViewState extends State<SearchView> {
                     child: Container(
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
+                        color: colors.background,
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(
-                          color: isSearching ? searchPrimary : searchBorder,
+                          color: isSearching ? colors.primary : colors.border,
                           width: isSearching ? 1.5 : 1,
                         ),
                       ),
                       child: Row(
                         children: [
                           const SizedBox(width: 14),
-                          Icon(Icons.search_rounded, size: 18,
-                              color: isSearching
-                                  ? searchPrimary
-                                  : searchMutedFg),
+                          Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: isSearching
+                                ? colors.primary
+                                : colors.mutedFg,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: TextField(
                               controller: searchCtrl,
                               autofocus: true,
-                              style: const TextStyle(fontSize: 14),
-                              decoration: const InputDecoration(
+                              enableSuggestions:
+                                  false, // disables predictive suggestions
+                              enableIMEPersonalizedLearning:
+                                  false, // disables learning/composing highlight in some keyboards
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: colors.text,
+                              ),
+
+                              cursorColor: colors.primary,
+                              decoration: InputDecoration(
                                 hintText: 'Search skills, mentors...',
                                 hintStyle: TextStyle(
-                                    color: searchMutedFg, fontSize: 14),
+                                  color: colors.mutedFg,
+                                  fontSize: 14,
+                                ),
                                 border: InputBorder.none,
                                 isDense: true,
                               ),
@@ -160,10 +175,13 @@ class SearchViewState extends State<SearchView> {
                           if (isSearching)
                             GestureDetector(
                               onTap: clearSearch,
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                                child: Icon(Icons.close_rounded,
-                                    size: 18, color: searchMutedFg),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 12),
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  size: 18,
+                                  color: colors.mutedFg,
+                                ),
                               ),
                             ),
                         ],
@@ -179,13 +197,10 @@ class SearchViewState extends State<SearchView> {
               child: BlocBuilder<SearchCubit, SearchState>(
                 builder: (context, state) {
                   return switch (state) {
-                    SearchLoadingSkills() => const Center(
-                        child: CircularProgressIndicator(
-                            color: searchPrimary)),
-                    SearchIdle(
-                      :final popularSkills,
-                      :final recentSearches,
-                    ) =>
+                    SearchLoadingSkills() => Center(
+                      child: CircularProgressIndicator(color: colors.primary),
+                    ),
+                    SearchIdle(:final popularSkills, :final recentSearches) =>
                       SearchIdleView(
                         popularSkills: popularSkills,
                         recentSearches: recentSearches,
@@ -198,18 +213,21 @@ class SearchViewState extends State<SearchView> {
                         onClearAll: () =>
                             context.read<SearchCubit>().clearRecentSearches(),
                       ),
-                    SearchLoading() => const Center(
-                        child: CircularProgressIndicator(
-                            color: searchPrimary)),
+                    SearchLoading() => Center(
+                      child: CircularProgressIndicator(color: colors.primary),
+                    ),
                     SearchLoaded(:final results) => SearchResultsView(
-                        results: _sort(results),
-                        sortTab: sortTab,
-                        onTabChange: (t) => setState(() => sortTab = t),
-                        sortTabs: sortTabs,
-                      ),
+                      results: _sort(results),
+                      sortTab: sortTab,
+                      onTabChange: (t) => setState(() => sortTab = t),
+                      sortTabs: sortTabs,
+                    ),
                     SearchError(:final message) => Center(
-                        child: Text(message,
-                            style: const TextStyle(color: searchMutedFg))),
+                      child: Text(
+                        message,
+                        style: TextStyle(color: colors.mutedFg),
+                      ),
+                    ),
                     _ => const SizedBox(),
                   };
                 },
@@ -241,66 +259,96 @@ class SearchIdleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       children: [
         Row(
           children: [
-            Text(AppLocalizations.of(context)!.recentSearches,
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            Text(
+              AppLocalizations.of(context)!.recentSearches,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: colors.text,
+              ),
+            ),
             const Spacer(),
             if (recentSearches.isNotEmpty)
               GestureDetector(
                 onTap: onClearAll,
-                child: Text(AppLocalizations.of(context)!.clearAll,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: searchPrimary)),
+                child: Text(
+                  AppLocalizations.of(context)!.clearAll,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: colors.primary,
+                  ),
+                ),
               ),
           ],
         ),
         const SizedBox(height: 12),
         if (recentSearches.isEmpty)
-          const Text('No recent searches.',
-              style: TextStyle(fontSize: 12, color: searchMutedFg))
+          Text(
+            'No recent searches.',
+            style: TextStyle(fontSize: 12, color: colors.mutedFg),
+          )
         else
           Wrap(
-            spacing: 8, runSpacing: 8,
+            spacing: 8,
+            runSpacing: 8,
             children: recentSearches
-                .map((s) => GestureDetector(
-                      onTap: () => onSelectQuery(s),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: searchBorder),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(s,
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500)),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () => onRemoveRecent(s),
-                              child: const Icon(Icons.close_rounded,
-                                  size: 14, color: searchMutedFg),
-                            ),
-                          ],
-                        ),
+                .map(
+                  (s) => GestureDetector(
+                    onTap: () => onSelectQuery(s),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
                       ),
-                    ))
+                      decoration: BoxDecoration(
+                        color: colors.card,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: colors.border),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            s,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: colors.text,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => onRemoveRecent(s),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 14,
+                              color: colors.mutedFg,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         const SizedBox(height: 24),
 
-        Text(AppLocalizations.of(context)!.popularSkills,
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+        Text(
+          AppLocalizations.of(context)!.popularSkills,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: colors.text,
+          ),
+        ),
         const SizedBox(height: 12),
         ...popularSkills.map(
           (p) => GestureDetector(
@@ -310,26 +358,34 @@ class SearchIdleView extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 48, height: 48,
+                    width: 48,
+                    height: 48,
                     decoration: BoxDecoration(
-                      color: searchPrimarySoft,
+                      color: colors.primarySoft,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.star_outline_rounded,
-                        color: searchPrimary),
+                    child: Icon(
+                      Icons.star_outline_rounded,
+                      color: colors.primary,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(p.name,
-                            style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600)),
-                        Text(p.count,
-                            style: const TextStyle(
-                                fontSize: 11, color: searchMutedFg)),
+                        Text(
+                          p.name,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colors.text,
+                          ),
+                        ),
+                        Text(
+                          p.count,
+                          style: TextStyle(fontSize: 11, color: colors.mutedFg),
+                        ),
                       ],
                     ),
                   ),
@@ -362,16 +418,22 @@ class SearchResultsView extends StatelessWidget {
   String _getLocalizedTab(BuildContext context, String tab) {
     final l10n = AppLocalizations.of(context)!;
     switch (tab) {
-      case 'All': return l10n.filterAll;
-      case 'Latest': return l10n.filterLatest;
-      case 'Most Popular': return l10n.filterMostPopular;
-      case 'Cheapest': return l10n.filterCheapest;
-      default: return tab;
+      case 'All':
+        return l10n.filterAll;
+      case 'Latest':
+        return l10n.filterLatest;
+      case 'Most Popular':
+        return l10n.filterMostPopular;
+      case 'Cheapest':
+        return l10n.filterCheapest;
+      default:
+        return tab;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       children: [
         // Sort tabs
@@ -388,19 +450,25 @@ class SearchResultsView extends StatelessWidget {
                 onTap: () => onTabChange(sortTabs[i]),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 8),
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: active ? searchPrimary : Theme.of(context).cardColor,
+                    color: active ? colors.primary : colors.card,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: active ? searchPrimary : searchBorder),
+                      color: active ? colors.primary : colors.border,
+                    ),
                   ),
-                  child: Text(_getLocalizedTab(context, sortTabs[i]),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: active ? Colors.white : searchDark,
-                      )),
+                  child: Text(
+                    _getLocalizedTab(context, sortTabs[i]),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      // was hardcoded `searchDark` (#1A1A2E) — invisible in dark mode
+                      color: active ? Colors.white : colors.text,
+                    ),
+                  ),
                 ),
               );
             },
@@ -411,20 +479,21 @@ class SearchResultsView extends StatelessWidget {
         Expanded(
           child: results.isEmpty
               ? Center(
-                  child: Text(AppLocalizations.of(context)!.noResultsFound,
-                      style: TextStyle(color: searchMutedFg)))
+                  child: Text(
+                    AppLocalizations.of(context)!.noResultsFound,
+                    style: TextStyle(color: colors.mutedFg),
+                  ),
+                )
               : GridView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: results.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                     childAspectRatio: 0.72,
                   ),
-                  itemBuilder: (_, i) =>
-                      SearchMentorCard(mentor: results[i]),
+                  itemBuilder: (_, i) => SearchMentorCard(mentor: results[i]),
                 ),
         ),
       ],
@@ -439,6 +508,7 @@ class SearchMentorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
@@ -447,17 +517,18 @@ class SearchMentorCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: colors.card,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: searchBorder),
+          border: Border.all(color: colors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: double.infinity,
@@ -466,9 +537,9 @@ class SearchMentorCard extends StatelessWidget {
                           mentor.avatarUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) =>
-                              const _AvatarPlaceholder(),
+                              _AvatarPlaceholder(colors: colors),
                         )
-                      : const _AvatarPlaceholder(),
+                      : _AvatarPlaceholder(colors: colors),
                 ),
               ),
             ),
@@ -477,31 +548,48 @@ class SearchMentorCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(mentor.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w600)),
-                  Text(mentor.skill,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontSize: 11, color: searchMutedFg)),
+                  Text(
+                    mentor.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: colors.text,
+                    ),
+                  ),
+                  Text(
+                    mentor.skill,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: colors.mutedFg),
+                  ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded,
-                          color: Color(0xFFFFC107), size: 12),
+                      const Icon(
+                        Icons.star_rounded,
+                        color: Color(0xFFFFC107),
+                        size: 12,
+                      ),
                       const SizedBox(width: 2),
-                      Text(mentor.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                              fontSize: 11, fontWeight: FontWeight.w600)),
+                      Text(
+                        mentor.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: colors.text,
+                        ),
+                      ),
                       const Spacer(),
-                      Text(mentor.rate,
-                          style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: searchPrimary)),
+                      Text(
+                        mentor.rate,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: colors.primary,
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -515,14 +603,14 @@ class SearchMentorCard extends StatelessWidget {
 }
 
 class _AvatarPlaceholder extends StatelessWidget {
-  const _AvatarPlaceholder();
+  final AppColorTheme colors;
+  const _AvatarPlaceholder({required this.colors});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: searchPrimarySoft,
-      child: const Icon(CupertinoIcons.person_fill,
-          color: searchPrimary, size: 44),
+      color: colors.primarySoft,
+      child: Icon(CupertinoIcons.person_fill, color: colors.primary, size: 44),
     );
   }
 }
@@ -536,20 +624,34 @@ class SkillTagBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final map = {
-      SkillTag.hot:      (l10n.tagHot,     const Color(0xFFFFEBEE), const Color(0xFFE53935)),
-      SkillTag.newSkill: (l10n.tagNew,     const Color(0xFFFFF3E0), const Color(0xFFF57C00)),
-      SkillTag.popular:  (l10n.tagPopular, const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
+      SkillTag.hot: (
+        l10n.tagHot,
+        const Color(0xFFFFEBEE),
+        const Color(0xFFE53935),
+      ),
+      SkillTag.newSkill: (
+        l10n.tagNew,
+        const Color(0xFFFFF3E0),
+        const Color(0xFFF57C00),
+      ),
+      SkillTag.popular: (
+        l10n.tagPopular,
+        const Color(0xFFE8F5E9),
+        const Color(0xFF2E7D32),
+      ),
     };
 
     final (label, bg, fg) = map[tag]!;
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
-          color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.w600, color: fg)),
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
+      ),
     );
   }
 }

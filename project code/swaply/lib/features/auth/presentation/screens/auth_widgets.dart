@@ -28,7 +28,7 @@ class AuthBackButton extends StatelessWidget {
 }
 
 // ── Input Field ──────────────────────────
-class AuthInputField extends StatelessWidget {
+class AuthInputField extends StatefulWidget {
   final String label;
   final String placeholder;
   final TextEditingController controller;
@@ -51,46 +51,87 @@ class AuthInputField extends StatelessWidget {
   });
 
   @override
+  State<AuthInputField> createState() => _AuthInputFieldState();
+}
+
+class _AuthInputFieldState extends State<AuthInputField> {
+  final _focusNode = FocusNode();
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() => _focused = _focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final hasError = error != null;
+    final colors = Theme.of(context).extension<AppColorTheme>()!;
+    final hasError = widget.error != null;
+
+    final borderColor = hasError
+        ? colors.rose
+        : _focused
+            ? colors.primary
+            : colors.border;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          widget.label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: colors.text,
+          ),
         ),
         if (hasError) ...[
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            error!,
-            style: TextStyle(fontSize: 11, color: Theme.of(context).extension<AppColorTheme>()!.rose),
+            widget.error!,
+            style: TextStyle(fontSize: 11, color: colors.rose),
           ),
         ],
-        SizedBox(height: 6),
+        const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).extension<AppColorTheme>()!.card,
+            color: colors.background, // darker than card → field now recesses instead of blending
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: hasError ? Theme.of(context).extension<AppColorTheme>()!.rose : Theme.of(context).extension<AppColorTheme>()!.border,
+              color: borderColor,
+              width: hasError || _focused ? 1.5 : 1,
             ),
           ),
           child: Row(
             children: [
-              SizedBox(width: 14),
-              Icon(icon, size: 20, color: Theme.of(context).extension<AppColorTheme>()!.mutedFg),
+              const SizedBox(width: 14),
+              Icon(
+                widget.icon,
+                size: 20,
+                color: _focused ? colors.primary : colors.mutedFg,
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: TextField(
-                  controller: controller,
-                  obscureText: obscureText,
-                  keyboardType: keyboardType,
-                  style: TextStyle(fontSize: 14),
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  obscureText: widget.obscureText,
+                  keyboardType: widget.keyboardType,
+                  style: TextStyle(fontSize: 14, color: colors.text),
+                  cursorColor: colors.primary,
                   decoration: InputDecoration(
-                    hintText: placeholder,
+                    hintText: widget.placeholder,
                     hintStyle: TextStyle(
-                      color: Theme.of(context).extension<AppColorTheme>()!.mutedFg,
+                      color: colors.mutedFg,
                       fontSize: 14,
                     ),
                     border: InputBorder.none,
@@ -98,7 +139,10 @@ class AuthInputField extends StatelessWidget {
                   ),
                 ),
               ),
-              if (trailing != null) ...[trailing!, const SizedBox(width: 14)],
+              if (widget.trailing != null) ...[
+                widget.trailing!,
+                const SizedBox(width: 14),
+              ],
             ],
           ),
         ),
