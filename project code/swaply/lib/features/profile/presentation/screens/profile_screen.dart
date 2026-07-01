@@ -204,8 +204,10 @@ class _ProfileView extends StatelessWidget {
   void _showManageSkillsSheet(BuildContext context, UserModel user) {
     final l10n = AppLocalizations.of(context)!;
     final newSkillController = TextEditingController();
-    final skills = List<String>.from(user.skillsCanTeach);
+    final teachSkills = List<String>.from(user.skillsCanTeach);
+    final learnSkills = List<String>.from(user.skillsWantsToLearn);
     final userCubit = context.read<UserCubit>();
+    bool isTeaching = true;
 
     showModalBottomSheet<void>(
       context: context,
@@ -223,6 +225,22 @@ class _ProfileView extends StatelessWidget {
           ),
           child: StatefulBuilder(
             builder: (context, setState) {
+              final colors = Theme.of(context).extension<AppColorTheme>()!;
+              final currentList = isTeaching ? teachSkills : learnSkills;
+
+              void addSkill() {
+                final skill = newSkillController.text.trim();
+                if (skill.isEmpty) return;
+                if (isTeaching) {
+                  userCubit.addTeachSkill(skill);
+                  setState(() => teachSkills.add(skill));
+                } else {
+                  userCubit.addLearnSkill(skill);
+                  setState(() => learnSkills.add(skill));
+                }
+                newSkillController.clear();
+              }
+
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -239,8 +257,68 @@ class _ProfileView extends StatelessWidget {
                     l10n.manageSkills,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 14),
-                  if (skills.isEmpty)
+                  const SizedBox(height: 14),
+                  
+                  // Toggle
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colors.card,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                    ),
+                    padding: const EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => isTeaching = true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: isTeaching ? colors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  l10n.skillsCanTeach,
+                                  style: TextStyle(
+                                    color: isTeaching ? Colors.white : colors.text,
+                                    fontWeight: isTeaching ? FontWeight.bold : FontWeight.normal,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() => isTeaching = false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              decoration: BoxDecoration(
+                                color: !isTeaching ? colors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  l10n.skillsToLearn,
+                                  style: TextStyle(
+                                    color: !isTeaching ? Colors.white : colors.text,
+                                    fontWeight: !isTeaching ? FontWeight.bold : FontWeight.normal,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  if (currentList.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Text(
@@ -250,14 +328,19 @@ class _ProfileView extends StatelessWidget {
                     )
                   else
                     Column(
-                      children: skills.map((skill) {
+                      children: currentList.map((skill) {
                         return ListTile(
                           title: Text(skill),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete_outline_rounded),
                             onPressed: () {
-                              userCubit.removeTeachSkill(skill);
-                              setState(() => skills.remove(skill));
+                              if (isTeaching) {
+                                userCubit.removeTeachSkill(skill);
+                                setState(() => teachSkills.remove(skill));
+                              } else {
+                                userCubit.removeLearnSkill(skill);
+                                setState(() => learnSkills.remove(skill));
+                              }
                             },
                           ),
                         );
@@ -271,12 +354,7 @@ class _ProfileView extends StatelessWidget {
                       hintText: 'Add a new skill',
                     ),
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (_) {
-                      final skill = newSkillController.text.trim();
-                      if (skill.isEmpty) return;
-                      userCubit.addTeachSkill(skill);
-                      Navigator.of(context).pop();
-                    },
+                    onSubmitted: (_) => addSkill(),
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -290,12 +368,7 @@ class _ProfileView extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {
-                            final skill = newSkillController.text.trim();
-                            if (skill.isEmpty) return;
-                            userCubit.addTeachSkill(skill);
-                            Navigator.of(context).pop();
-                          },
+                          onPressed: addSkill,
                           child: Text(l10n.addSkill),
                         ),
                       ),
