@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:swaply/features/home/data/models/category_skills_map.dart';
-import 'package:swaply/features/search/data/models/search_model.dart';
-import 'package:swaply/features/search/data/repositories/search_repository.dart';
+import 'package:swaply/features/category_search/data/models/search_model.dart';
+import 'package:swaply/features/category_search/data/repositories/search_repository.dart';
 
 class FirebaseSearchRepository implements SearchRepository {
   final _db = FirebaseFirestore.instance;

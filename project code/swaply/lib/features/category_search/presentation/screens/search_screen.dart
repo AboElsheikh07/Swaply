@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/core/constants/app_colors.dart';
 import 'package:swaply/core/constants/extensions/theme_extention.dart';
 import 'package:swaply/features/mentor_details/presentation/screens/mentor_details_screen.dart';
-import 'package:swaply/features/search/data/models/search_model.dart';
-import 'package:swaply/features/search/data/repositories/search_repository_firebase.dart';
-import 'package:swaply/features/search/presentation/cubit/search_cubit.dart';
-import 'package:swaply/features/search/presentation/cubit/search_state.dart';
+import 'package:swaply/features/category_search/data/models/search_model.dart';
+import 'package:swaply/features/category_search/data/repositories/search_repository_firebase.dart';
+import 'package:swaply/features/category_search/presentation/cubit/search_cubit.dart';
+import 'package:swaply/features/category_search/presentation/cubit/search_state.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
 class SearchScreen extends StatelessWidget {
