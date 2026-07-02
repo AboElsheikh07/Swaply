@@ -8,11 +8,78 @@ import '../../data/repositories/chat_repository.dart';
 import 'chat_screen.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
-class ConversationsScreen extends StatelessWidget {
-  ConversationsScreen({super.key});
+class ConversationsScreen extends StatefulWidget {
+  const ConversationsScreen({super.key});
 
+  @override
+  State<ConversationsScreen> createState() => _ConversationsScreenState();
+}
+
+class _ConversationsScreenState extends State<ConversationsScreen> {
   final ChatRepository _chatRepository = ChatRepository();
   final UserRepository _userRepository = UserRepository();
+  final TextEditingController _searchController = TextEditingController();
+
+  String _query = '';
+
+  // otherUserId -> live username, same source of truth the tile itself
+  // uses (UserModel.username via watchUser). Populated lazily as
+  // conversations stream in, so search matches the name actually shown
+  // on screen rather than the possibly-stale Conversation.name snapshot.
+  final Map<String, String> _nameCache = {};
+  final Set<String> _fetchingIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      // Trim + lowercase once here so build() doesn't repeat the work
+      // on every filter() call.
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  /// Fire-and-forget: for any conversation whose other-user's live name
+  /// isn't cached yet, fetch it once and stash it. Doesn't block the
+  /// current build — the affected conversation just filters using its
+  /// `c.name` fallback until this resolves and triggers a rebuild.
+  void _ensureNamesLoaded(List<Conversation> conversations) {
+    for (final c in conversations) {
+      final id = c.otherUserId;
+      if (_nameCache.containsKey(id) || _fetchingIds.contains(id)) continue;
+      _fetchingIds.add(id);
+      _userRepository
+          .fetchUser(id)
+          .then((user) {
+            if (!mounted) return;
+            setState(() {
+              _nameCache[id] = (user?.username.isNotEmpty ?? false)
+                  ? user!.username
+                  : c.name;
+              _fetchingIds.remove(id);
+            });
+          })
+          .catchError((_) {
+            // Leave uncached on failure — filtering just falls back to
+            // c.name for this conversation, and we'll retry on next build.
+            _fetchingIds.remove(id);
+          });
+    }
+  }
+
+  List<Conversation> _filter(List<Conversation> conversations) {
+    if (_query.isEmpty) return conversations;
+    return conversations.where((c) {
+      final liveName = _nameCache[c.otherUserId] ?? c.name;
+      return liveName.toLowerCase().contains(_query);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +121,34 @@ class ConversationsScreen extends StatelessWidget {
                     const SizedBox(width: 14),
                     Icon(Icons.search, color: colors.mutedFg, size: 20),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.searchConversations,
-                      style: TextStyle(fontSize: 15, color: colors.mutedFg),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: TextStyle(fontSize: 15, color: colors.text),
+                        decoration: InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          hintText: l10n.searchConversations,
+                          hintStyle: TextStyle(
+                            fontSize: 15,
+                            color: colors.mutedFg,
+                          ),
+                        ),
+                      ),
                     ),
+                    if (_query.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: _searchController.clear,
+                          child: Icon(
+                            Icons.close,
+                            color: colors.mutedFg,
+                            size: 18,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -96,12 +187,16 @@ class ConversationsScreen extends StatelessWidget {
                           );
                         }
 
-                        final conversations = snapshot.data ?? [];
+                        final rawConversations = snapshot.data ?? [];
+                        _ensureNamesLoaded(rawConversations);
+                        final conversations = _filter(rawConversations);
 
                         if (conversations.isEmpty) {
                           return Center(
                             child: Text(
-                              l10n.noChatsYet,
+                              _query.isEmpty
+                                  ? l10n.noChatsYet
+                                  : l10n.noChatsYet, 
                               style: TextStyle(color: colors.mutedFg),
                             ),
                           );

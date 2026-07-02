@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:swaply/features/search/presentation/screens/search_screen.dart';
+import 'package:swaply/features/category_search/presentation/screens/search_screen.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 import '../../data/models/category_model.dart';
 

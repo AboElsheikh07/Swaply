@@ -9,7 +9,7 @@ import 'package:swaply/features/auth/presentation/cubit/auth_state.dart';
 import 'package:swaply/features/home/data/repositories/home_repository_impl.dart';
 import 'package:swaply/features/mentor_details/presentation/screens/mentor_details_screen.dart';
 
-import 'package:swaply/features/search/presentation/screens/search_screen.dart';
+import 'package:swaply/features/category_search/presentation/screens/search_screen.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
 import '../cubit/home_cubit.dart';
