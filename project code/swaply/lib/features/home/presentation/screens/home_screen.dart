@@ -379,7 +379,7 @@ class _HomeTabState extends State<_HomeTab> {
             onSeeAll: () {},
           ),
           const SizedBox(height: 12),
-          _MentorGrid(mentors: widget.topMentors.take(8).toList()),
+          _MentorGrid(mentors: widget.topMentors),
           const SizedBox(height: 24),
 
           // ── Just For You ──

@@ -22,7 +22,7 @@ class HomeCubit extends Cubit<HomeState> {
 
     try {
       final results = await Future.wait([
-        _repo.getTopMentors(),
+        _repo.getTopMentors(currentUser),
         _repo.getRecommendedMentors(currentUser),
         _repo.getCategories(),
       ]);
