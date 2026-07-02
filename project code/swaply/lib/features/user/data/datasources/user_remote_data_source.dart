@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
 class UserRemoteDataSource {
@@ -53,6 +55,15 @@ class UserRemoteDataSource {
   /// Replace the avatar URL
   Future<void> updateAvatar(String uid, String avatarUrl) async {
     await _users.doc(uid).update({'avatarUrl': avatarUrl});
+  }
+
+  /// Upload avatar to Firebase Storage and update Firestore
+  Future<String> uploadAvatar(String uid, File imageFile) async {
+    final ref = FirebaseStorage.instance.ref().child('users/$uid/avatar.jpg');
+    await ref.putFile(imageFile);
+    final downloadUrl = await ref.getDownloadURL();
+    await updateAvatar(uid, downloadUrl);
+    return downloadUrl;
   }
 
   /// Add a skill to skillsCanTeach

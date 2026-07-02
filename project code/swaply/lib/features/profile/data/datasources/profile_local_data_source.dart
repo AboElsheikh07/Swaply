@@ -25,13 +25,4 @@ class ProfileLocalDataSource {
     return prefs.getBool(_themeKey) ?? false;
   }
 
-  Future<void> saveProfileImage(String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_imageKey, path);
-  }
-
-  Future<String?> getProfileImage() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_imageKey);
-  }
 }

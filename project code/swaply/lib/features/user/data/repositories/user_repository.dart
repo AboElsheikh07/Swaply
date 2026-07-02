@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:swaply/features/user/data/datasources/user_remote_data_source.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 
@@ -47,6 +48,9 @@ class UserRepository {
 
   Future<void> updateAvatar(String uid, String avatarUrl) =>
       _remote.updateAvatar(uid, avatarUrl);
+
+  Future<String> uploadAvatar(String uid, File imageFile) =>
+      _remote.uploadAvatar(uid, imageFile);
 
   Future<void> addTeachSkill(String uid, String skill) =>
       _remote.addTeachSkill(uid, skill);
