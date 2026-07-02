@@ -12,8 +12,8 @@ class UserCubit extends Cubit<UserState> {
   StreamSubscription<UserModel?>? _userSub;
 
   UserCubit({required this.currentUid, UserRepository? repo})
-      : _repo = repo ?? UserRepository(),
-        super(const UserInitial());
+    : _repo = repo ?? UserRepository(),
+      super(const UserInitial());
 
   // ── Load ─────────────────────────────────
 
@@ -21,30 +21,33 @@ class UserCubit extends Cubit<UserState> {
   /// Call this once after login — UI stays in sync automatically.
   void watchUser() {
     emit(const UserLoading());
-    _userSub = _repo.watchUser(currentUid).listen(
-      (user) {
-        if (user == null) {
-          emit(const UserError('User not found.'));
-        } else {
-          emit(UserLoaded(user));
-        }
-      },
-      onError: (_) {
-        emit(const UserError('Failed to load user. Please try again.'));
-      },
-    );
+    _userSub = _repo
+        .watchUser(currentUid)
+        .listen(
+          (user) async {
+            if (user == null) {
+              emit(const UserError('User not found.'));
+              return;
+            }
+            final count = await _repo.getCompletedSessionsCount(currentUid);
+            emit(UserLoaded(user, sessionsCount: count));
+          },
+          onError: (_) {
+            emit(const UserError('Failed to load user. Please try again.'));
+          },
+        );
   }
 
-  /// One-time fetch (no real-time updates).
   Future<void> fetchUser() async {
     emit(const UserLoading());
     try {
       final user = await _repo.fetchUser(currentUid);
       if (user == null) {
         emit(const UserError('User not found.'));
-      } else {
-        emit(UserLoaded(user));
+        return;
       }
+      final count = await _repo.getCompletedSessionsCount(currentUid);
+      emit(UserLoaded(user, sessionsCount: count));
     } catch (_) {
       emit(const UserError('Failed to load user. Please try again.'));
     }
@@ -62,6 +65,12 @@ class UserCubit extends Cubit<UserState> {
     return UserModel.empty();
   }
 
+/// Completed sessions count — 0 if not loaded yet.
+int get sessionsCount {
+  final s = state;
+  if (s is UserLoaded) return s.sessionsCount;
+  return 0;
+}
   /// Spendable balance — safe to call from UI directly.
   int get spendableBalance => currentUser.spendableBalance;
 
@@ -77,10 +86,12 @@ class UserCubit extends Cubit<UserState> {
       await _repo.updateAvatar(currentUid, avatarUrl);
       // watchUser stream will emit the updated user automatically
       // if using watchUser(); otherwise update locally:
-      emit(UserActionSuccess(
-        user: current.copyWith(avatarUrl: avatarUrl),
-        message: 'Avatar updated.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(avatarUrl: avatarUrl),
+          message: 'Avatar updated.',
+        ),
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not update avatar. Try again.'));
@@ -95,12 +106,14 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.addTeachSkill(currentUid, skill);
-      emit(UserActionSuccess(
-        user: current.copyWith(
-          skillsCanTeach: [...current.skillsCanTeach, skill],
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(
+            skillsCanTeach: [...current.skillsCanTeach, skill],
+          ),
+          message: 'Skill added.',
         ),
-        message: 'Skill added.',
-      ));
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not add skill. Try again.'));
@@ -112,13 +125,16 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.removeTeachSkill(currentUid, skill);
-      emit(UserActionSuccess(
-        user: current.copyWith(
-          skillsCanTeach:
-              current.skillsCanTeach.where((s) => s != skill).toList(),
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(
+            skillsCanTeach: current.skillsCanTeach
+                .where((s) => s != skill)
+                .toList(),
+          ),
+          message: 'Skill removed.',
         ),
-        message: 'Skill removed.',
-      ));
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not remove skill. Try again.'));
@@ -131,12 +147,14 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.addLearnSkill(currentUid, skill);
-      emit(UserActionSuccess(
-        user: current.copyWith(
-          skillsWantsToLearn: [...current.skillsWantsToLearn, skill],
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(
+            skillsWantsToLearn: [...current.skillsWantsToLearn, skill],
+          ),
+          message: 'Skill added.',
         ),
-        message: 'Skill added.',
-      ));
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not add skill. Try again.'));
@@ -148,13 +166,16 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.removeLearnSkill(currentUid, skill);
-      emit(UserActionSuccess(
-        user: current.copyWith(
-          skillsWantsToLearn:
-              current.skillsWantsToLearn.where((s) => s != skill).toList(),
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(
+            skillsWantsToLearn: current.skillsWantsToLearn
+                .where((s) => s != skill)
+                .toList(),
+          ),
+          message: 'Skill removed.',
         ),
-        message: 'Skill removed.',
-      ));
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not remove skill. Try again.'));
@@ -168,10 +189,12 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       final url = await _repo.uploadAvatar(currentUid, imageFile);
-      emit(UserActionSuccess(
-        user: current.copyWith(avatarUrl: url),
-        message: 'Avatar updated.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(avatarUrl: url),
+          message: 'Avatar updated.',
+        ),
+      );
     } catch (e, stacktrace) {
       print('Avatar upload error: $e');
       print(stacktrace);
@@ -185,10 +208,12 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.updateUser(currentUid, {'username': username});
-      emit(UserActionSuccess(
-        user: current.copyWith(username: username),
-        message: 'Profile updated.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(username: username),
+          message: 'Profile updated.',
+        ),
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not update profile. Try again.'));
@@ -206,10 +231,12 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.deductBalance(currentUid, amount);
-      emit(UserActionSuccess(
-        user: current.copyWith(balance: current.balance - amount),
-        message: 'Balance deducted.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(balance: current.balance - amount),
+          message: 'Balance deducted.',
+        ),
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not deduct balance. Try again.'));
@@ -221,10 +248,12 @@ class UserCubit extends Cubit<UserState> {
     emit(UserActionLoading(current));
     try {
       await _repo.addBalance(currentUid, amount);
-      emit(UserActionSuccess(
-        user: current.copyWith(balance: current.balance + amount),
-        message: 'Balance updated.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(balance: current.balance + amount),
+          message: 'Balance updated.',
+        ),
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not update balance. Try again.'));
@@ -247,10 +276,12 @@ class UserCubit extends Cubit<UserState> {
         toUid: toUid,
         amount: amount,
       );
-      emit(UserActionSuccess(
-        user: current.copyWith(balance: current.balance - amount),
-        message: 'Points transferred.',
-      ));
+      emit(
+        UserActionSuccess(
+          user: current.copyWith(balance: current.balance - amount),
+          message: 'Points transferred.',
+        ),
+      );
     } catch (_) {
       emit(UserLoaded(current));
       emit(const UserError('Could not transfer points. Try again.'));

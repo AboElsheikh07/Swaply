@@ -21,11 +21,12 @@ class UserLoading extends UserState {
 /// User loaded successfully
 class UserLoaded extends UserState {
   final UserModel user;
+  final int sessionsCount;
 
-  const UserLoaded(this.user);
+  const UserLoaded(this.user, {this.sessionsCount = 0});
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, sessionsCount];
 }
 
 /// Something went wrong

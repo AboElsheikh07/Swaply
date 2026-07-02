@@ -21,8 +21,7 @@ class AppProviders extends StatelessWidget {
       providers: [
         // ── Auth ─────────────────────────────────────────
         BlocProvider(
-          create: (_) =>
-              AuthCubit(FirebaseAuthRepository())..getCurrentUser(),
+          create: (_) => AuthCubit(FirebaseAuthRepository())..getCurrentUser(),
         ),
 
         // ── Profile (dark mode + local prefs) ────────────
@@ -30,7 +29,7 @@ class AppProviders extends StatelessWidget {
           create: (_) => ProfileCubit(
             ProfileLocalDataSource(),
             initialDarkMode: initialDarkMode,
-          )..loadData(),
+          )..loadSettings(),
         ),
       ],
       child: child,

@@ -6,7 +6,7 @@ class UserRepository {
   final UserRemoteDataSource _remote;
 
   UserRepository({UserRemoteDataSource? remote})
-      : _remote = remote ?? UserRemoteDataSource();
+    : _remote = remote ?? UserRemoteDataSource();
 
   // ── Create ────────────────────────────────
 
@@ -17,8 +17,8 @@ class UserRepository {
     String avatarUrl = '',
   }) async {
     final user = UserModel.initial(
-      id:        uid,
-      username:  username,
+      id: uid,
+      username: username,
       avatarUrl: avatarUrl,
     );
     await _remote.createUser(user);
@@ -35,11 +35,14 @@ class UserRepository {
 
   // ── Read ──────────────────────────────────
 
-  Future<UserModel?> fetchUser(String uid) =>
-      _remote.fetchUser(uid);
+  Future<UserModel?> fetchUser(String uid) => _remote.fetchUser(uid);
 
-  Stream<UserModel?> watchUser(String uid) =>
-      _remote.watchUser(uid);
+  Stream<UserModel?> watchUser(String uid) => _remote.watchUser(uid);
+
+  // ── Sessions ──────────────────────────────
+
+  Future<int> getCompletedSessionsCount(String uid) =>
+      _remote.getCompletedSessionsCount(uid);
 
   // ── Update ────────────────────────────────
 
@@ -77,11 +80,7 @@ class UserRepository {
     required String fromUid,
     required String toUid,
     required int amount,
-  }) => _remote.transferBalance(
-        fromUid: fromUid,
-        toUid:   toUid,
-        amount:  amount,
-      );
+  }) => _remote.transferBalance(fromUid: fromUid, toUid: toUid, amount: amount);
 
   // ── Explore ───────────────────────────────
 
@@ -93,6 +92,5 @@ class UserRepository {
 
   // ── Delete ────────────────────────────────
 
-  Future<void> deleteUser(String uid) =>
-      _remote.deleteUser(uid);
+  Future<void> deleteUser(String uid) => _remote.deleteUser(uid);
 }
