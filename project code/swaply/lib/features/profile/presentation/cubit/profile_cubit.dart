@@ -12,18 +12,10 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> loadData() async {
     final skills = await localDataSource.getSkills();
     final isDark = await localDataSource.getTheme();
-    final imagePath = await localDataSource.getProfileImage();
     emit(state.copyWith(
       offeredSkills: skills.isNotEmpty ? skills : state.offeredSkills,
       isDarkMode: isDark,
-      profileImagePath: imagePath,
     ));
-  }
-
-  
-  void updateProfileImage(String path) {
-    emit(state.copyWith(profileImagePath: path));
-    localDataSource.saveProfileImage(path);
   }
 
   void toggleDarkMode() {

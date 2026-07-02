@@ -30,6 +30,8 @@ dependencies:
   zego_uikit_prebuilt_call: ^4.24.2
   flutter_localizations:
     sdk: flutter
+  firebase_storage: ^13.4.3
+  cached_network_image: ^3.4.1
   
 
 dev_dependencies:

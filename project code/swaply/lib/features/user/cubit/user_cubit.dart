@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 import 'package:swaply/features/user/data/repositories/user_repository.dart';
@@ -161,6 +162,23 @@ class UserCubit extends Cubit<UserState> {
   }
 
   // ── Profile ──────────────────────────────
+
+  Future<void> uploadAvatar(File imageFile) async {
+    final current = currentUser;
+    emit(UserActionLoading(current));
+    try {
+      final url = await _repo.uploadAvatar(currentUid, imageFile);
+      emit(UserActionSuccess(
+        user: current.copyWith(avatarUrl: url),
+        message: 'Avatar updated.',
+      ));
+    } catch (e, stacktrace) {
+      print('Avatar upload error: $e');
+      print(stacktrace);
+      emit(UserLoaded(current));
+      emit(const UserError('Could not update avatar. Try again.'));
+    }
+  }
 
   Future<void> updateProfile({required String username}) async {
     final current = currentUser;

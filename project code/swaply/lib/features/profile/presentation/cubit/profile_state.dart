@@ -8,7 +8,6 @@ class ProfileState {
   final List<String> offeredSkills;
   final String language;
   final bool isDarkMode;
-  final String? profileImagePath;
 
   const ProfileState({
     required this.name,
@@ -20,7 +19,6 @@ class ProfileState {
     required this.offeredSkills,
     required this.language,
     required this.isDarkMode,
-    this.profileImagePath,
   });
 
   factory ProfileState.initial({bool isDarkMode = false}) {
@@ -34,7 +32,6 @@ class ProfileState {
       offeredSkills: const ['UI Design', 'Figma', 'Design Systems'],
       language: 'English',
       isDarkMode: isDarkMode,
-      profileImagePath: null,
     );
   }
 
@@ -48,7 +45,6 @@ class ProfileState {
     List<String>? offeredSkills,
     String? language,
     bool? isDarkMode,
-    String? profileImagePath,
   }) {
     return ProfileState(
       name: name ?? this.name,
@@ -60,7 +56,18 @@ class ProfileState {
       offeredSkills: offeredSkills ?? this.offeredSkills,
       language: language ?? this.language,
       isDarkMode: isDarkMode ?? this.isDarkMode,
-      profileImagePath: profileImagePath ?? this.profileImagePath,
     );
   }
+
+  List<Object?> get props => [
+        name,
+        email,
+        points,
+        rating,
+        taught,
+        learned,
+        offeredSkills,
+        language,
+        isDarkMode,
+      ];
 }
