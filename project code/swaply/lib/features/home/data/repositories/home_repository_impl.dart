@@ -9,49 +9,54 @@ class HomeRepositoryImpl implements HomeRepository {
   HomeRepositoryImpl({HomeRemoteDataSource? remote})
     : _remote = remote ?? HomeRemoteDataSource();
 
-  static const _recommendationPoolSize = 50;
-  static const _displayCount = 10;
+  static const _pool_size = 50;
+  static const _topMentorsCount = 3;
+  static const _recommendedCount = 10;
 
-  @override
-  Future<List<UserModel>> getTopMentors({String? excludeUid}) =>
-      _remote.fetchTopRatedMentors(limit: _displayCount, excludeUid: excludeUid);
-
-  @override
-  Future<List<UserModel>> getRecommendedMentors(UserModel currentUser) async {
+  /// Shared logic: fetch a rating-ranked pool, drop [currentUser],
+  /// and — unless they have no skillsWantsToLearn — keep only mentors
+  /// whose skillsCanTeach overlaps with what the user wants to learn.
+  Future<List<UserModel>> _filteredPool(UserModel currentUser) async {
     final pool = await _remote.fetchTopRatedMentors(
-      limit: _recommendationPoolSize,
-      excludeUid: currentUser.id, // استثناء اليوزر الحالي من الـ recommendations أيضاً
+      limit: _pool_size,
+      excludeUid: currentUser.id,
     );
 
     final wantsToLearn = currentUser.skillsWantsToLearn
         .map((s) => s.toLowerCase())
         .toSet();
 
-    bool hasOverlap(UserModel mentor) => mentor.skillsCanTeach.any(
-      (skill) => wantsToLearn.contains(skill.toLowerCase()),
-    );
+    Iterable<UserModel> candidates = pool.where((m) => m.id != currentUser.id);
 
-    final matches = <UserModel>[];
-    final others = <UserModel>[];
-    for (final mentor in pool) {
-      if (mentor.id == currentUser.id) continue;
-      (hasOverlap(mentor) ? matches : others).add(mentor);
+    if (wantsToLearn.isNotEmpty) {
+      candidates = candidates.where(
+        (mentor) => mentor.skillsCanTeach
+            .any((skill) => wantsToLearn.contains(skill.toLowerCase())),
+      );
     }
 
-    return [...matches, ...others].take(_displayCount).toList();
+    return candidates.toList(); // already rating-ranked from fetchTopRatedMentors
+  }
+
+  @override
+  Future<List<UserModel>> getTopMentors(UserModel currentUser) async {
+    final filtered = await _filteredPool(currentUser);
+    return filtered.take(_topMentorsCount).toList();
+  }
+
+  @override
+  Future<List<UserModel>> getRecommendedMentors(UserModel currentUser) async {
+    final filtered = await _filteredPool(currentUser);
+    return filtered.take(_recommendedCount).toList();
   }
 
   @override
   Future<List<CategoryModel>> getCategories() async {
-    // تعديل ذكي: لو الـ categories collection فيها داتا بـ count = 0،
-    // بنجبر السيستم يعمل الـ fallback ويبني الداتا الحقيقية من المينتورز الفعليين
     var raw = await _remote.fetchCategoriesRaw();
-    
-    // تشييك: لو كل الكاتيجوريز اللي جاية الـ count بتاعها صفر، يتجاهلها ويبني من المينتورز
+
     final allZeros = raw.every((cat) => (cat['count'] ?? 0) == 0);
     if (allZeros) {
-      // بنادي الـ build الحقيقي مباشرة
-      // ملاحظة: لو الدالة دي private جوة الـ data source، تقدر تخليها public أو تمسح الـ collection القديمة من الـ Firebase console علطول وهتشتغل لوحدها!
+      // fallback path left as-is
     }
 
     return raw
