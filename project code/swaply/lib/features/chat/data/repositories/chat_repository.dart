@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:swaply/features/sessions/services/onesignal_push_service.dart';
+import 'package:swaply/services/onesignal_push_service.dart';
 import 'package:swaply/features/user/data/repositories/user_repository.dart';
 import '../models/chat_models.dart';
 

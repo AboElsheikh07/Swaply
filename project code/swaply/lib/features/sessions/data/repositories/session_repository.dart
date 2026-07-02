@@ -1,6 +1,6 @@
 import 'package:swaply/features/sessions/data/data_sources/session_remote_data_source.dart';
 import 'package:swaply/features/sessions/data/models/session_model.dart';
-import 'package:swaply/features/sessions/services/onesignal_push_service.dart';
+import 'package:swaply/services/onesignal_push_service.dart';
 
 /// Business-logic layer between cubit and data source.
 class SessionRepository {
