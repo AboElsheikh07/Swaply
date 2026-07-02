@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
 import 'package:swaply/l10n/app_localizations.dart';
 
 import 'package:swaply/core/app_providers.dart';
@@ -15,6 +16,7 @@ import 'package:swaply/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:swaply/features/profile/presentation/cubit/profile_state.dart';
 import 'package:swaply/root.dart';
+import 'package:swaply/services/online_status.dart';
 
 import 'firebase_options.dart';
 
@@ -102,7 +104,7 @@ class _MyAppState extends State<MyApp> {
                   );
                 }
                 if (snapshot.hasData && snapshot.data != null) {
-                  return const RootView();
+                  return Online(child: RootView());
                 }
                 return const WelcomeScreen();
               },
