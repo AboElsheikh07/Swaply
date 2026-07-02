@@ -379,7 +379,7 @@ class _HomeTabState extends State<_HomeTab> {
             onSeeAll: () {},
           ),
           const SizedBox(height: 12),
-          _MentorGrid(mentors: widget.topMentors),
+          _TopMentorsCarousel(mentors: widget.topMentors),
           const SizedBox(height: 24),
 
           // ── Just For You ──
@@ -461,6 +461,91 @@ class _MentorGrid extends StatelessWidget {
         ),
         itemBuilder: (_, i) => _MentorCard(mentor: mentors[i]),
       ),
+    );
+  }
+}
+
+// ── Top Mentors Carousel (swipeable) ─────
+class _TopMentorsCarousel extends StatefulWidget {
+  final List<UserModel> mentors;
+  const _TopMentorsCarousel({required this.mentors});
+
+  @override
+  State<_TopMentorsCarousel> createState() => _TopMentorsCarouselState();
+}
+
+class _TopMentorsCarouselState extends State<_TopMentorsCarousel> {
+  late final PageController _pageCtrl;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageCtrl = PageController(viewportFraction: 0.62);
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    if (widget.mentors.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 260,
+          child: PageView.builder(
+            controller: _pageCtrl,
+            itemCount: widget.mentors.length,
+            onPageChanged: (i) => setState(() => _index = i),
+            itemBuilder: (_, i) {
+              return AnimatedBuilder(
+                animation: _pageCtrl,
+                builder: (context, child) {
+                  double scale = 1.0;
+                  if (_pageCtrl.position.haveDimensions) {
+                    final page =
+                        _pageCtrl.page ?? _pageCtrl.initialPage.toDouble();
+                    scale = (1 - ((page - i).abs() * 0.15)).clamp(0.85, 1.0);
+                  }
+                  return Transform.scale(scale: scale, child: child);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: _MentorCard(mentor: widget.mentors[i]),
+                ),
+              );
+            },
+          ),
+        ),
+        if (widget.mentors.length > 1) ...[
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              widget.mentors.length,
+              (i) => AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: _index == i ? 20 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: _index == i ? colors.text : colors.border,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
