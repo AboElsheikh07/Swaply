@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:swaply/features/sessions/services/onesignal_push_service.dart';
+import 'package:swaply/features/user/data/repositories/user_repository.dart';
 import '../models/chat_models.dart';
 
 class ChatRepository {
   final FirebaseFirestore _db;
+  final UserRepository _userRepository;
 
-  ChatRepository({FirebaseFirestore? db})
-    : _db = db ?? FirebaseFirestore.instance;
+  ChatRepository({FirebaseFirestore? db, UserRepository? userRepository})
+    : _db = db ?? FirebaseFirestore.instance,
+      _userRepository = userRepository ?? UserRepository();
 
   CollectionReference<Map<String, dynamic>> get _conversations =>
       _db.collection('conversations');
@@ -88,6 +92,41 @@ class ChatRepository {
       'updatedAt': Timestamp.fromDate(now),
       'unreadCounts': unreadCounts,
     });
+
+    // ── Push notification to everyone else in the conversation ──
+    _notifyRecipients(
+      members: members,
+      senderId: senderId,
+      text: text,
+      conversationId: conversationId,
+    );
+  }
+
+  /// Fire-and-forget: fetches the sender's display name, then pushes to
+  /// every other member. Doesn't block sendMessage or surface failures
+  /// to the UI — a failed push shouldn't stop the message from sending.
+  Future<void> _notifyRecipients({
+    required List<String> members,
+    required String senderId,
+    required String text,
+    required String conversationId,
+  }) async {
+    try {
+      final sender = await _userRepository.fetchUser(senderId);
+      final senderName = sender?.username ?? 'New message';
+
+      for (final memberId in members) {
+        if (memberId == senderId) continue;
+        await OneSignalPushService.sendToUser(
+          externalUserId: memberId,
+          title: senderName,
+          body: text,
+          data: {'conversationId': conversationId, 'type': 'chat_message'},
+        );
+      }
+    } catch (_) {
+      // non-critical — message already sent successfully regardless
+    }
   }
 
   Future<String?> findConversationId({
