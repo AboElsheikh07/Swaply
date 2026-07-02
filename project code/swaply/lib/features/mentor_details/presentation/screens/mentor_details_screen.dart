@@ -9,7 +9,6 @@ import 'package:swaply/features/mentor_details/data/repositories/mentor_details_
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_cubit.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
-import 'package:swaply/features/user/cubit/user_cubit.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
@@ -93,8 +92,6 @@ class MentorDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = AppLocalizations.of(context)!;
-
-    final sessionsCount = context.watch<UserCubit>().sessionsCount; // add this
     return Stack(
       children: [
         CustomScrollView(
@@ -271,7 +268,7 @@ class MentorDetailsContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         MdStatCard(
                           value: Text(
-                            '$sessionsCount',
+                            '${availability.totalSessions}',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
