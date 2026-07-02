@@ -19,8 +19,23 @@ import 'package:swaply/features/user/cubit/user_state.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load dark mode / language from local prefs.
+    context.read<ProfileCubit>().loadSettings();
+    // Make sure we have the real user document, in case nothing upstream
+    // has started watching it yet.
+    context.read<UserCubit>().watchUser();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +48,19 @@ class _ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<UserCubit>().currentUser;
+    final sessionsCount = context.watch<UserCubit>().sessionsCount; // add this
+
     final l10n = AppLocalizations.of(context)!;
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, userState) {
-        final user = context.watch<UserCubit>().currentUser;
+        if (userState is UserLoading || userState is UserInitial) {
+          return Scaffold(
+            backgroundColor: context.pageBackground,
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
         return BlocListener<UserCubit, UserState>(
           listener: (context, state) {
             if (state is UserError) {
@@ -75,7 +99,7 @@ class _ProfileView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _AvatarSection(state: state, user: user),
+                      _AvatarSection(user: user),
                       const SizedBox(height: 18),
                       _PointsCard(
                         l10n: l10n,
@@ -92,7 +116,11 @@ class _ProfileView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 14),
-                      _StatsRow(l10n: l10n, state: state, user: user),
+                      _StatsRow(
+                        l10n: l10n,
+                        user: user,
+                        sessionsCount: sessionsCount,
+                      ),
                       const SizedBox(height: 16),
                       _SkillsSection(
                         l10n: l10n,
@@ -143,9 +171,7 @@ class _ProfileView extends StatelessWidget {
   void _showEditProfileDialog(BuildContext context, UserModel user) {
     final l10n = AppLocalizations.of(context)!;
     final nameController = TextEditingController(text: user.username);
-    final emailController = TextEditingController(
-      text: FirebaseAuth.instance.currentUser?.email ?? '',
-    );
+    final email = FirebaseAuth.instance.currentUser?.email ?? '';
 
     showDialog<void>(
       context: context,
@@ -160,10 +186,14 @@ class _ProfileView extends StatelessWidget {
                 decoration: const InputDecoration(labelText: 'Name'),
               ),
               const SizedBox(height: 12),
+              // Email comes from Firebase Auth and isn't editable here —
+              // changing it requires re-authentication + verifyBeforeUpdateEmail,
+              // not a Firestore write. Show it read-only to avoid implying
+              // it can be changed from this dialog.
               TextField(
-                controller: emailController,
+                controller: TextEditingController(text: email),
+                enabled: false,
                 decoration: const InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
               ),
             ],
           ),
@@ -175,10 +205,8 @@ class _ProfileView extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 final name = nameController.text.trim();
-                final email = emailController.text.trim();
-                if (name.isEmpty || email.isEmpty) return;
-                final userCubit = context.read<UserCubit>();
-                userCubit.updateProfile(username: name);
+                if (name.isEmpty) return;
+                context.read<UserCubit>().updateProfile(username: name);
                 Navigator.of(context).pop();
               },
               child: Text(l10n.save),
@@ -460,42 +488,6 @@ class _ProfileView extends StatelessWidget {
     );
   }
 
-  void _showPointsDialog(BuildContext context, bool isTopUp) {
-    final l10n = AppLocalizations.of(context)!;
-    final amounts = [20, 50, 100];
-
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(isTopUp ? l10n.topUp : l10n.withdraw),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: amounts.map((amount) {
-              return ListTile(
-                title: Text('$amount ${l10n.pointsAbbr}'),
-                onTap: () {
-                  if (isTopUp) {
-                    context.read<ProfileCubit>().topUpPoints(amount);
-                  } else {
-                    context.read<ProfileCubit>().withdrawPoints(amount);
-                  }
-                  Navigator.of(context).pop();
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showPrivacyDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     showDialog<void>(
@@ -517,10 +509,9 @@ class _ProfileView extends StatelessWidget {
 }
 
 class _AvatarSection extends StatelessWidget {
-  final ProfileState state;
   final UserModel user;
 
-  const _AvatarSection({required this.state, required this.user});
+  const _AvatarSection({required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -544,21 +535,38 @@ class _AvatarSection extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     shape: BoxShape.circle,
-                    border: Border.all(color: Theme.of(context).cardColor, width: 3),
+                    border: Border.all(
+                      color: Theme.of(context).cardColor,
+                      width: 3,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.15),
+                        color: Theme.of(
+                          context,
+                        ).primaryColor.withValues(alpha: 0.15),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
+                  // Real user avatar when present, person icon otherwise —
+                  // also falls back to the icon if the image fails to load.
                   child: ClipOval(
                     child: user.avatarUrl.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: user.avatarUrl,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => const CircularProgressIndicator(),
+                            width: 92,
+                            height: 92,
+                            placeholder: (context, url) => const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
                             errorWidget: (context, url, error) => Icon(
                               CupertinoIcons.person_fill,
                               size: 40,
@@ -782,13 +790,13 @@ class _BalanceActionButton extends StatelessWidget {
 
 class _StatsRow extends StatelessWidget {
   final AppLocalizations l10n;
-  final ProfileState state;
   final UserModel user;
+  final int sessionsCount; // add this
 
   const _StatsRow({
     required this.l10n,
-    required this.state,
     required this.user,
+    required this.sessionsCount,
   });
 
   @override
@@ -812,7 +820,10 @@ class _StatsRow extends StatelessWidget {
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: _StatCard(value: '0', label: l10n.sessions),
+          child: _StatCard(
+            value: sessionsCount.toString(), // was '0'
+            label: l10n.sessions,
+          ),
         ),
       ],
     );

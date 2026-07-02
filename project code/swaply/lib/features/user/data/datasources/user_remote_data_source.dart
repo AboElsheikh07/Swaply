@@ -45,6 +45,38 @@ class UserRemoteDataSource {
     });
   }
 
+  // ── Sessions ──────────────────────────────
+
+/// Total completed sessions for this user, counting both roles
+/// (as teacher and as student).
+Future<int> getCompletedSessionsCount(String uid) async {
+  int total = 0;
+
+  try {
+    final asTeacher = await _db
+        .collection('sessions')
+        .where('teacherId', isEqualTo: uid)
+        .where('status', isEqualTo: 'completed')
+        .get();
+    total += asTeacher.docs.length;
+  } catch (e) {
+    print('Error fetching completed sessions (teacher): $e');
+  }
+
+  try {
+    final asStudent = await _db
+        .collection('sessions')
+        .where('studentId', isEqualTo: uid)
+        .where('status', isEqualTo: 'completed')
+        .get();
+    total += asStudent.docs.length;
+  } catch (e) {
+    print('Error fetching completed sessions (student): $e');
+  }
+
+  return total;
+}
+
   // ── Update ────────────────────────────────
 
   /// Update specific fields — only the fields you pass get written

@@ -9,6 +9,7 @@ import 'package:swaply/features/mentor_details/data/repositories/mentor_details_
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_cubit.dart';
 import 'package:swaply/features/mentor_details/presentation/cubit/mentor_details_state.dart';
 import 'package:swaply/features/sessions/presentation/screens/request_session_screen/request_session_screen.dart';
+import 'package:swaply/features/user/cubit/user_cubit.dart';
 import 'package:swaply/features/user/data/models/user_model.dart';
 import 'package:swaply/l10n/app_localizations.dart';
 
@@ -33,7 +34,6 @@ class MentorDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final colors = context.colors;
     return Scaffold(
       backgroundColor: colors.background,
@@ -47,10 +47,7 @@ class MentorDetailsView extends StatelessWidget {
               child: Text(message, style: TextStyle(color: colors.mutedFg)),
             ),
             MentorDetailsLoaded(:final user, :final availability) =>
-              MentorDetailsContent(
-              mentor: user,
-              availability: availability,
-            ),
+              MentorDetailsContent(mentor: user, availability: availability),
           };
         },
       ),
@@ -96,6 +93,8 @@ class MentorDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final l10n = AppLocalizations.of(context)!;
+
+    final sessionsCount = context.watch<UserCubit>().sessionsCount; // add this
     return Stack(
       children: [
         CustomScrollView(
@@ -221,7 +220,10 @@ class MentorDetailsContent extends StatelessWidget {
                             ),
                             Text(
                               'session rate',
-                              style: TextStyle(fontSize: 11, color: colors.mutedFg),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: colors.mutedFg,
+                              ),
                             ),
                           ],
                         ),
@@ -269,7 +271,7 @@ class MentorDetailsContent extends StatelessWidget {
                         const SizedBox(width: 8),
                         MdStatCard(
                           value: Text(
-                            '${availability.totalSessions}',
+                            '$sessionsCount',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -404,7 +406,10 @@ class MentorDetailsContent extends StatelessWidget {
                             availability.upcomingSlots.isEmpty
                                 ? 'No upcoming sessions scheduled yet.'
                                 : availability.upcomingSlots.join(' · '),
-                            style: TextStyle(fontSize: 12, color: colors.mutedFg),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: colors.mutedFg,
+                            ),
                           ),
                         ],
                       ),
@@ -540,7 +545,10 @@ class MdCircleBtn extends StatelessWidget {
           color: colors.card.withValues(alpha: 0.92),
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+            ),
           ],
         ),
         child: Icon(icon, size: 18, color: colors.text),

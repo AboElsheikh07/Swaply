@@ -21,7 +21,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-   
+
   OneSignal.initialize("badf98d9-e2dd-4bde-8da7-9108d945ce6f");
   OneSignal.Notifications.requestPermission(true);
 
@@ -32,8 +32,6 @@ void main() async {
       OneSignal.logout();
     }
   });
-  
- 
 
   // await SeedCategories.seed();
   final prefs = await SharedPreferences.getInstance();
@@ -52,6 +50,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String? _lastUid;
+  // Cache this ONCE — never call authStateChanges() inline in build().
+  late final Stream<User?> _authStateChanges = FirebaseAuth.instance
+      .authStateChanges();
 
   @override
   Widget build(BuildContext context) {
@@ -74,18 +75,13 @@ class _MyAppState extends State<MyApp> {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [
-              Locale('en', ''), // English
-              Locale('ar', ''), // Arabic
-            ],
+            supportedLocales: const [Locale('en', ''), Locale('ar', '')],
             builder: (context, child) {
               return StreamBuilder<User?>(
-                stream: FirebaseAuth.instance.authStateChanges(),
+                stream: _authStateChanges, // same cached stream
                 builder: (context, snapshot) {
                   final user = snapshot.data;
-                  if (user != null) {
-                    _lastUid = user.uid;
-                  }
+                  if (user != null) _lastUid = user.uid;
                   if (_lastUid != null) {
                     return AuthenticatedProviders(
                       key: ValueKey(_lastUid),
@@ -98,7 +94,7 @@ class _MyAppState extends State<MyApp> {
               );
             },
             home: StreamBuilder<User?>(
-              stream: FirebaseAuth.instance.authStateChanges(),
+              stream: _authStateChanges, // same cached stream, not a new call
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Scaffold(
